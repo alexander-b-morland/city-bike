@@ -1,0 +1,437 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oslo Night Truck</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column; the map player is the widest thing on the page and sits high. */
+:root {
+  --bg: #f7f7f4; --surface: #fdfdfc; --night: #e9edf3; --ink: #0d0f12; --ink2: #50524f; --muted: #85857f;
+  --grid: #e3e2db; --axis: #c3c2b7; --border: rgba(13,15,18,.12);
+  --none: #85857f; --greedy: #eb6834; --optimal: #1baf7a;
+  --empty: #e34948; --low: #f2b6b3; --mid: #c6c5bd; --high: #a8caf2; --full: #2a78d6;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0f10; --surface: #1a1b1b; --night: #11141b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
+  --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
+  --none: #8d8c85; --greedy: #d95926; --optimal: #199e70;
+  --empty: #e66767; --low: #7c3d3d; --mid: #4b4b47; --high: #2e4f7a; --full: #3987e5; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e0f10; --surface: #1a1b1b; --night: #11141b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
+  --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
+  --none: #8d8c85; --greedy: #d95926; --optimal: #199e70;
+  --empty: #e66767; --low: #7c3d3d; --mid: #4b4b47; --high: #2e4f7a; --full: #3987e5; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; }
+.page { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+section, header { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.01em; }
+h2 { font-size: 24px; }
+h3 { font-size: 16px; font-weight: 500; }
+p { margin: 0; max-width: 68ch; color: var(--ink2); }
+p strong { color: var(--ink); font-weight: 600; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.lede { font-size: 18px; color: var(--ink); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.tile .who { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); }
+.tile .big { font-family: var(--display); font-size: 40px; font-weight: 600; line-height: 1.1; }
+.tile .sub { font-size: 13px; color: var(--muted); }
+.key { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+.player { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--ink2); font: 500 13px var(--body); padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.btn:hover, .seg button:hover { border-color: var(--ink2); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--full); outline-offset: 2px; }
+.clock { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink2); }
+.mapwrap { position: relative; width: 100%; aspect-ratio: 1.46; max-width: 100%; }
+.mapwrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 5px 9px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+.scrub { padding: 10px 16px 4px; }
+.scrub input { width: 100%; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 20px; padding: 6px 16px 14px; font-size: 13px; color: var(--ink2); }
+.facts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink2); padding: 0 16px 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.line { width: 18px; height: 3px; border-radius: 2px; flex: none; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel small { color: var(--muted); font-size: 13px; }
+.panel small b { color: var(--ink); font-weight: 600; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { font-family: var(--body); font-size: 12px; fill: var(--muted); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; }
+ul { margin: 0; padding-left: 20px; color: var(--ink2); max-width: 68ch; display: flex; flex-direction: column; gap: 6px; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+summary { cursor: pointer; font-weight: 500; }
+.math { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre; color: var(--ink); margin: 12px 0 0; }
+footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
+footer a, p a { color: inherit; }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Oslo Bysykkel · first model</span>
+    <h1>Can one night truck keep Oslo's bikes where riders need them?</h1>
+    <p class="lede">Oslo's city bikes roll downhill. By evening the stations in the hills are empty and the centre is full. Here one truck works from 01:00 to 06:00 and carries bikes back. We replay four weeks of real trips three times and count every rider who was let down: no bike to take, or no free dock to park it.</p>
+    <div class="tiles" id="tiles"></div>
+    <p id="headline"></p>
+  </header>
+
+  <section>
+    <h2>Watch it run</h2>
+    <p>Each dot is a station. Press play to follow the city through the day. At night the truck drives its route, and the number at each stop shows the bikes it added or took away.</p>
+    <div class="player">
+      <div class="bar">
+        <div class="seg" role="group" aria-label="Which truck">
+          <button type="button" id="p-none" data-policy="none" aria-pressed="false"><span class="key" style="background:var(--none)"></span>No truck</button>
+          <button type="button" id="p-greedy" data-policy="greedy" aria-pressed="false"><span class="key" style="background:var(--greedy)"></span>Rule of thumb</button>
+          <button type="button" id="p-optimal" data-policy="optimal" aria-pressed="true"><span class="key" style="background:var(--optimal)"></span>Optimized</button>
+        </div>
+        <button type="button" class="btn" id="play">Play</button>
+        <button type="button" class="btn" id="speed" aria-label="Playback speed">Speed 1×</button>
+        <div class="clock"><span class="chip" id="phase">Night shift</span><span id="clock"></span></div>
+      </div>
+      <div class="mapwrap" id="mapwrap">
+        <canvas id="map" role="img" aria-label="Map of Oslo bike stations coloured by how full they are, with the truck's night route"></canvas>
+        <div class="tip" id="maptip" hidden></div>
+      </div>
+      <div class="scrub"><input type="range" id="scrub" min="0" max="1343" step="1" value="0" aria-label="Day and time"></div>
+      <div class="facts" id="facts"></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--empty)"></i>No bikes</span>
+        <span><i class="dot" style="background:var(--low)"></i>Under 20% full</span>
+        <span><i class="dot" style="background:var(--mid)"></i>Fine</span>
+        <span><i class="dot" style="background:var(--high)"></i>Over 80% full</span>
+        <span><i class="dot" style="background:var(--full)"></i>No free docks</span>
+        <span><i class="line" id="routekey"></i>Truck route, with bikes added (+) or taken (−)</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Four weeks, day by day</h2>
+    <p>The share of riders let down each day. All three runs start on 17 August with every station about half full, and replay the same real trips. Click a day to see it on the map.</p>
+    <div class="legend" style="padding:0">
+      <span><i class="line" style="background:var(--none)"></i>No truck</span>
+      <span><i class="line" style="background:var(--greedy)"></i>Rule of thumb</span>
+      <span><i class="line" style="background:var(--optimal)"></i>Optimized</span>
+      <span><i class="key" style="background:var(--grid)"></i>Weekend</span>
+    </div>
+    <div class="chart" id="weeks"><div class="tip" id="weektip" hidden></div></div>
+    <div class="tablewrap"><table id="table"></table></div>
+  </section>
+
+  <section>
+    <h2>How the optimized truck decides</h2>
+    <p>From eleven weeks of earlier trips we learn one curve per station: <strong>if this station starts the day with this many bikes, how many riders will it let down?</strong> A hill station wants to start full, because riders take bikes all morning. A station in the centre wants to start nearly empty, because riders arrive all day and need a free dock.</p>
+    <div class="two">
+      <div class="panel"><h3 id="c1name"></h3><small>In the hills. Riders mostly leave from here.</small><div class="chart" id="c1"></div><small id="c1best"></small></div>
+      <div class="panel"><h3 id="c2name"></h3><small>In the centre. Riders mostly arrive here.</small><div class="chart" id="c2"></div><small id="c2best"></small></div>
+    </div>
+    <p>Each night the model looks at where the bikes stand at 01:00 and chooses the route and the number of bikes to load or unload at each stop, so that the sum of all the curves is as low as possible. It must fit the shift, never carry more than the truck holds, and end the night empty.</p>
+    <p>The <strong>rule of thumb</strong> is what a dispatcher might do without a model: drive to the fullest station, load until it is half full, drive to the emptiest station, unload until it is half full, and repeat.</p>
+    <details>
+      <summary>The model, written out</summary>
+<div class="math">Sets        N   stations worth a visit tonight (the 20 best donors and 20 best receivers), 0 = depot
+Data        b_i   bikes at station i at 01:00        C_i   docks at station i
+            F_i(s) riders let down tomorrow if i starts with s bikes (convex, from history)
+            t_ij  driving minutes i to j             Q = 20 bikes, T = 300 minutes
+Decide      x_ij ∈ {0,1}   truck drives i to j       y_i ∈ {0,1}   truck visits i
+            p_i, d_i ≥ 0 integer   bikes picked up / dropped at i
+            f_ij ≥ 0   bikes on board from i to j
+
+Minimize    Σ_i F_i(b_i + d_i − p_i)
+
+Subject to  Σ_j x_ij = Σ_j x_ji = y_i                 one way in, one way out of each stop
+            Σ_j x_0j = Σ_j x_j0 = 1                   start and end at the depot
+            y_i ≤ p_i + d_i ≤ Q·y_i                   bikes move only at stops
+            Σ_j f_ij − Σ_j f_ji = p_i − d_i           load changes by what is handled
+            f_ij ≤ Q·x_ij,  f_0j = f_j0 = 0           fits the truck, leaves and returns empty
+            Σ t_ij·x_ij + 3·Σ y_i + ½·Σ (p_i + d_i) ≤ T    the shift
+            0 ≤ b_i + d_i − p_i ≤ C_i                 stations stay within their docks
+            (plus a flow that ties the stops into one connected tour)</div>
+    </details>
+  </section>
+
+  <section>
+    <h2>What we assumed</h2>
+    <ul>
+      <li>The fleet is 3,000 bikes, the operator's own figure. Real evening inventories are not published, so every run starts with all stations about half full.</li>
+      <li>The truck holds 20 bikes and works five hours. A stop costs 3 minutes plus half a minute per bike. It drives at 25 km/h over 1.4 times the straight-line distance, from an assumed depot at Økern. The map draws straight lines between stops.</li>
+      <li>A rider who finds no bike gives up. A rider who finds no free dock rides on to the nearest station with room. Both count as let down.</li>
+      <li>Nobody moves bikes during the day. The real operator does, which is why the run with no truck looks worse than real life.</li>
+      <li>The planner only sees trips from 1 June to 16 August. It never sees the trips of the day it plans for.</li>
+      <li>Recorded trips understate demand, because an empty station records no departures.</li>
+    </ul>
+  </section>
+
+  <footer>Trip and station data: Oslo Bysykkel, published under the Norwegian Licence for Open Government Data (NLOD) 2.0. Replay period 17 August to 13 September 2026.</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  const D = window.FIRST_MODEL;
+  const S = D.stations.map(([name, lat, lon, cap]) => ({ name, lat, lon, cap }));
+  const N = S.length, SNAPS = 48, DAYS = D.days.length;
+  const POLICIES = ["none", "greedy", "optimal"];
+  const LABEL = { none: "No truck", greedy: "Rule of thumb", optimal: "Optimized" };
+  const SHIFT = D.truck.shift;
+  const $ = (id) => document.getElementById(id);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const fmt = (n) => Math.round(n).toLocaleString("en-US");
+  const pct = (a, b) => (100 * a / b).toFixed(1) + "%";
+  const dayDate = (d) => new Date(D.days[d] + "T00:00:00");
+  const dayName = (d, long) => dayDate(d).toLocaleDateString("en-GB", long ? { weekday: "short", day: "numeric", month: "short" } : { day: "numeric", month: "short" });
+  const isWeekend = (d) => [0, 6].includes(dayDate(d).getDay());
+
+  function level(policy, d, k, i) {
+    const c = D.policies[policy][d].levels.charCodeAt(k * N + i);
+    return c < 58 ? c - 48 : c < 91 ? c - 29 : c - 87;
+  }
+  const letDown = (r) => r.noBike + r.noDock;
+  const moved = (r) => r.stops.reduce((sum, s) => sum + Math.max(s[1], 0), 0);
+  const totals = {};
+  for (const p of POLICIES) {
+    const rows = D.policies[p];
+    totals[p] = {
+      trips: rows.reduce((a, r) => a + r.trips, 0), noBike: rows.reduce((a, r) => a + r.noBike, 0),
+      noDock: rows.reduce((a, r) => a + r.noDock, 0), moved: rows.reduce((a, r) => a + moved(r), 0) / DAYS,
+      stops: rows.reduce((a, r) => a + r.stops.length, 0) / DAYS, km: rows.reduce((a, r) => a + r.km, 0) / DAYS,
+    };
+    totals[p].down = totals[p].noBike + totals[p].noDock;
+  }
+
+  // ---------- headline tiles and table
+  $("tiles").innerHTML = POLICIES.map((p) => `<div class="tile"><div class="who"><span class="key" style="background:var(--${p})"></span>${LABEL[p]}</div>
+    <div class="big">${pct(totals[p].down, totals[p].trips)}</div><div class="sub">${fmt(totals[p].down)} of ${fmt(totals[p].trips)} riders let down</div></div>`).join("");
+  const savedO = totals.none.down - totals.optimal.down, savedG = totals.none.down - totals.greedy.down;
+  $("headline").innerHTML = `Over four weeks the optimized truck spares <strong>${fmt(savedO)} riders</strong>, about ${fmt(savedO / DAYS)} a day. The rule-of-thumb truck spares ${fmt(savedG)}. ` +
+    `The optimized truck moves ${fmt(totals.optimal.moved)} bikes a night against ${fmt(totals.greedy.moved)}, in the same five hours. One truck is still far from enough. About 900 bikes drift out of place every day and nobody moves bikes in daytime here, so even with the optimized route about ${fmt(totals.optimal.down / DAYS)} riders a day are let down.`;
+  $("table").innerHTML = `<thead><tr><th>Four weeks</th><th>Riders let down</th><th>Share</th><th>Found no bike</th><th>Found no dock</th><th>Bikes moved per night</th><th>Stops per night</th><th>Km per night</th></tr></thead><tbody>` +
+    POLICIES.map((p) => { const t = totals[p]; return `<tr><td>${LABEL[p]}</td><td>${fmt(t.down)}</td><td>${pct(t.down, t.trips)}</td><td>${fmt(t.noBike)}</td><td>${fmt(t.noDock)}</td><td>${p === "none" ? "–" : fmt(t.moved)}</td><td>${p === "none" ? "–" : fmt(t.stops)}</td><td>${p === "none" ? "–" : fmt(t.km)}</td></tr>`; }).join("") + "</tbody>";
+
+  // ---------- map player
+  const state = { policy: "optimal", day: 3, t: 300, playing: false, speed: 1 };
+  const canvas = $("map"), ctx = canvas.getContext("2d"), wrap = $("mapwrap");
+  const lats = S.map((s) => s.lat).concat(D.truck.depot[0]), lons = S.map((s) => s.lon).concat(D.truck.depot[1]);
+  const box = { lat0: Math.min(...lats), lat1: Math.max(...lats), lon0: Math.min(...lons), lon1: Math.max(...lons) };
+  const K = Math.cos(59.92 * Math.PI / 180);
+  let W = 0, H = 0, proj = null, colors = {};
+  function readColors() {
+    for (const name of ["surface", "night", "ink", "ink2", "muted", "none", "greedy", "optimal", "empty", "low", "mid", "high", "full", "grid"]) colors[name] = css("--" + name);
+    $("routekey").style.background = colors[state.policy === "none" ? "ink2" : state.policy];
+  }
+  function resize() {
+    const ratio = window.devicePixelRatio || 1;
+    W = wrap.clientWidth; H = wrap.clientHeight;
+    if (!W || !H) return false;
+    canvas.width = Math.round(W * ratio); canvas.height = Math.round(H * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const pad = W < 520 ? 16 : 30;
+    const scale = Math.min((W - 2 * pad) / ((box.lon1 - box.lon0) * K), (H - 2 * pad) / (box.lat1 - box.lat0));
+    const ox = (W - (box.lon1 - box.lon0) * K * scale) / 2, oy = (H - (box.lat1 - box.lat0) * scale) / 2;
+    proj = (lat, lon) => [ox + (lon - box.lon0) * K * scale, H - oy - (lat - box.lat0) * scale];
+    for (const s of S) [s.x, s.y] = proj(s.lat, s.lon);
+    return true;
+  }
+  function routeOf(policy, d) {
+    const r = D.policies[policy][d];
+    if (!r.stops.length) return null;
+    const depot = proj(D.truck.depot[0], D.truck.depot[1]);
+    const legs = []; let from = depot, leave = 0;
+    for (const [i, change, done] of r.stops) {
+      const arrive = Math.max(leave, done - D.truck.stopMinutes - D.truck.bikeMinutes * Math.abs(change));
+      legs.push({ from, to: [S[i].x, S[i].y], leave, arrive, done, change });
+      from = [S[i].x, S[i].y]; leave = done;
+    }
+    legs.push({ from, to: depot, leave, arrive: Math.max(leave, r.minutes), done: Infinity, change: 0, home: true });
+    return { depot, legs };
+  }
+  function draw() {
+    const { policy, day, t } = state;
+    const night = t < SHIFT, k = Math.min(SNAPS - 1, Math.floor(t / 30));
+    ctx.fillStyle = night ? colors.night : colors.surface; ctx.fillRect(0, 0, W, H);
+    ctx.font = "12px Inter, system-ui, sans-serif"; ctx.fillStyle = colors.muted; ctx.textAlign = "center";
+    const place = (text, lat, lon, dy) => { const [x, y] = proj(lat, lon); ctx.fillText(text, x, y + (dy || 0)); };
+    place("Oslofjord", 59.9012, 10.722); place("Nydalen", 59.9534, 10.7665, -12); place("Majorstuen", 59.929, 10.7169, -14);
+    place("Skøyen", 59.9223, 10.6796, -16);
+
+    const route = routeOf(policy, day), color = colors[policy];
+    if (route) {
+      const [dx, dy] = route.depot;
+      ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.strokeStyle = color; ctx.globalAlpha = night ? 1 : 0.7;
+      ctx.beginPath(); ctx.moveTo(dx, dy);
+      let truck = route.depot;
+      for (const leg of route.legs) {
+        if (t <= leg.leave) break;
+        const f = leg.arrive > leg.leave ? Math.min(1, (t - leg.leave) / (leg.arrive - leg.leave)) : 1;
+        truck = [leg.from[0] + (leg.to[0] - leg.from[0]) * f, leg.from[1] + (leg.to[1] - leg.from[1]) * f];
+        ctx.lineTo(truck[0], truck[1]);
+      }
+      ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.fillStyle = colors.ink; ctx.fillRect(dx - 5, dy - 5, 10, 10);
+      ctx.textAlign = "left"; ctx.fillStyle = colors.ink2; ctx.fillText("Depot", dx + 9, dy + 4);
+      if (night) { ctx.beginPath(); ctx.arc(truck[0], truck[1], 6, 0, 7); ctx.fillStyle = color; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = colors.surface; ctx.stroke(); }
+    }
+    let empty = 0, full = 0;
+    for (let i = 0; i < N; i++) {
+      const s = S[i], b = level(policy, day, k, i), share = b / s.cap;
+      let r = 2 + Math.sqrt(s.cap) * 0.55, fill = colors.mid;
+      if (b === 0) { fill = colors.empty; r += 1.5; empty++; }
+      else if (b === s.cap) { fill = colors.full; r += 1.5; full++; }
+      else if (share < 0.2) fill = colors.low; else if (share > 0.8) fill = colors.high;
+      if (W < 520) r *= 0.75;
+      ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, 7); ctx.fillStyle = fill; ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = night ? colors.night : colors.surface; ctx.stroke();
+    }
+    if (route && W >= 520) {
+      ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.textAlign = "left";
+      for (const leg of route.legs) {
+        if (leg.home || t < leg.done) continue;
+        const text = (leg.change > 0 ? "+" : "−") + Math.abs(leg.change);
+        ctx.lineWidth = 3; ctx.strokeStyle = night ? colors.night : colors.surface; ctx.strokeText(text, leg.to[0] + 8, leg.to[1] - 6);
+        ctx.fillStyle = colors.ink; ctx.fillText(text, leg.to[0] + 8, leg.to[1] - 6);
+      }
+    }
+    const clock = new Date(dayDate(day).getTime() + (60 + t) * 60000);
+    $("clock").textContent = clock.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) + " · " +
+      String(clock.getHours()).padStart(2, "0") + ":" + String(clock.getMinutes()).padStart(2, "0");
+    $("phase").textContent = night ? "Night shift" : "Riders on the road";
+    const r = D.policies[policy][day];
+    $("facts").innerHTML = `<span>Stations with no bikes now: <b>${empty}</b></span><span>Stations with no free docks now: <b>${full}</b></span>` +
+      `<span>Riders let down this day: <b>${fmt(letDown(r))}</b> of ${fmt(r.trips)}</span>` +
+      (policy === "none" ? "<span>No truck this night</span>" : `<span>Truck this night: <b>${moved(r)}</b> bikes, ${r.stops.length} stops, ${fmt(r.km)} km</span>`);
+    $("scrub").value = day * SNAPS + k;
+    $("scrub").setAttribute("aria-valuetext", $("clock").textContent);
+  }
+  function setPolicy(policy) {
+    state.policy = policy;
+    document.querySelectorAll("[data-policy]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.policy === policy)));
+    readColors(); draw();
+  }
+  document.querySelectorAll("[data-policy]").forEach((b) => b.addEventListener("click", () => setPolicy(b.dataset.policy)));
+  $("scrub").addEventListener("input", (e) => { const v = +e.target.value; state.day = Math.floor(v / SNAPS); state.t = (v % SNAPS) * 30; draw(); });
+  $("speed").addEventListener("click", () => { state.speed = state.speed === 1 ? 3 : state.speed === 3 ? 8 : 1; $("speed").textContent = "Speed " + state.speed + "×"; });
+  let last = 0;
+  function tick(now) {
+    if (!state.playing) return;
+    const dt = Math.min(100, now - last) / 1000; last = now;
+    const slow = state.t < SHIFT && state.policy !== "none";
+    state.t += dt * state.speed * (slow ? 40 : 130);
+    if (state.t >= 1440) { if (state.day === DAYS - 1) { state.t = 1439; setPlaying(false); } else { state.day++; state.t -= 1440; } }
+    draw(); requestAnimationFrame(tick);
+  }
+  function setPlaying(on) {
+    state.playing = on; $("play").textContent = on ? "Pause" : "Play";
+    if (on) { if (state.day === DAYS - 1 && state.t >= 1439) { state.day = 0; state.t = 0; } last = performance.now(); requestAnimationFrame(tick); }
+  }
+  $("play").addEventListener("click", () => setPlaying(!state.playing));
+  canvas.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+    let best = -1, dist = 144;
+    for (let i = 0; i < N; i++) { const d = (S[i].x - x) ** 2 + (S[i].y - y) ** 2; if (d < dist) { dist = d; best = i; } }
+    const tip = $("maptip");
+    if (best < 0) { tip.hidden = true; return; }
+    const b = level(state.policy, state.day, Math.min(SNAPS - 1, Math.floor(state.t / 30)), best);
+    tip.textContent = `${S[best].name}: ${b} bikes, ${S[best].cap - b} free docks`;
+    tip.hidden = false;
+    tip.style.left = Math.max(4, Math.min(W - tip.offsetWidth - 4, S[best].x + 10)) + "px"; tip.style.top = Math.max(4, S[best].y - 34) + "px";
+  });
+  canvas.addEventListener("mouseleave", () => { $("maptip").hidden = true; });
+
+  // ---------- small SVG helpers
+  const NS = "http://www.w3.org/2000/svg";
+  function el(parent, tag, attrs, text) {
+    const node = document.createElementNS(NS, tag);
+    for (const key in attrs) node.setAttribute(key, attrs[key]);
+    if (text !== undefined) node.textContent = text;
+    parent.appendChild(node); return node;
+  }
+  function niceMax(v) { const step = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 2, 2.5, 5, 10]) if (m * step >= v) return m * step; return 10 * step; }
+
+  // ---------- four weeks, day by day
+  function drawWeeks() {
+    const host = $("weeks"); host.querySelectorAll("svg").forEach((n) => n.remove());
+    const w = host.clientWidth, h = Math.max(240, Math.min(340, w * 0.42)), wide = w >= 620;
+    if (!w) return;
+    const m = { l: 40, r: wide ? 112 : 12, t: 12, b: 28 };
+    const svg = el(host, "svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "img", "aria-label": "Share of riders let down each day under the three runs" });
+    const share = (p, d) => 100 * letDown(D.policies[p][d]) / D.policies[p][d].trips;
+    const top = niceMax(Math.max(...POLICIES.flatMap((p) => D.days.map((_, d) => share(p, d)))));
+    const x = (d) => m.l + (w - m.l - m.r) * d / (DAYS - 1), y = (v) => m.t + (h - m.t - m.b) * (1 - v / top), step = x(1) - x(0);
+    for (let d = 0; d < DAYS; d++) if (isWeekend(d)) el(svg, "rect", { x: x(d) - step / 2, y: m.t, width: step, height: h - m.t - m.b, fill: "var(--grid)", opacity: 0.55 });
+    for (let i = 0; i <= 5; i++) { const v = top * i / 5;
+      el(svg, "line", { x1: m.l, x2: w - m.r, y1: y(v), y2: y(v), stroke: i ? "var(--grid)" : "var(--axis)", "stroke-width": 1 });
+      el(svg, "text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end" }, v + "%"); }
+    for (let d = 0; d < DAYS; d += 7) el(svg, "text", { x: x(d), y: h - 8, "text-anchor": d ? "middle" : "start" }, dayName(d));
+    const ends = [];
+    for (const p of POLICIES) {
+      el(svg, "polyline", { points: D.days.map((_, d) => x(d) + "," + y(share(p, d))).join(" "), fill: "none", stroke: `var(--${p})`, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" });
+      el(svg, "circle", { cx: x(DAYS - 1), cy: y(share(p, DAYS - 1)), r: 4, fill: `var(--${p})`, stroke: "var(--bg)", "stroke-width": 2 });
+      ends.push({ p, y: y(share(p, DAYS - 1)) });
+    }
+    if (wide) { ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 15);
+      for (const e of ends) el(svg, "text", { x: w - m.r + 10, y: e.y + 4, style: "fill:var(--ink2)" }, LABEL[e.p]); }
+    const cross = el(svg, "line", { y1: m.t, y2: h - m.b, stroke: "var(--ink2)", "stroke-width": 1, visibility: "hidden" });
+    const hit = el(svg, "rect", { x: m.l, y: m.t, width: w - m.l - m.r, height: h - m.t - m.b, fill: "transparent", style: "cursor:pointer" });
+    const tip = $("weektip"), dayAt = (e) => Math.max(0, Math.min(DAYS - 1, Math.round((e.clientX - svg.getBoundingClientRect().left - m.l) / step)));
+    hit.addEventListener("mousemove", (e) => { const d = dayAt(e);
+      cross.setAttribute("x1", x(d)); cross.setAttribute("x2", x(d)); cross.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${dayName(d, true)}</b><br>` + POLICIES.map((p) => `${LABEL[p]}: ${share(p, d).toFixed(1)}%`).join("<br>");
+      tip.hidden = false; tip.style.whiteSpace = "normal"; tip.style.minWidth = "150px";
+      tip.style.left = Math.max(0, Math.min(w - 170, x(d) + 12)) + "px"; tip.style.top = m.t + "px"; });
+    hit.addEventListener("mouseleave", () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); });
+    hit.addEventListener("click", (e) => { state.day = dayAt(e); state.t = SHIFT; draw(); wrap.scrollIntoView({ behavior: "smooth", block: "center" }); });
+  }
+
+  // ---------- one station's curve
+  function drawCurve(hostId, nameId, name) {
+    const index = S.findIndex((s) => s.name === name), curve = D.weekdayCurves[index], cap = S[index].cap;
+    $(nameId).textContent = `${name} · ${cap} docks`;
+    const host = $(hostId); host.innerHTML = "";
+    const w = host.clientWidth, h = 210, m = { l: 36, r: 14, t: 22, b: 40 };
+    if (!w) return;
+    const svg = el(host, "svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "img", "aria-label": `Riders let down at ${name} by number of bikes at the start of the day` });
+    const top = niceMax(Math.max(...curve)), best = curve.indexOf(Math.min(...curve));
+    const x = (b) => m.l + (w - m.l - m.r) * b / cap, y = (v) => m.t + (h - m.t - m.b) * (1 - v / top);
+    for (let i = 0; i <= 2; i++) { const v = top * i / 2;
+      el(svg, "line", { x1: m.l, x2: w - m.r, y1: y(v), y2: y(v), stroke: i ? "var(--grid)" : "var(--axis)", "stroke-width": 1 });
+      if (i !== 1) el(svg, "text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end" }, v); }
+    for (const b of [0, Math.round(cap / 2), cap]) el(svg, "text", { x: x(b), y: h - 22, "text-anchor": "middle" }, b);
+    el(svg, "text", { x: (m.l + w - m.r) / 2, y: h - 4, "text-anchor": "middle" }, "Bikes at the station when the day starts");
+    el(svg, "text", { x: m.l - 30, y: 12 }, "Riders let down that day");
+    const points = curve.map((v, b) => x(b) + "," + y(v)).join(" ");
+    el(svg, "polygon", { points: `${x(0)},${y(0)} ${points} ${x(cap)},${y(0)}`, fill: "var(--ink)", opacity: 0.07 });
+    el(svg, "polyline", { points, fill: "none", stroke: "var(--ink)", "stroke-width": 2, "stroke-linejoin": "round" });
+    el(svg, "circle", { cx: x(best), cy: y(curve[best]), r: 5, fill: "var(--optimal)", stroke: "var(--surface)", "stroke-width": 2 });
+    $(hostId + "best").innerHTML = `Best start: <b>${best} bikes</b>. It then lets down about ${fmt(curve[best])} riders a day, against ${fmt(Math.max(curve[0], curve[cap]))} at the worst start.`;
+  }
+
+  function renderAll() { readColors(); if (!resize()) return; draw(); drawWeeks(); drawCurve("c1", "c1name", "Stavangergata"); drawCurve("c2", "c2name", "Tøyenbekken"); }
+  renderAll();
+  window.addEventListener("resize", renderAll);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderAll);
+})();
+</script>

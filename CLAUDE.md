@@ -6,7 +6,7 @@ batteries) so that as few stations as possible are empty or full in the morning.
 with Oslo Bysykkel, one night and one vehicle, then extend.
 
 This is not coursework. Claude writes the formulation, code and analysis, and the user
-steers the modeling choices. The exact formulation has not been chosen yet.
+steers the modeling choices.
 
 ## Stack
 
@@ -16,10 +16,33 @@ Julia with JuMP and Gurobi. The repository root is the Julia package `CityBike`
 - Install dependencies: `julia --project=. -e "using Pkg; Pkg.instantiate()"`
 - Run tests: `julia --project=. -e "using Pkg; Pkg.test()"`
 - Add a dependency: `julia --project=. -e "using Pkg; Pkg.add(\"Name\")"`
+- Run the first model (about ten minutes): `julia --project=. scripts/first_model.jl`
 
 Gurobi needs a licence file on the machine; it is never committed. The tool for the
 animation has not been chosen. The model should write its routes and inventories to
 plain files in `results/` so the animation can be built in any tool.
+
+## How the models work
+
+- **Demand curves** (`src/demand.jl`): for each station, the average number of riders let
+  down over a day as a function of the bikes it holds when the day starts, learned by
+  replaying historical days at that station alone. The curves are convex, which keeps
+  the model linear. Weekdays and weekends have separate curves.
+- **Simulator** (`src/simulate.jl`): replays real trips against station inventories. A
+  rider who finds no bike gives up; a rider who finds no dock rides on to the nearest
+  station with room. The truck's plan is carried out stop by stop during the night.
+- **Benchmark** (`src/greedy.jl`): fullest station to emptiest station, to half full.
+- **Model** (`src/model.jl`): one truck, one night. Chooses route and bikes per stop to
+  minimise the sum of the demand curves, within the shift and the truck's capacity.
+- A service day runs 01:00 to 01:00. The truck works 01:00 to 06:00.
+- Planners must only use trips from before the replay period. Never let a planner see
+  the trips of the day it plans for.
+- Each model gets a script in `scripts/` and a self-contained page in `report/<model>/`
+  (`index.html` plus a generated `data.js`).
+
+Assumptions that are not from data: fleet of 3,000 bikes spread evenly at the start,
+truck of 20 bikes, 3 minutes per stop, half a minute per bike, 25 km/h, detour factor
+1.4, depot at Økern, no daytime rebalancing.
 
 ## Layout
 

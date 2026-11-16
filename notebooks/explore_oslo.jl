@@ -4,6 +4,7 @@
 #   julia --project=. scripts/download_oslo.jl 2025-11 2026-10
 #   julia --project=. notebooks/explore_oslo.jl
 
+using CityBike: haversine, oslo_time, parse_utc
 using CSV
 using DataFrames
 using Dates
@@ -16,23 +17,6 @@ const RAW = joinpath(ROOT, "data", "raw", "oslo")
 const OUT = joinpath(ROOT, "results", "exploration")
 
 # ---------------------------------------------------------------- loading
-
-"Last Sunday of the given month at 01:00 UTC, when European clocks change."
-function clock_change(year, month)
-    day = lastdayofmonth(Date(year, month))
-    while dayofweek(day) != Dates.Sunday
-        day -= Day(1)
-    end
-    return DateTime(day) + Hour(1)
-end
-
-"Convert a UTC time to Oslo wall-clock time."
-function oslo_time(utc::DateTime)
-    summer = clock_change(year(utc), 3) <= utc < clock_change(year(utc), 10)
-    return utc + Hour(summer ? 2 : 1)
-end
-
-parse_utc(text) = DateTime(SubString(text, 1, 19), dateformat"yyyy-mm-dd HH:MM:SS")
 
 function load_trips()
     columns = [:started_at, :ended_at, :duration, :start_station_id, :end_station_id,
@@ -74,12 +58,6 @@ function load_status()
         active = [Bool(row["is_installed"]) && Bool(row["is_renting"]) for row in rows],
     )
     return status, file
-end
-
-"Great-circle distance in km."
-function haversine(lat1, lon1, lat2, lon2)
-    a = sind((lat2 - lat1) / 2)^2 + cosd(lat1) * cosd(lat2) * sind((lon2 - lon1) / 2)^2
-    return 2 * 6371.0 * asin(sqrt(a))
 end
 
 # A "service day" runs from 04:00 to 04:00, so trips just after midnight belong to the

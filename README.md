@@ -30,9 +30,10 @@ bikes from the fullest station to the emptiest.
 
 ## Status
 
-The stack is chosen: Julia with JuMP and the Gurobi solver. The data download and a
-first exploration of the Oslo data exist. No model has been formulated or implemented
-yet.
+The first model is built and solved: one truck, one night at a time, replayed over four
+weeks of real trips and compared with a rule of thumb and with no truck at all. The
+results and an animated map are in [`report/first-model/`](report/first-model/); open
+`index.html` in a browser. More vehicles, e-bikes and uncertain demand come next.
 
 ## Data
 
@@ -52,13 +53,13 @@ Raw downloads are not committed. They go in `data/raw/`, which is git-ignored.
 
 | Path         | Purpose                                                  |
 |--------------|----------------------------------------------------------|
-| `src/`       | Model, algorithm and data code (the `CityBike` package)  |
+| `src/`       | Data loading, demand curves, simulator, benchmark and model (the `CityBike` package) |
 | `test/`      | Tests for the code in `src/`                             |
 | `data/`      | Input data (small files only; document the source)       |
-| `scripts/`   | Command-line scripts, such as the data download          |
+| `scripts/`   | Command-line scripts: data download and model runs       |
 | `notebooks/` | Exploratory analysis and experiments                     |
 | `results/`   | Generated output (figures, tables, logs) — not committed |
-| `report/`    | Written report, slides and the final animation           |
+| `report/`    | Result pages, written report, slides and the final animation |
 
 ## Getting started
 
@@ -89,6 +90,15 @@ Print a first look at the data and write per-station summaries to
 
 ```bash
 julia --project=. notebooks/explore_oslo.jl
+```
+
+Run the first model. It learns station demand from 1 June to 16 August 2026, replays
+17 August to 13 September with no truck, a rule-of-thumb truck and an optimized truck,
+and writes `results/first_model/summary.csv` and the data behind the page in
+`report/first-model/` (about ten minutes):
+
+```bash
+julia --project=. scripts/first_model.jl
 ```
 
 The models are written in JuMP, so another solver such as the open-source HiGHS can be
