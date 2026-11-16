@@ -145,3 +145,38 @@ end
     @test all(540 < stop.done < 660 for stop in late[1].stops[2])
     @test sum(bikes) == 20
 end
+
+@testset "clocks and service days" begin
+    @test oslo_time(DateTime(2026, 6, 1, 22, 0)) == DateTime(2026, 6, 2, 0, 0)       # summer: two hours ahead
+    @test oslo_time(DateTime(2026, 1, 15, 22, 0)) == DateTime(2026, 1, 15, 23, 0)    # winter: one hour ahead
+    @test oslo_time(DateTime(2026, 3, 29, 0, 59)) == DateTime(2026, 3, 29, 1, 59)    # the minute before clocks go forward
+    @test oslo_time(DateTime(2026, 3, 29, 1, 0)) == DateTime(2026, 3, 29, 3, 0)
+    @test parse_utc("2026-05-31 22:00:15.503000+00:00") == DateTime(2026, 5, 31, 22, 0, 15)
+    @test service_day(DateTime(2026, 6, 2, 0, 59)) == Date(2026, 6, 1)               # before 01:00 belongs to the day before
+    @test service_day(DateTime(2026, 6, 2, 1, 0)) == Date(2026, 6, 2)
+    @test is_weekday(Date(2026, 8, 21)) && !is_weekday(Date(2026, 8, 22))
+end
+
+@testset "simulation across days and with trucks that cannot follow the plan" begin
+    first_day, second_day = Date(2026, 6, 1), Date(2026, 6, 2)
+    # A ride that starts at 00:50 and ends at 01:10 is on the road when the day changes.
+    late = [Trip(2, 3, DateTime(second_day) + Minute(50), DateTime(second_day) + Minute(70))]
+    bikes = [10, 5, 5, 0]
+    one = simulate!(bikes, stations, late, [first_day], truck, (day, bikes, shift) -> Plan[])
+    @test bikes == [10, 4, 5, 0] && one[1].trips == 1                 # the bike has left and not yet arrived
+    bikes = [10, 5, 5, 0]
+    two = simulate!(bikes, stations, late, [first_day, second_day], truck, (day, bikes, shift) -> Plan[])
+    @test bikes == [10, 4, 6, 0]                                      # it arrives on the second day
+    @test [result.trips for result in two] == [1, 0]
+
+    # The plan wants to drop 5 bikes at a station with room for 2. The truck drops 2 and
+    # leaves the other 3 at the nearest station with room when its shift ends.
+    bikes = [10, 5, 5, 8]
+    forced(day, bikes, shift) = [timed_plan(truck, travel, [1 => -5, 4 => 5])]
+    result = only(simulate!(bikes, stations, Trip[], [first_day], truck, forced))
+    @test sum(bikes) == 28 && bikes[1] == 5 && bikes[4] == 10 && bikes[3] == 8
+    @test [stop.change for stop in only(result.stops)] == [-5, 2, 3]
+
+    # A shift that would run past 01:00 is refused.
+    @test_throws ErrorException simulate!([10, 5, 5, 0], stations, Trip[], [first_day], truck, forced; shifts = [1400.0])
+end

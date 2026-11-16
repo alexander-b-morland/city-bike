@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="760" height="400" fill="#ffffff"/>
+<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">The system settles within a few days</text>
+<text x="56" y="48" fill="#85857f">Riders let down each day</text>
+<line x1="56" x2="590" y1="348.0" y2="348.0" stroke="#c3c2b7"/>
+<text x="48" y="352.0" text-anchor="end" fill="#85857f">0%</text>
+<line x1="56" x2="590" y1="290.0" y2="290.0" stroke="#e3e2db"/>
+<text x="48" y="294.0" text-anchor="end" fill="#85857f">10%</text>
+<line x1="56" x2="590" y1="232.0" y2="232.0" stroke="#e3e2db"/>
+<text x="48" y="236.0" text-anchor="end" fill="#85857f">20%</text>
+<line x1="56" x2="590" y1="174.0" y2="174.0" stroke="#e3e2db"/>
+<text x="48" y="178.0" text-anchor="end" fill="#85857f">30%</text>
+<line x1="56" x2="590" y1="115.99999999999999" y2="115.99999999999999" stroke="#e3e2db"/>
+<text x="48" y="119.99999999999999" text-anchor="end" fill="#85857f">40%</text>
+<line x1="56" x2="590" y1="58.0" y2="58.0" stroke="#e3e2db"/>
+<text x="48" y="62.0" text-anchor="end" fill="#85857f">50%</text>
+<text x="56.0" y="368" text-anchor="middle" fill="#85857f">17 Aug</text>
+<text x="194.44444444444446" y="368" text-anchor="middle" fill="#85857f">24 Aug</text>
+<text x="332.8888888888889" y="368" text-anchor="middle" fill="#85857f">31 Aug</text>
+<text x="471.3333333333333" y="368" text-anchor="middle" fill="#85857f">7 Sep</text>
+<text x="323.0" y="390" text-anchor="middle" fill="#85857f"></text>
+<polyline points="56.0,295.3 75.8,174.4 95.6,106.4 115.3,88.5 135.1,80.9 154.9,114.5 174.7,126.2 194.4,87.2 214.2,106.4 234.0,105.1 253.8,95.2 273.6,67.5 293.3,97.7 313.1,109.6 332.9,75.5 352.7,94.3 372.4,99.1 392.2,89.7 412.0,99.4 431.8,108.6 451.6,126.4 471.3,82.2 491.1,129.0 510.9,141.9 530.7,106.6 550.4,86.7 570.2,108.7 590.0,141.2" fill="none" stroke="#8f8e87" stroke-width="2.2" stroke-linejoin="round" />
+<polyline points="56.0,312.9 75.8,223.1 95.6,152.5 115.3,126.1 135.1,112.9 154.9,179.6 174.7,199.9 194.4,117.2 214.2,141.2 234.0,135.8 253.8,126.4 273.6,100.9 293.3,147.0 313.1,193.1 332.9,106.9 352.7,120.8 372.4,129.5 392.2,125.7 412.0,138.2 431.8,154.7 451.6,202.8 471.3,128.5 491.1,180.9 510.9,190.3 530.7,147.4 550.4,136.2 570.2,160.0 590.0,218.7" fill="none" stroke="#9fdcc4" stroke-width="2.2" stroke-linejoin="round" />
+<polyline points="56.0,322.2 75.8,298.1 95.6,285.6 115.3,267.0 135.1,241.4 154.9,292.2 174.7,318.5 194.4,276.4 214.2,275.4 234.0,242.0 253.8,220.2 273.6,209.6 293.3,280.3 313.1,325.4 332.9,267.9 352.7,232.8 372.4,236.2 392.2,225.2 412.0,247.9 431.8,280.2 451.6,316.7 471.3,313.4 491.1,304.4 510.9,288.9 530.7,299.4 550.4,316.6 570.2,325.0 590.0,336.3" fill="none" stroke="#3fbf90" stroke-width="2.2" stroke-linejoin="round" />
+<polyline points="56.0,320.4 75.8,304.2 95.6,306.6 115.3,307.3 135.1,308.4 154.9,324.3 174.7,327.1 194.4,305.8 214.2,311.4 234.0,302.1 253.8,293.6 273.6,296.0 293.3,331.6 313.1,342.0 332.9,303.5 352.7,294.3 372.4,303.7 392.2,296.6 412.0,314.3 431.8,328.4 451.6,332.4 471.3,325.6 491.1,320.9 510.9,307.0 530.7,314.6 550.4,321.6 570.2,333.2 590.0,336.0" fill="none" stroke="#0b6b49" stroke-width="2.2" stroke-linejoin="round" />
+<rect x="600" y="136.24577861163226" width="10" height="10" rx="2" fill="#8f8e87"/>
+<text x="616" y="145.24577861163226" fill="#50524f">No trucks</text>
+<rect x="600" y="213.6620209059233" width="10" height="10" rx="2" fill="#9fdcc4"/>
+<text x="616" y="222.6620209059233" fill="#50524f">1 optimized truck</text>
+<rect x="600" y="331.03001876172607" width="10" height="10" rx="2" fill="#0b6b49"/>
+<text x="616" y="340.03001876172607" fill="#50524f">8 optimized trucks</text>
+<rect x="600" y="347.03001876172607" width="10" height="10" rx="2" fill="#3fbf90"/>
+<text x="616" y="356.03001876172607" fill="#50524f">4 optimized trucks</text>
+</svg>

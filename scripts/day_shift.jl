@@ -10,6 +10,8 @@
 #
 # Writes results/day_shift/night<a>_day<b>_<mode>.json. Midday driving takes 30% longer
 # than at night, to allow for traffic.
+#
+#   julia --project=. scripts/day_shift.jl page             # collect the runs for the page
 
 using CityBike
 using Dates
@@ -29,6 +31,8 @@ const SOLVER = (per_side = 15, time_limit = 10.0, gap = 0.02, km_penalty = 0.05,
 
 function replay(night_trucks::Integer, day_trucks::Integer, mode::AbstractString)
     mode in ("full", "split") || error("mode must be full or split")
+    target = joinpath(ROOT, "results", "day_shift", "night$(night_trucks)_day$(day_trucks)_$(mode).json")
+    isfile(target) && return println("have ", target)
     windows = [(0, mode == "split" && day_trucks > 0 ? MIDDAY : 1440), (MIDDAY, 1440)]
     case = load_case(ROOT, TRAINING, REPLAY; windows)
     stations = case.stations
@@ -52,16 +56,66 @@ function replay(night_trucks::Integer, day_trucks::Integer, mode::AbstractString
     @printf("%d night + %d midday trucks (%s): %d of %d riders let down (%.1f%%), %.0f s\n",
             night_trucks, day_trucks, mode, failed, total, 100 * failed / total, seconds)
 
-    out = joinpath(ROOT, "results", "day_shift")
-    mkpath(out)
-    open(joinpath(out, "night$(night_trucks)_day$(day_trucks)_$(mode).json"), "w") do io
+    mkpath(dirname(target))
+    open(target, "w") do io
         JSON.print(io, Dict("night" => night_trucks, "day" => day_trucks, "mode" => mode, "midday" => MIDDAY,
                             "days" => day_records(results, nights)))
     end
 end
 
+"""
+Collect the runs for the page in report/day-shift/. Night-only runs come from
+scripts/fleet_size.jl. Runs with 4 or 8 trucks in total are kept in full for the map;
+the others keep their totals only.
+"""
+function page()
+    stations = load_stations(joinpath(ROOT, "data", "raw", "oslo", "gbfs", "station_information.json"))
+    roads = load_roads(joinpath(ROOT, "data", "raw", "osm", "roads.json"), stations, TRUCK)
+    runs = [JSON.parsefile(joinpath(ROOT, "results", "day_shift", file))
+            for file in readdir(joinpath(ROOT, "results", "day_shift")) if endswith(file, ".json")]
+    fleet = joinpath(ROOT, "results", "fleet_size")
+    for file in readdir(fleet)
+        startswith(file, "optimal_") || file == "none_0.json" || continue
+        run = JSON.parsefile(joinpath(fleet, file))
+        push!(runs, Dict("night" => run["trucks"], "day" => 0, "mode" => "full", "days" => run["days"]))
+    end
+    sort!(runs; by = run -> (run["night"] + run["day"], -run["night"], run["mode"]))
+    legs = Dict{String,Vector{Int}}()
+    for run in runs
+        if run["night"] + run["day"] in (4, 8) && !(run["mode"] == "full" && run["night"] > 0 && run["day"] > 0)
+            collect_legs!(legs, roads, run["days"])
+        else
+            for day in run["days"]
+                delete!(day, "levels")
+                foreach(truck -> truck["stops"] = length(truck["stops"]), day["trucks"])
+            end
+        end
+    end
+    data = Dict(
+        "days" => string.(collect(REPLAY)), "midday" => MIDDAY,
+        "truck" => Dict("capacity" => TRUCK.capacity, "shift" => TRUCK.shift, "stopMinutes" => TRUCK.stop_minutes,
+                        "bikeMinutes" => TRUCK.bike_minutes, "depot" => [TRUCK.depot_lat, TRUCK.depot_lon]),
+        "stations" => [[station.name, round(station.lat; digits = 5), round(station.lon; digits = 5), station.capacity]
+                       for station in stations],
+        "runs" => runs, "legs" => legs)
+    target = joinpath(ROOT, "report", "day-shift")
+    mkpath(target)
+    file = joinpath(target, "data.js")
+    open(file, "w") do io
+        print(io, "window.DAY_SHIFT = ")
+        JSON.print(io, data)
+        println(io, ";")
+    end
+    cp(joinpath(ROOT, "report", "map", "oslo.js"), joinpath(target, "map.js"); force = true)
+    cp(joinpath(ROOT, "report", "shared", "player.js"), joinpath(target, "player.js"); force = true)
+    @printf("%d runs, %d street legs, %.1f MB in %s
+", length(runs), length(legs), filesize(file) / 1e6, file)
+end
+
 if length(ARGS) == 4 && ARGS[1] == "run"
     replay(parse(Int, ARGS[2]), parse(Int, ARGS[3]), ARGS[4])
+elseif ARGS == ["page"]
+    page()
 else
-    error("usage: day_shift.jl run <night trucks> <midday trucks> <full|split>")
+    error("usage: day_shift.jl run <night trucks> <midday trucks> <full|split>   or   day_shift.jl page")
 end

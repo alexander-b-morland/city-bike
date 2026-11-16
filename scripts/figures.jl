@@ -99,6 +99,68 @@ km_per_night(run) = sum(sum((truck["km"] for truck in day["trucks"]); init = 0.0
 daily_share(run) = [100 * (day["noBike"] + day["noDock"]) / day["trips"] for day in run["days"]]
 moved_per_night(run) = sum(sum((sum((max(stop[2], 0) for stop in truck["stops"]); init = 0) for truck in day["trucks"]); init = 0) for day in run["days"]) / length(run["days"])
 
+"Decode a base-map line into (x, y) pairs in map units."
+function unpack(numbers)
+    points, x, y = Tuple{Int,Int}[], 0, 0
+    for k in 1:2:length(numbers)
+        x, y = x + numbers[k], y + numbers[k + 1]
+        push!(points, (x, y))
+    end
+    return points
+end
+
+"""
+The stations on the real map, coloured by how many bikes they gain or lose over an
+average summer weekday (from notebooks/explore_oslo.jl).
+"""
+function drift_map(file)
+    text = read(joinpath(ROOT, "report", "map", "oslo.js"), String)
+    map = JSON.parse(text[findfirst('{', text):findlast('}', text)])
+    south, west, north, east = map["box"]
+    unit = map["unit"]
+    view = (59.8945, 10.6440, 59.9560, 10.8210)
+    width = 900
+    scale = width / ((view[4] - view[2]) * cosd(59.92))
+    height = round(Int, (view[3] - view[1]) * scale)
+    px(lat, lon) = (round((lon - view[2]) * cosd(59.92) * scale; digits = 1), round(height - (lat - view[1]) * scale; digits = 1))
+    path(numbers; close = false) = "M" * join(("$(p[1]) $(p[2])" for p in (px(south + y * unit, west + x * unit) for (x, y) in unpack(numbers))), "L") * (close ? "Z" : "")
+    stations = [split(line, ",") for line in readlines(joinpath(ROOT, "results", "exploration", "stations.csv"))[2:end]]
+    open(joinpath(OUT, file), "w") do io
+        println(io, """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 $width $(height + 62)" width="$width" height="$(height + 62)" $FONT font-size="13">""")
+        println(io, """<rect width="$width" height="$(height + 62)" fill="#ffffff"/><clipPath id="c"><rect width="$width" height="$height"/></clipPath><g clip-path="url(#c)">""")
+        println(io, """<rect width="$width" height="$height" fill="#f2f1ec"/>""")
+        println(io, """<path d="$(join((path(line; close = true) for line in map["parks"]), ""))" fill="#dbe8cf"/>""")
+        rows = map["sea"]["rows"]
+        d_lat, d_lon = (north - south) / length(rows), (east - west) / map["sea"]["columns"]
+        sea = IOBuffer()
+        for (r, runs) in enumerate(rows), k in 1:2:length(runs)
+            (x1, y1), (x2, y2) = px(north - (r - 1) * d_lat, west + runs[k] * d_lon), px(north - r * d_lat, west + (runs[k] + runs[k + 1]) * d_lon)
+            (y2 < 0 || y1 > height || x2 < 0 || x1 > width) && continue
+            print(sea, "M$x1 $(y1)H$(x2 + 0.5)V$(y2 + 0.5)H$(x1)Z")
+        end
+        println(io, """<path d="$(String(take!(sea)))" fill="#c9dcef"/>""")
+        println(io, """<path d="$(join((path(line; close = true) for line in map["lakes"]), ""))" fill="#c9dcef"/>""")
+        for (name, stroke) in (("medium", 1.6), ("major", 2.6))
+            println(io, """<path d="$(join((path(line) for line in map["roads"][name]), ""))" fill="none" stroke="#ffffff" stroke-width="$stroke" stroke-linecap="round" stroke-linejoin="round"/>""")
+        end
+        for row in sort(stations; by = row -> -abs(parse(Float64, row[6])))
+            lat, lon, drift = parse(Float64, row[3]), parse(Float64, row[4]), parse(Float64, row[6])
+            x, y = px(lat, lon)
+            colour = abs(drift) < 2 ? "#a9a8a0" : drift < 0 ? RED : BLUE
+            println(io, """<circle cx="$x" cy="$y" r="$(round(3 + 1.9 * sqrt(abs(drift)); digits = 1))" fill="$colour" fill-opacity="0.85" stroke="#ffffff"/>""")
+        end
+        for (text, lat, lon) in (("Oslofjord", 59.9005, 10.722), ("Nydalen", 59.9535, 10.7665), ("Majorstuen", 59.9305, 10.706), ("Bygdøy", 59.906, 10.682), ("Blindern", 59.9445, 10.7215))
+            x, y = px(lat, lon)
+            println(io, """<text x="$x" y="$y" text-anchor="middle" fill="$SOFT" stroke="#f2f1ec" stroke-width="3" paint-order="stroke">$text</text>""")
+        end
+        println(io, "</g>")
+        for (k, (colour, text)) in enumerate(((RED, "Loses bikes over a weekday"), (BLUE, "Gains bikes over a weekday"), ("#a9a8a0", "Within 2 bikes of balance")))
+            println(io, """<circle cx="$(20 + 230 * (k - 1))" cy="$(height + 22)" r="6" fill="$colour"/><text x="$(32 + 230 * (k - 1))" y="$(height + 27)" fill="$SOFT">$text</text>""")
+        end
+        println(io, """<text x="14" y="$(height + 50)" fill="$MUTED">Larger circle = larger change. Map © OpenStreetMap contributors.</text></svg>""")
+    end
+end
+
 function main()
     mkpath(OUT)
     numbers = Dict{String,Any}()
@@ -112,7 +174,7 @@ function main()
     series = Any[("Rule of thumb", ORANGE, count_of.(greedy), share.(greedy), false),
                  ("Optimized", GREEN, count_of.(optimal), share.(optimal), false)]
     isempty(oracle) || push!(series, ("Knowing tomorrow", GREY, vcat(0, count_of.(oracle)), vcat(share(none), share.(oracle)), true))
-    line_chart("fleet_size.svg"; title = "Each extra truck helps less than the one before", ylabel = "Riders let down over four weeks",
+    line_chart("fleet_size.svg"; title = "The first five trucks do almost all the work", ylabel = "Riders let down over four weeks",
                xlabel = "Trucks working each night", series, suffix = "%",
                xticks = [(k, string(k)) for k in 0:2:maximum(count_of.(greedy))])
     numbers["fleet"] = Dict(policy => [Dict("trucks" => count_of(run), "share" => round(share(run); digits = 1), "perDay" => round(per_day(run)),
@@ -183,6 +245,24 @@ function main()
         numbers["sensitivity"] = vcat([Dict("parameter" => "base", "share" => round(base; digits = 1))],
                                       [Dict("parameter" => run["parameter"], "value" => run["value"], "share" => run["share"]) for run in runs])
     end
+
+    # 6. The problem itself: the daily rhythm, the drift and two stations' curves.
+    hours = [split(line, ",") for line in readlines(joinpath(ROOT, "results", "exploration", "hourly.csv"))[2:end]]
+    bar_chart("hourly.svg"; title = "A summer weekday has two rush hours, and a quiet night for the trucks", ylabel = "Trips started per hour",
+              xlabel = "Hour of the day", labels = [row[1] for row in hours], values = [parse(Float64, row[2]) for row in hours],
+              colours = [1 <= parse(Int, row[1]) <= 5 ? GREEN : GREY for row in hours], notes = fill("", length(hours)), height = 340)
+    drift_map("drift_map.svg")
+    case = load_case(ROOT, Date(2026, 6, 1):Day(1):Date(2026, 8, 16), Date(2026, 8, 17):Day(1):Date(2026, 8, 17))
+    curve_of(name) = case.weekday_curves[1][findfirst(station -> station.name == name, case.stations)]
+    hill, centre = curve_of("Stavangergata"), curve_of("Tøyenbekken")
+    line_chart("curves.svg"; title = "What each station wants: riders let down by how the day starts", ylabel = "Riders let down that day",
+               xlabel = "Bikes at the station when the day starts (both have 30 docks)", markers = false,
+               series = [("Stavangergata
+(in the hills)"[1:13], RED, collect(0:length(hill) - 1), hill, false),
+                         ("Tøyenbekken"[1:11], BLUE, collect(0:length(centre) - 1), centre, false)],
+               xticks = [(k, string(k)) for k in 0:5:30])
+    numbers["curves"] = Dict("hillBest" => argmin(hill) - 1, "hillWorst" => round(maximum(hill); digits = 1), "hillAtBest" => round(minimum(hill); digits = 1),
+                             "centreBest" => argmin(centre) - 1, "centreWorst" => round(maximum(centre); digits = 1), "centreAtBest" => round(minimum(centre); digits = 1))
 
     open(joinpath(OUT, "numbers.json"), "w") do io
         JSON.print(io, numbers, 2)

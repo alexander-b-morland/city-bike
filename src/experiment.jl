@@ -90,3 +90,33 @@ function night_replay(case::Case, travel::Travel, truck::Truck, days::Vector{Dat
     results = simulate!(even_start(stations, fleet), stations, case.trips, days, truck, planner)
     return results, nights
 end
+
+"A street route as whole numbers: the first point in 1e-5 degrees, then the step to each next point."
+function encode_route(points::Vector{Tuple{Float64,Float64}})
+    points = thin_line(points, 6.0)
+    xs = [round(Int, lon * 1e5) for (_, lon) in points]
+    ys = [round(Int, lat * 1e5) for (lat, _) in points]
+    numbers = [xs[1], ys[1]]
+    for k in 2:length(points)
+        push!(numbers, xs[k] - xs[k - 1], ys[k] - ys[k - 1])
+    end
+    return numbers
+end
+
+"""
+Add to `legs` the street route of every leg driven by the trucks in `days`, which are
+day records as written by `day_records`. Legs are keyed "from>to" by station number
+counted from zero, with the base as the number after the last station.
+"""
+function collect_legs!(legs::Dict{String,Vector{Int}}, roads::Roads, days)
+    home = length(roads.node)
+    for day in days, truck in day["trucks"]
+        previous = home
+        for stop in vcat(collect(truck["stops"]), [[home - 1, 0, 0]])
+            place = Int(stop[1]) + 1
+            previous == place || get!(() -> encode_route(route(roads, previous, place)), legs, "$(previous - 1)>$(place - 1)")
+            previous = place
+        end
+    end
+    return legs
+end

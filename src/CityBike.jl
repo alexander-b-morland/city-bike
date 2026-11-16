@@ -16,7 +16,7 @@ export failures, failure_curves, is_convex, convex_envelope
 export straight_line_travel, load_roads, route, thin_line, depot
 export timed_plan, after, problems, bikes_moved, expected_saved
 export greedy_plan, optimal_plan, plan_night, simulate!, let_down
-export load_case, curves_for, even_start, encode_levels, day_records, night_replay
+export load_case, curves_for, even_start, encode_levels, day_records, night_replay, collect_legs!
 
 include("data.jl")
 include("demand.jl")

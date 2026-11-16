@@ -22,6 +22,8 @@ const SOLVER = (per_side = 15, time_limit = 10.0, gap = 0.02, km_penalty = 0.05,
                 attributes = Dict{String,Any}("Threads" => 2))
 
 function replay(parameter::AbstractString, value::Real, trucks::Integer)
+    target = joinpath(ROOT, "results", "sensitivity", "$(parameter)_$(value)_$(trucks).json")
+    isfile(target) && return println("have ", target)
     fleet = parameter == "fleet" ? round(Int, value) : 3000
     truck = parameter == "capacity" ? Truck(capacity = round(Int, value)) :
             parameter == "shift" ? Truck(shift = value) :
@@ -35,9 +37,8 @@ function replay(parameter::AbstractString, value::Real, trucks::Integer)
     total, failed = sum(result.trips for result in results), sum(let_down(result) for result in results)
     moved = sum(sum(bikes_moved, result.plans; init = 0) for result in results) / length(results)
     @printf("%s = %s with %d trucks: %d of %d riders let down (%.1f%%)\n", parameter, value, trucks, failed, total, 100 * failed / total)
-    out = joinpath(ROOT, "results", "sensitivity")
-    mkpath(out)
-    open(joinpath(out, "$(parameter)_$(value)_$(trucks).json"), "w") do io
+    mkpath(dirname(target))
+    open(target, "w") do io
         JSON.print(io, Dict("parameter" => parameter, "value" => value, "trucks" => trucks, "trips" => total,
                             "letDown" => failed, "share" => round(100 * failed / total; digits = 2),
                             "bikesMovedPerNight" => round(moved; digits = 1)))

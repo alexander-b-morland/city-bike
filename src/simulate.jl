@@ -29,6 +29,7 @@ room. Returns one `DayResult` per day; `bikes` is updated in place.
 function simulate!(bikes::Vector{Int}, stations::Vector{Station}, trips::Vector{Trip},
                    days::Vector{Date}, truck::Truck, planner;
                    shifts::Vector{<:Real} = [0.0], snapshot_every::Period = Minute(30), bike_kmh::Real = 12.0)
+    all(start + truck.shift <= 1440 for start in shifts) || error("a shift must end before the service day does, at 01:00")
     n = length(stations)
     nearest = [sortperm([haversine(a, b) for b in stations]) for a in stations]
     by_day = Dict(day => Trip[] for day in days)

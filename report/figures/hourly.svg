@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" width="760" height="340" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="760" height="340" fill="#ffffff"/>
+<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">A summer weekday has two rush hours, and a quiet night for the trucks</text>
+<text x="56" y="48" fill="#85857f">Trips started per hour</text>
+<line x1="56" x2="740" y1="278.0" y2="278.0" stroke="#c3c2b7"/>
+<text x="48" y="282.0" text-anchor="end" fill="#85857f">0</text>
+<line x1="56" x2="740" y1="234.0" y2="234.0" stroke="#e3e2db"/>
+<text x="48" y="238.0" text-anchor="end" fill="#85857f">200</text>
+<line x1="56" x2="740" y1="190.0" y2="190.0" stroke="#e3e2db"/>
+<text x="48" y="194.0" text-anchor="end" fill="#85857f">400</text>
+<line x1="56" x2="740" y1="146.0" y2="146.0" stroke="#e3e2db"/>
+<text x="48" y="150.0" text-anchor="end" fill="#85857f">600</text>
+<line x1="56" x2="740" y1="102.0" y2="102.0" stroke="#e3e2db"/>
+<text x="48" y="106.0" text-anchor="end" fill="#85857f">800</text>
+<line x1="56" x2="740" y1="58.0" y2="58.0" stroke="#e3e2db"/>
+<text x="48" y="62.0" text-anchor="end" fill="#85857f">1000</text>
+<rect x="61.415" y="244.648" width="17.669999999999998" height="33.352000000000004" rx="3" fill="#8f8e87"/>
+<text x="70.25" y="237.648" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="70.25" y="298" text-anchor="middle" fill="#50524f">0</text>
+<rect x="89.915" y="268.892" width="17.669999999999998" height="9.108000000000004" rx="3" fill="#1baf7a"/>
+<text x="98.75" y="261.892" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="98.75" y="298" text-anchor="middle" fill="#50524f">1</text>
+<rect x="118.415" y="268.804" width="17.669999999999998" height="9.196000000000026" rx="3" fill="#1baf7a"/>
+<text x="127.25" y="261.804" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="127.25" y="298" text-anchor="middle" fill="#50524f">2</text>
+<rect x="146.915" y="273.578" width="17.669999999999998" height="4.4220000000000255" rx="3" fill="#1baf7a"/>
+<text x="155.75" y="266.578" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="155.75" y="298" text-anchor="middle" fill="#50524f">3</text>
+<rect x="175.415" y="273.776" width="17.669999999999998" height="4.2239999999999895" rx="3" fill="#1baf7a"/>
+<text x="184.25" y="266.776" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="184.25" y="298" text-anchor="middle" fill="#50524f">4</text>
+<rect x="203.915" y="272.17" width="17.669999999999998" height="5.829999999999984" rx="3" fill="#1baf7a"/>
+<text x="212.75" y="265.17" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="212.75" y="298" text-anchor="middle" fill="#50524f">5</text>
+<rect x="232.415" y="254.548" width="17.669999999999998" height="23.451999999999998" rx="3" fill="#8f8e87"/>
+<text x="241.25" y="247.548" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="241.25" y="298" text-anchor="middle" fill="#50524f">6</text>
+<rect x="260.915" y="195.522" width="17.669999999999998" height="82.47800000000001" rx="3" fill="#8f8e87"/>
+<text x="269.75" y="188.522" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="269.75" y="298" text-anchor="middle" fill="#50524f">7</text>
+<rect x="289.415" y="143.118" width="17.669999999999998" height="134.882" rx="3" fill="#8f8e87"/>
+<text x="298.25" y="136.118" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="298.25" y="298" text-anchor="middle" fill="#50524f">8</text>
+<rect x="317.915" y="214.332" width="17.669999999999998" height="63.668000000000006" rx="3" fill="#8f8e87"/>
+<text x="326.75" y="207.332" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="326.75" y="298" text-anchor="middle" fill="#50524f">9</text>
+<rect x="346.415" y="233.098" width="17.669999999999998" height="44.90199999999999" rx="3" fill="#8f8e87"/>
+<text x="355.25" y="226.098" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="355.25" y="298" text-anchor="middle" fill="#50524f">10</text>
+<rect x="374.915" y="228.478" width="17.669999999999998" height="49.52199999999999" rx="3" fill="#8f8e87"/>
+<text x="383.75" y="221.478" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="383.75" y="298" text-anchor="middle" fill="#50524f">11</text>
+<rect x="403.415" y="226.96" width="17.669999999999998" height="51.03999999999999" rx="3" fill="#8f8e87"/>
+<text x="412.25" y="219.96" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="412.25" y="298" text-anchor="middle" fill="#50524f">12</text>
+<rect x="431.915" y="222.802" width="17.669999999999998" height="55.19800000000001" rx="3" fill="#8f8e87"/>
+<text x="440.75" y="215.802" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="440.75" y="298" text-anchor="middle" fill="#50524f">13</text>
+<rect x="460.415" y="208.70000000000002" width="17.669999999999998" height="69.29999999999998" rx="3" fill="#8f8e87"/>
+<text x="469.25" y="201.70000000000002" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="469.25" y="298" text-anchor="middle" fill="#50524f">14</text>
+<rect x="488.915" y="167.78" width="17.669999999999998" height="110.22" rx="3" fill="#8f8e87"/>
+<text x="497.75" y="160.78" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="497.75" y="298" text-anchor="middle" fill="#50524f">15</text>
+<rect x="517.415" y="141.93" width="17.669999999999998" height="136.07" rx="3" fill="#8f8e87"/>
+<text x="526.25" y="134.93" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="526.25" y="298" text-anchor="middle" fill="#50524f">16</text>
+<rect x="545.915" y="166.108" width="17.669999999999998" height="111.892" rx="3" fill="#8f8e87"/>
+<text x="554.75" y="159.108" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="554.75" y="298" text-anchor="middle" fill="#50524f">17</text>
+<rect x="574.415" y="188.10799999999998" width="17.669999999999998" height="89.89200000000002" rx="3" fill="#8f8e87"/>
+<text x="583.25" y="181.10799999999998" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="583.25" y="298" text-anchor="middle" fill="#50524f">18</text>
+<rect x="602.915" y="207.18200000000002" width="17.669999999999998" height="70.81799999999998" rx="3" fill="#8f8e87"/>
+<text x="611.75" y="200.18200000000002" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="611.75" y="298" text-anchor="middle" fill="#50524f">19</text>
+<rect x="631.415" y="218.864" width="17.669999999999998" height="59.135999999999996" rx="3" fill="#8f8e87"/>
+<text x="640.25" y="211.864" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="640.25" y="298" text-anchor="middle" fill="#50524f">20</text>
+<rect x="659.915" y="226.388" width="17.669999999999998" height="51.611999999999995" rx="3" fill="#8f8e87"/>
+<text x="668.75" y="219.388" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="668.75" y="298" text-anchor="middle" fill="#50524f">21</text>
+<rect x="688.415" y="236.48600000000002" width="17.669999999999998" height="41.51399999999998" rx="3" fill="#8f8e87"/>
+<text x="697.25" y="229.48600000000002" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="697.25" y="298" text-anchor="middle" fill="#50524f">22</text>
+<rect x="716.915" y="226.652" width="17.669999999999998" height="51.34800000000001" rx="3" fill="#8f8e87"/>
+<text x="725.75" y="219.652" text-anchor="middle" font-weight="600" fill="#0d0f12"></text>
+<text x="725.75" y="298" text-anchor="middle" fill="#50524f">23</text>
+<text x="398.0" y="334" text-anchor="middle" fill="#85857f">Hour of the day</text>
+</svg>

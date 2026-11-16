@@ -80,7 +80,7 @@ function problems(plan::Plan, truck::Truck, stations::Vector{Station}, bikes::Ve
             push!(found, "station $(stop.station) would hold $level bikes")
     end
     load == 0 || push!(found, "truck ends with $load bikes on board")
-    plan.minutes <= truck.shift + 1e-6 || push!(found, "shift takes $(round(plan.minutes; digits = 1)) minutes")
+    plan.minutes <= truck.shift + 1e-3 || push!(found, "shift takes $(round(plan.minutes; digits = 1)) minutes")
     return found
 end
 

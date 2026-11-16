@@ -33,6 +33,8 @@ const SOLVER = (per_side = 15, time_limit = 10.0, gap = 0.02, km_penalty = KM_PE
                 attributes = Dict{String,Any}("Threads" => 2))
 
 function replay(policy::AbstractString, trucks::Integer)
+    target = joinpath(OUT, "$(policy)_$(trucks).json")
+    isfile(target) && return println("have ", target)
     case = load_case(ROOT, TRAINING, REPLAY)
     stations = case.stations
     roads = load_roads(joinpath(ROOT, "data", "raw", "osm", "roads.json"), stations, TRUCK)
@@ -43,49 +45,30 @@ function replay(policy::AbstractString, trucks::Integer)
     @printf("%s with %d trucks: %d of %d riders let down (%.1f%%), %.0f s\n", policy, trucks, failed, total, 100 * failed / total, seconds)
 
     mkpath(OUT)
-    open(joinpath(OUT, "$(policy)_$(trucks).json"), "w") do io
+    open(target, "w") do io
         JSON.print(io, Dict("policy" => policy, "trucks" => trucks, "days" => day_records(results, nights)))
     end
-end
-
-"A street route as whole numbers: the first point in 1e-5 degrees, then the step to each next point."
-function encode_route(points)
-    points = thin_line(points, 6.0)
-    xs = [round(Int, lon * 1e5) for (_, lon) in points]
-    ys = [round(Int, lat * 1e5) for (lat, _) in points]
-    numbers = [xs[1], ys[1]]
-    for k in 2:length(points)
-        push!(numbers, xs[k] - xs[k - 1], ys[k] - ys[k - 1])
-    end
-    return numbers
 end
 
 function page()
     stations = load_stations(joinpath(ROOT, "data", "raw", "oslo", "gbfs", "station_information.json"))
     roads = load_roads(joinpath(ROOT, "data", "raw", "osm", "roads.json"), stations, TRUCK)
-    home = length(stations) + 1
     runs = [JSON.parsefile(joinpath(OUT, file)) for file in readdir(OUT) if endswith(file, ".json")]
     sort!(runs; by = run -> (run["policy"], run["trucks"]))
 
-    # The street route of every leg that a truck on the map drives, stored once.
+    # The page maps the optimized trucks only; the other runs keep their totals.
     legs = Dict{String,Vector{Int}}()
-    summary = []
     for run in runs
-        mapped = run["policy"] in ("optimal", "none")      # the page maps the optimized trucks only
-        for day in run["days"]
-            mapped || delete!(day, "levels")
-            for truck in day["trucks"]
-                mapped || (truck["stops"] = length(truck["stops"]); continue)
-                previous = home
-                for stop in vcat(truck["stops"], [[home - 1, 0, 0]])
-                    place = Int(stop[1]) + 1
-                    previous == place || get!(() -> encode_route(route(roads, previous, place)), legs, "$(previous - 1)>$(place - 1)")
-                    previous = place
-                end
+        if run["policy"] in ("optimal", "none")
+            collect_legs!(legs, roads, run["days"])
+        else
+            for day in run["days"]
+                delete!(day, "levels")
+                foreach(truck -> truck["stops"] = length(truck["stops"]), day["trucks"])
             end
         end
-        push!(summary, run)
     end
+    summary = runs
 
     data = Dict(
         "days" => string.(collect(REPLAY)), "fleet" => FLEET,

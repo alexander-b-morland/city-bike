@@ -1,0 +1,225 @@
+{
+  "cost": {
+    "cheapest": 5,
+    "greedyCheapest": 6,
+    "greedyTotal": 47935.0,
+    "steps": [
+      {
+        "breakEven": 7.6,
+        "from": 0,
+        "sparedPerTruck": 417.0,
+        "to": 1
+      },
+      {
+        "breakEven": 8.6,
+        "from": 1,
+        "sparedPerTruck": 370.0,
+        "to": 2
+      },
+      {
+        "breakEven": 7.3,
+        "from": 2,
+        "sparedPerTruck": 430.0,
+        "to": 3
+      },
+      {
+        "breakEven": 8.0,
+        "from": 3,
+        "sparedPerTruck": 394.0,
+        "to": 4
+      },
+      {
+        "breakEven": 13.1,
+        "from": 4,
+        "sparedPerTruck": 240.0,
+        "to": 5
+      },
+      {
+        "breakEven": 43.5,
+        "from": 5,
+        "sparedPerTruck": 72.0,
+        "to": 6
+      },
+      {
+        "breakEven": 104.3,
+        "from": 6,
+        "sparedPerTruck": 30.0,
+        "to": 8
+      },
+      {
+        "breakEven": 853.9,
+        "from": 8,
+        "sparedPerTruck": 4.0,
+        "to": 10
+      }
+    ],
+    "total": 28044.0
+  },
+  "curves": {
+    "centreAtBest": 9.2,
+    "centreBest": 0,
+    "centreWorst": 37.1,
+    "hillAtBest": 1.9,
+    "hillBest": 29,
+    "hillWorst": 21.5
+  },
+  "fleet": {
+    "greedy": [
+      {
+        "kmPerNight": 0.0,
+        "movedPerNight": 0.0,
+        "perDay": 2342.0,
+        "share": 40.7,
+        "trucks": 0
+      },
+      {
+        "kmPerNight": 74.3,
+        "movedPerNight": 74.0,
+        "perDay": 2193.0,
+        "share": 38.1,
+        "trucks": 1
+      },
+      {
+        "kmPerNight": 147.0,
+        "movedPerNight": 160.0,
+        "perDay": 1937.0,
+        "share": 33.7,
+        "trucks": 2
+      },
+      {
+        "kmPerNight": 222.4,
+        "movedPerNight": 236.0,
+        "perDay": 1711.0,
+        "share": 29.7,
+        "trucks": 3
+      },
+      {
+        "kmPerNight": 296.4,
+        "movedPerNight": 313.0,
+        "perDay": 1499.0,
+        "share": 26.0,
+        "trucks": 4
+      },
+      {
+        "kmPerNight": 374.1,
+        "movedPerNight": 378.0,
+        "perDay": 1298.0,
+        "share": 22.6,
+        "trucks": 5
+      },
+      {
+        "kmPerNight": 457.4,
+        "movedPerNight": 431.0,
+        "perDay": 1142.0,
+        "share": 19.8,
+        "trucks": 6
+      },
+      {
+        "kmPerNight": 636.2,
+        "movedPerNight": 504.0,
+        "perDay": 1003.0,
+        "share": 17.4,
+        "trucks": 8
+      },
+      {
+        "kmPerNight": 800.5,
+        "movedPerNight": 544.0,
+        "perDay": 946.0,
+        "share": 16.4,
+        "trucks": 10
+      },
+      {
+        "kmPerNight": 858.1,
+        "movedPerNight": 551.0,
+        "perDay": 934.0,
+        "share": 16.2,
+        "trucks": 12
+      },
+      {
+        "kmPerNight": 851.1,
+        "movedPerNight": 552.0,
+        "perDay": 933.0,
+        "share": 16.2,
+        "trucks": 16
+      }
+    ],
+    "optimal": [
+      {
+        "kmPerNight": 0.0,
+        "movedPerNight": 0.0,
+        "perDay": 2342.0,
+        "share": 40.7,
+        "trucks": 0
+      },
+      {
+        "kmPerNight": 49.3,
+        "movedPerNight": 139.0,
+        "perDay": 1925.0,
+        "share": 33.4,
+        "trucks": 1
+      },
+      {
+        "kmPerNight": 107.6,
+        "movedPerNight": 259.0,
+        "perDay": 1555.0,
+        "share": 27.0,
+        "trucks": 2
+      },
+      {
+        "kmPerNight": 161.8,
+        "movedPerNight": 370.0,
+        "perDay": 1125.0,
+        "share": 19.5,
+        "trucks": 3
+      },
+      {
+        "kmPerNight": 212.7,
+        "movedPerNight": 466.0,
+        "perDay": 731.0,
+        "share": 12.7,
+        "trucks": 4
+      },
+      {
+        "kmPerNight": 260.6,
+        "movedPerNight": 547.0,
+        "perDay": 490.0,
+        "share": 8.5,
+        "trucks": 5
+      },
+      {
+        "kmPerNight": 301.8,
+        "movedPerNight": 594.0,
+        "perDay": 419.0,
+        "share": 7.3,
+        "trucks": 6
+      },
+      {
+        "kmPerNight": 382.0,
+        "movedPerNight": 665.0,
+        "perDay": 359.0,
+        "share": 6.2,
+        "trucks": 8
+      },
+      {
+        "kmPerNight": 425.3,
+        "movedPerNight": 690.0,
+        "perDay": 352.0,
+        "share": 6.1,
+        "trucks": 10
+      }
+    ],
+    "oracle": [
+      {
+        "kmPerNight": 45.6,
+        "movedPerNight": 148.0,
+        "perDay": 1969.0,
+        "share": 34.2,
+        "trucks": 1
+      }
+    ]
+  },
+  "solver": {
+    "maxGap": 0.6452,
+    "secondsPerNightPerTruck": 7.4
+  }
+}
