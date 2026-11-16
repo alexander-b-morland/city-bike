@@ -1,15 +1,26 @@
 # The rebalancing truck and the plan it follows during one night.
 
+"""
+Driving minutes and kilometres between places. Places are the stations in order,
+followed by the depot as the last index.
+"""
+struct Travel
+    minutes::Matrix{Float64}
+    km::Matrix{Float64}
+end
+
+depot(travel::Travel) = size(travel.minutes, 1)
+
 "The vehicle and its working conditions. Times are in minutes."
 Base.@kwdef struct Truck
     capacity::Int = 20            # bikes on board at most
     shift::Float64 = 300.0        # 01:00 to 06:00
     stop_minutes::Float64 = 3.0   # parking and walking at each station
     bike_minutes::Float64 = 0.5   # loading or unloading one bike
-    speed_kmh::Float64 = 25.0
-    detour::Float64 = 1.4         # road distance per straight-line distance
-    depot_lat::Float64 = 59.9309  # assumed depot at Økern
-    depot_lon::Float64 = 10.8019
+    depot_lat::Float64 = 59.9059  # the operator's base, Kværnerveien 5
+    depot_lon::Float64 = 10.7787
+    speed_kmh::Float64 = 25.0     # only used for straight-line travel
+    detour::Float64 = 1.4         # road distance per straight-line distance, likewise
 end
 
 "One visit. `change` is the number of bikes added to the station (negative: taken away)."
@@ -27,32 +38,34 @@ end
 
 Plan() = Plan(Stop[], 0.0, 0.0)
 bikes_moved(plan::Plan) = sum(max(stop.change, 0) for stop in plan.stops; init = 0)
-
-road_km(truck::Truck, a::Station, b::Station) = truck.detour * haversine(a, b)
-road_km(truck::Truck, a::Station) = truck.detour * haversine(a.lat, a.lon, truck.depot_lat, truck.depot_lon)
-drive_minutes(truck::Truck, km) = 60 * km / truck.speed_kmh
 visit_minutes(truck::Truck, bikes) = truck.stop_minutes + truck.bike_minutes * abs(bikes)
 
 "Turn an ordered list of `station => change` visits into a plan with times and distance."
-function timed_plan(truck::Truck, stations::Vector{Station}, visits::Vector{Pair{Int,Int}})
+function timed_plan(truck::Truck, travel::Travel, visits::Vector{Pair{Int,Int}})
     isempty(visits) && return Plan()
     stops, minutes, km = Stop[], 0.0, 0.0
-    previous = 0
+    previous = depot(travel)
     for (station, change) in visits
-        leg = previous == 0 ? road_km(truck, stations[station]) :
-              road_km(truck, stations[previous], stations[station])
-        km += leg
-        minutes += drive_minutes(truck, leg) + visit_minutes(truck, change)
+        km += travel.km[previous, station]
+        minutes += travel.minutes[previous, station] + visit_minutes(truck, change)
         push!(stops, Stop(station, change, minutes))
         previous = station
     end
-    leg = road_km(truck, stations[previous])
-    return Plan(stops, minutes + drive_minutes(truck, leg), km + leg)
+    return Plan(stops, minutes + travel.minutes[previous, depot(travel)], km + travel.km[previous, depot(travel)])
+end
+
+"The inventories after the plan has been carried out."
+function after(bikes::Vector{Int}, plan::Plan)
+    result = copy(bikes)
+    for stop in plan.stops
+        result[stop.station] += stop.change
+    end
+    return result
 end
 
 """
-Check that the truck can carry out `plan` starting from the inventories `bikes`: it
-never carries a negative load or more than its capacity, ends empty, keeps every station
+Check that a truck can carry out `plan` starting from the inventories `bikes`: it never
+carries a negative load or more than its capacity, ends empty, keeps every station
 within its docks, visits no station twice and finishes within the shift. Returns a list
 of problems, empty if the plan is valid.
 """
@@ -68,5 +81,15 @@ function problems(plan::Plan, truck::Truck, stations::Vector{Station}, bikes::Ve
     end
     load == 0 || push!(found, "truck ends with $load bikes on board")
     plan.minutes <= truck.shift + 1e-6 || push!(found, "shift takes $(round(plan.minutes; digits = 1)) minutes")
+    return found
+end
+
+"Check several trucks' plans, each starting from what the trucks before it leave behind."
+function problems(plans::Vector{Plan}, truck::Truck, stations::Vector{Station}, bikes::Vector{Int})
+    found = String[]
+    for plan in plans
+        append!(found, problems(plan, truck, stations, bikes))
+        bikes = after(bikes, plan)
+    end
     return found
 end

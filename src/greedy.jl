@@ -6,7 +6,7 @@ half full. Drive to the emptiest station and unload until it is half full; conti
 the next emptiest until the truck is empty. Repeat until the next round no longer fits
 in the shift. No station is visited twice.
 """
-function greedy_plan(truck::Truck, stations::Vector{Station}, bikes::Vector{Int})
+function greedy_plan(truck::Truck, stations::Vector{Station}, travel::Travel, bikes::Vector{Int})
     half = [station.capacity ÷ 2 for station in stations]
     fill_level(i) = bikes[i] / stations[i].capacity
     open = trues(length(stations))
@@ -31,7 +31,7 @@ function greedy_plan(truck::Truck, stations::Vector{Station}, bikes::Vector{Int}
                 used[receiver] = true
                 load -= put
             end
-            if load == 0 && timed_plan(truck, stations, vcat(visits, candidate)).minutes <= truck.shift
+            if load == 0 && timed_plan(truck, travel, vcat(visits, candidate)).minutes <= truck.shift
                 round = candidate
                 break
             end
@@ -42,5 +42,5 @@ function greedy_plan(truck::Truck, stations::Vector{Station}, bikes::Vector{Int}
             open[station] = false
         end
     end
-    return timed_plan(truck, stations, visits)
+    return timed_plan(truck, travel, visits)
 end

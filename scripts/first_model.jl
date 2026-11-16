@@ -6,8 +6,11 @@
 # of 17 August to 13 September three times: with no truck, with a rule-of-thumb truck and
 # with an optimized truck. The planner never sees the trips of the day it plans for.
 #
+# This first model drives in straight lines from an assumed depot at Økern; the later
+# models use real streets and the operator's real base (see scripts/fleet_size.jl).
+#
 # Writes results/first_model/summary.csv and the data file for the page in
-# report/first-model/.
+# report/first-model/. Pass a number of days to replay fewer and skip the page data.
 
 using CityBike
 using Dates
@@ -19,75 +22,52 @@ const ROOT = joinpath(@__DIR__, "..")
 const TRAINING = Date(2026, 6, 1):Day(1):Date(2026, 8, 16)
 const REPLAY = Date(2026, 8, 17):Day(1):Date(2026, 9, 13)
 const FLEET = 3000          # bikes, the operator's own figure
-const TRUCK = Truck()
-const LETTERS = ['0':'9'; 'a':'z'; 'A':'Z']   # one character per inventory level
+const TRUCK = Truck(depot_lat = 59.9309, depot_lon = 10.8019)
+const POLICIES = ("none", "greedy", "optimal")
 
-"Spread the fleet over the stations in proportion to their docks."
-function even_start(stations, fleet)
-    share = fleet .* [station.capacity for station in stations] ./ sum(station.capacity for station in stations)
-    bikes = floor.(Int, share)
-    for index in sortperm(share .- bikes; rev = true)[1:fleet - sum(bikes)]
-        bikes[index] += 1
-    end
-    return bikes
-end
-
-expected_saved(plan, curves, bikes) =
-    sum(curves[stop.station][bikes[stop.station] + 1] - curves[stop.station][bikes[stop.station] + stop.change + 1]
-        for stop in plan.stops; init = 0.0)
-
-function main()
-    stations = load_stations(joinpath(ROOT, "data", "raw", "oslo", "gbfs", "station_information.json"))
-    trips = load_trips(joinpath(ROOT, "data", "raw", "oslo", "trips"), stations, first(TRAINING), last(REPLAY))
-    weekday_curves = failure_curves(trips, stations, filter(is_weekday, collect(TRAINING)))
-    weekend_curves = failure_curves(trips, stations, filter(!is_weekday, collect(TRAINING)))
-    all(is_convex, weekday_curves) && all(is_convex, weekend_curves) || error("a demand curve is not convex")
-    curves_for(day) = is_weekday(day) ? weekday_curves : weekend_curves
-
+function main(args)
+    days = isempty(args) ? collect(REPLAY) : collect(REPLAY)[1:parse(Int, args[1])]
+    case = load_case(ROOT, TRAINING, REPLAY)
+    stations = case.stations
+    travel = straight_line_travel(TRUCK, stations)
     environment = Gurobi.Env()
     optimizer() = Gurobi.Optimizer(environment)
-    nights = Dict{Tuple{String,Date},NamedTuple}()   # what each planner expected and how it solved
+    nights = Dict{Tuple{String,Date},Solution}()
 
-    function planner(policy)
-        return function (day, bikes)
-            curves = curves_for(day)
-            if policy == "none"
-                plan, gap, seconds = Plan(), 0.0, 0.0
-            elseif policy == "greedy"
-                plan, gap, seconds = greedy_plan(TRUCK, stations, bikes), 0.0, 0.0
-            else
-                solution = optimal_plan(TRUCK, stations, bikes, curves; optimizer)
-                plan, gap, seconds = solution.plan, solution.gap, solution.seconds
-            end
-            isempty(problems(plan, TRUCK, stations, bikes)) || error("invalid plan on $day: $(problems(plan, TRUCK, stations, bikes))")
-            nights[(policy, day)] = (expected = expected_saved(plan, curves, bikes), gap = gap, seconds = seconds)
-            return plan
-        end
+    planner(policy) = function (day, bikes)
+        policy == "none" && return Plan[]
+        night = plan_night(TRUCK, stations, travel, bikes, curves_for(case, day);
+                           trucks = 1, method = policy == "greedy" ? :greedy : :optimal, optimizer)
+        isempty(problems(night.plans, TRUCK, stations, bikes)) || error("invalid plan on $day")
+        nights[(policy, day)] = night
+        return night.plans
     end
 
-    days = collect(REPLAY)
     results = Dict{String,Vector{DayResult}}()
-    for policy in ("none", "greedy", "optimal")
+    for policy in POLICIES
         seconds = @elapsed results[policy] =
-            simulate!(even_start(stations, FLEET), stations, trips, days, TRUCK, planner(policy))
+            simulate!(even_start(stations, FLEET), stations, case.trips, days, TRUCK, planner(policy))
         total = sum(result.trips for result in results[policy])
         failed = sum(let_down(result) for result in results[policy])
         @printf("%-8s %6d of %d riders let down (%.1f%%), %.0f s\n", policy, failed, total, 100 * failed / total, seconds)
     end
 
+    night_of(policy, day) = get(nights, (policy, day), Solution())
+    plan_of(result) = isempty(result.plans) ? Plan() : only(result.plans)
     out = joinpath(ROOT, "results", "first_model")
     mkpath(out)
     open(joinpath(out, "summary.csv"), "w") do io
         println(io, "day,policy,trips,no_bike,no_dock,stops,bikes_moved,km,minutes,expected_saved,gap,solve_seconds")
-        for policy in ("none", "greedy", "optimal"), result in results[policy]
-            night = nights[(policy, result.day)]
+        for policy in POLICIES, result in results[policy]
+            night, plan = night_of(policy, result.day), plan_of(result)
             @printf(io, "%s,%s,%d,%d,%d,%d,%d,%.1f,%.1f,%.1f,%.4f,%.1f\n", result.day, policy, result.trips,
-                    result.no_bike, result.no_dock, length(result.plan.stops), bikes_moved(result.plan),
-                    result.plan.km, result.plan.minutes, night.expected, night.gap, night.seconds)
+                    result.no_bike, result.no_dock, length(plan.stops), bikes_moved(plan), plan.km, plan.minutes,
+                    night.expected_saved, night.gap, night.seconds)
         end
     end
+    println("wrote ", joinpath(out, "summary.csv"))
+    isempty(args) || return
 
-    encode(snapshots) = join(LETTERS[level + 1] for level in permutedims(snapshots))
     page = Dict(
         "training" => [string(first(TRAINING)), string(last(TRAINING))],
         "days" => string.(days),
@@ -97,14 +77,15 @@ function main()
                         "depot" => [TRUCK.depot_lat, TRUCK.depot_lon]),
         "stations" => [[station.name, round(station.lat; digits = 5), round(station.lon; digits = 5), station.capacity]
                        for station in stations],
-        "weekdayCurves" => [round.(curve; digits = 2) for curve in weekday_curves],
+        "weekdayCurves" => [round.(curve; digits = 2) for curve in case.weekday_curves],
         "policies" => Dict(policy => [Dict(
             "trips" => result.trips, "noBike" => result.no_bike, "noDock" => result.no_dock,
-            "km" => round(result.plan.km; digits = 1), "minutes" => round(result.plan.minutes),
-            "expected" => round(nights[(policy, result.day)].expected; digits = 1),
-            "stops" => [[stop.station - 1, stop.change, round(stop.done; digits = 1)] for stop in result.stops],
-            "levels" => encode(result.snapshots)) for result in results[policy]]
-            for policy in ("none", "greedy", "optimal")),
+            "km" => round(plan_of(result).km; digits = 1), "minutes" => round(plan_of(result).minutes),
+            "expected" => round(night_of(policy, result.day).expected_saved; digits = 1),
+            "stops" => [[stop.station - 1, stop.change, round(stop.done; digits = 1)]
+                        for stops in result.stops for stop in stops],
+            "levels" => encode_levels(result.snapshots)) for result in results[policy]]
+            for policy in POLICIES),
     )
     target = joinpath(ROOT, "report", "first-model")
     mkpath(target)
@@ -113,7 +94,7 @@ function main()
         JSON.print(io, page)
         println(io, ";")
     end
-    println("wrote ", joinpath(out, "summary.csv"), " and ", joinpath(target, "data.js"))
+    println("wrote ", joinpath(target, "data.js"))
 end
 
-main()
+main(ARGS)
