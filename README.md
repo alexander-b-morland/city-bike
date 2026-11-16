@@ -30,8 +30,8 @@ bikes from the fullest station to the emptiest.
 
 ## Status
 
-Only the project structure exists so far. The language, solver and formulation have not
-been chosen.
+The stack is chosen: Julia with JuMP and the Gurobi solver. The project structure and a
+smoke test exist. No model has been formulated or implemented yet.
 
 ## Data
 
@@ -51,8 +51,8 @@ Raw downloads are not committed. They go in `data/raw/`, which is git-ignored.
 
 | Path         | Purpose                                                  |
 |--------------|----------------------------------------------------------|
-| `src/`       | Model, algorithm and visualization code                  |
-| `tests/`     | Tests for the code in `src/`                             |
+| `src/`       | Model, algorithm and data code (the `CityBike` package)  |
+| `test/`      | Tests for the code in `src/`                             |
 | `data/`      | Input data (small files only; document the source)       |
 | `notebooks/` | Exploratory analysis and experiments                     |
 | `results/`   | Generated output (figures, tables, logs) — not committed |
@@ -60,7 +60,23 @@ Raw downloads are not committed. They go in `data/raw/`, which is git-ignored.
 
 ## Getting started
 
-To be filled in once the language and dependencies are decided.
+You need [Julia](https://julialang.org/downloads/) 1.13 or newer and a Gurobi licence
+(free for academic use). The Gurobi solver itself is downloaded with the Julia package.
+
+Install the dependencies:
+
+```bash
+julia --project=. -e "using Pkg; Pkg.instantiate()"
+```
+
+Run the tests:
+
+```bash
+julia --project=. -e "using Pkg; Pkg.test()"
+```
+
+The models are written in JuMP, so another solver such as the open-source HiGHS can be
+swapped in where Gurobi is not available.
 
 ## Licence
 

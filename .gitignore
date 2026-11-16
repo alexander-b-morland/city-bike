@@ -52,3 +52,6 @@ results/*
 .env
 .env.*
 !.env.example
+
+# Course material kept locally for reference only (not ours to publish)
+course/
