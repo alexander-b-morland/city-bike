@@ -103,6 +103,7 @@ function page()
         println(io, ";")
     end
     cp(joinpath(ROOT, "report", "map", "oslo.js"), joinpath(target, "map.js"); force = true)
+    cp(joinpath(ROOT, "report", "shared", "player.js"), joinpath(target, "player.js"); force = true)
     @printf("%d runs, %d street legs, %.1f MB in %s\n", length(runs), length(legs), filesize(file) / 1e6, file)
 end
 
