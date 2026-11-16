@@ -27,14 +27,14 @@ Four weeks of real rides (161,183 of them) were replayed for each policy. A ride
 
 - **Optimization is worth more than doubling the fleet.** Three optimized trucks do as
   well as six that follow the rule "fullest station to emptiest station". The rule never
-  gets below 16%, however many trucks it has.
+  got below 16%, with up to 20 trucks.
 - **The first five trucks do almost all the work.** Each of the first four spares about
   400 riders a day. After five, more night trucks add little.
 - **Four trucks pay for themselves if a let-down rider costs more than about 9 kr**, at
   3,000 kr per truck night. A single ride earns about 17 kr.
-- **Some trucks should work at midday.** Night trucks alone never get below 6%. Six
-  trucks split three and three between night and midday reach 5.7%, and eight split
-  four and four reach 4.8%.
+- **Some trucks should work at midday.** Night trucks alone did not get below 6%, even
+  with ten. Six trucks split three and three between night and midday reach 5.7%, and
+  eight split four and four reach 4.8%.
 - **Fuel hardly matters.** A truck drives about 50 km a night, around 5% of what it costs.
   The driver's time is what counts.
 

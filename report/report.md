@@ -22,12 +22,12 @@ is *let down* when there is no bike to take or no free dock to park it.
   empties out within three days.
 - **Optimized trucks beat a rule of thumb by a wide margin.** Four optimized trucks leave
   12.7% of riders let down. Trucks that follow the rule "fullest station to emptiest
-  station" never get below 16.2%, however many there are.
+  station" never got below 16.2%, with up to 20 of them.
 - **The first five trucks do almost all the work.** Five trucks reach 8.5%, ten reach
   6.1%. What is left happens during the day, which night trucks cannot fix.
 - **Four trucks pay for themselves if a let-down rider costs more than about 9 kr.** A
   single ride earns about 17 kr. The fifth truck needs 13 kr, the sixth 44 kr.
-- **Some of the trucks should work at midday.** Night trucks alone never get below 6%.
+- **Some of the trucks should work at midday.** Night trucks alone did not get below 6%, even with ten.
   Six trucks split three at night and three at midday reach 5.7%, better than ten trucks
   at night, and eight split four and four reach 4.8%.
 - **Fuel hardly matters.** A truck drives about 50 km a night. The driver's time is what
@@ -42,8 +42,8 @@ riders take bikes downhill and take the tram back up.
 
 ![Stations by how many bikes they gain or lose over a weekday](figures/drift_map.svg)
 
-The map shows the result. Stations in Nydalen, Bjølsen, Torshov and around Blindern lose
-12 to 23 bikes on an average summer weekday. Stations in the centre and on the
+The map shows the result. Stations in Nydalen, Bjølsen, Torshov and Hasle lose 12 to 23
+bikes on an average summer weekday. Stations in the centre and on the
 waterfront gain 20 to 35. One station, Tøyenbekken, gains 35 bikes a day and has 30
 docks. Left alone, the hills run out of bikes and the centre runs out of docks, and a
 rider who meets either has been let down.
@@ -69,6 +69,8 @@ trucks, and the one we start with.
 Everything in the model is real data except the points listed under
 [What we assumed](#what-we-assumed). Three gaps in the data shaped the work:
 
+- **Stations come and go.** About 2% of the rides in the replay period start or end at
+  a station that is no longer in the station feed. Those rides are left out.
 - **No inventories.** The trip files show rides, not how many bikes stood where. We
   therefore simulate: every replay starts with the 3,000 bikes spread evenly, and the
   real rides then move them.
@@ -222,7 +224,8 @@ on a weekend day.
 full is simply the wrong target. A hill station should start nearly full and a central
 one nearly empty, and the rule cannot know that. Three optimized trucks (19.5%) do as
 well as six rule-of-thumb trucks (19.8%), and four optimized trucks do better than any
-number of rule-of-thumb trucks.
+number of rule-of-thumb trucks we tried, up to 20: beyond 12 trucks the rule finds
+nothing more to do.
 
 ![The share of riders let down, day by day](figures/four_weeks.svg)
 
