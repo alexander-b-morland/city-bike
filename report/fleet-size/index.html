@@ -247,12 +247,9 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
       (match ? `Optimization is worth many trucks: ${pick.k} optimized trucks do as well as about <strong>${match.toFixed(0)} rule-of-thumb trucks</strong>.`
              : `Optimization is worth many trucks: ${pick.k} optimized trucks (${pick.share.toFixed(1)}%) do better than ${most.k} rule-of-thumb trucks (${most.share.toFixed(1)}%).`);
     if (ORA.length > 1) {
-      const f = ORA[ORA.length - 1], o = OPT.find((r) => r.k === f.k);
+      const gains = ORA.slice(1).map((f) => OPT.find((r) => r.k === f.k).share - f.share), worst = Math.min(...gains), bestGain = Math.max(...gains);
       $("oracleKey").hidden = $("oracleText").hidden = false;
-      const gain = o.share - f.share;
-      $("oracleText").innerHTML = `The dashed line shows trucks that plan with tomorrow's real trips instead of history. With ${f.k} truck${f.k === 1 ? "" : "s"} the share goes from ${o.share.toFixed(1)}% to ${f.share.toFixed(1)}%. ` +
-        (gain > 0.5 ? `So a perfect demand forecast would be worth at most ${gain.toFixed(1)} percentage points.`
-                    : `So a perfect forecast of tomorrow would not help. What holds the trucks back is how many bikes they can move in a night, not what they know about demand.`);
+      $("oracleText").innerHTML = `The dashed line shows trucks that plan with tomorrow's real rides instead of history. It makes little difference: from ${Math.abs(worst).toFixed(1)} points ${worst < 0 ? "worse" : "better"} to ${Math.abs(bestGain).toFixed(1)} points ${bestGain < 0 ? "worse" : "better"}, depending on the fleet. The trucks are held back by how many bikes they can move in a night, not by what they know about demand.`;
     }
   }
 

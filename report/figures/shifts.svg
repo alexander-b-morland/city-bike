@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 910 400" width="910" height="400" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="910" height="400" fill="#ffffff"/>
+<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">The same trucks, split between night and midday</text>
+<text x="56" y="48" fill="#85857f">Riders let down over four weeks</text>
+<line x1="56" x2="890" y1="338.0" y2="338.0" stroke="#c3c2b7"/>
+<text x="48" y="342.0" text-anchor="end" fill="#85857f">0%</text>
+<line x1="56" x2="890" y1="282.0" y2="282.0" stroke="#e3e2db"/>
+<text x="48" y="286.0" text-anchor="end" fill="#85857f">10%</text>
+<line x1="56" x2="890" y1="226.0" y2="226.0" stroke="#e3e2db"/>
+<text x="48" y="230.0" text-anchor="end" fill="#85857f">20%</text>
+<line x1="56" x2="890" y1="170.0" y2="170.0" stroke="#e3e2db"/>
+<text x="48" y="174.0" text-anchor="end" fill="#85857f">30%</text>
+<line x1="56" x2="890" y1="113.99999999999999" y2="113.99999999999999" stroke="#e3e2db"/>
+<text x="48" y="117.99999999999999" text-anchor="end" fill="#85857f">40%</text>
+<line x1="56" x2="890" y1="58.0" y2="58.0" stroke="#e3e2db"/>
+<text x="48" y="62.0" text-anchor="end" fill="#85857f">50%</text>
+<rect x="68.18923076923078" y="186.72151529627817" width="39.77538461538462" height="151.27848470372183" rx="3" fill="#8f8e87"/>
+<text x="88.07692307692308" y="179.72151529627817" text-anchor="middle" font-weight="600" fill="#0d0f12">27.0%</text>
+<text x="88.07692307692308" y="358" text-anchor="middle" fill="#50524f">2 night</text>
+<text x="88.07692307692308" y="374" text-anchor="middle" fill="#50524f">0 midday</text>
+<rect x="132.34307692307692" y="195.75472599467685" width="39.77538461538462" height="142.24527400532315" rx="3" fill="#1baf7a"/>
+<text x="152.23076923076923" y="188.75472599467685" text-anchor="middle" font-weight="600" fill="#0d0f12">25.4%</text>
+<text x="152.23076923076923" y="358" text-anchor="middle" fill="#50524f">1 night</text>
+<text x="152.23076923076923" y="374" text-anchor="middle" fill="#50524f">1 midday</text>
+<rect x="196.4969230769231" y="266.89126024456675" width="39.77538461538462" height="71.10873975543325" rx="3" fill="#8f8e87"/>
+<text x="216.38461538461542" y="259.89126024456675" text-anchor="middle" font-weight="600" fill="#0d0f12">12.7%</text>
+<text x="216.38461538461542" y="358" text-anchor="middle" fill="#50524f">4 night</text>
+<text x="216.38461538461542" y="374" text-anchor="middle" fill="#50524f">0 midday</text>
+<rect x="260.65076923076924" y="274.06223981437245" width="39.77538461538462" height="63.93776018562755" rx="3" fill="#1baf7a"/>
+<text x="280.53846153846155" y="267.06223981437245" text-anchor="middle" font-weight="600" fill="#0d0f12">11.4%</text>
+<text x="280.53846153846155" y="358" text-anchor="middle" fill="#50524f">3 night</text>
+<text x="280.53846153846155" y="374" text-anchor="middle" fill="#50524f">1 midday</text>
+<rect x="324.80461538461543" y="269.45877666999627" width="39.77538461538462" height="68.54122333000373" rx="3" fill="#1baf7a"/>
+<text x="344.69230769230774" y="262.45877666999627" text-anchor="middle" font-weight="600" fill="#0d0f12">12.2%</text>
+<text x="344.69230769230774" y="358" text-anchor="middle" fill="#50524f">2 night</text>
+<text x="344.69230769230774" y="374" text-anchor="middle" fill="#50524f">2 midday</text>
+<rect x="388.95846153846156" y="263.4099998138762" width="39.77538461538462" height="74.5900001861238" rx="3" fill="#1baf7a"/>
+<text x="408.84615384615387" y="256.4099998138762" text-anchor="middle" font-weight="600" fill="#0d0f12">13.3%</text>
+<text x="408.84615384615387" y="358" text-anchor="middle" fill="#50524f">1 night</text>
+<text x="408.84615384615387" y="374" text-anchor="middle" fill="#50524f">3 midday</text>
+<rect x="453.11230769230775" y="254.265611137651" width="39.77538461538462" height="83.734388862349" rx="3" fill="#1baf7a"/>
+<text x="473.00000000000006" y="247.265611137651" text-anchor="middle" font-weight="600" fill="#0d0f12">15.0%</text>
+<text x="473.00000000000006" y="358" text-anchor="middle" fill="#50524f">0 night</text>
+<text x="473.00000000000006" y="374" text-anchor="middle" fill="#50524f">4 midday</text>
+<rect x="517.2661538461539" y="297.2741169974501" width="39.77538461538462" height="40.72588300254989" rx="3" fill="#8f8e87"/>
+<text x="537.1538461538462" y="290.2741169974501" text-anchor="middle" font-weight="600" fill="#0d0f12">7.3%</text>
+<text x="537.1538461538462" y="358" text-anchor="middle" fill="#50524f">6 night</text>
+<text x="537.1538461538462" y="374" text-anchor="middle" fill="#50524f">0 midday</text>
+<rect x="581.4200000000001" y="304.56669748050354" width="39.77538461538462" height="33.433302519496465" rx="3" fill="#1baf7a"/>
+<text x="601.3076923076924" y="297.56669748050354" text-anchor="middle" font-weight="600" fill="#0d0f12">6.0%</text>
+<text x="601.3076923076924" y="358" text-anchor="middle" fill="#50524f">4 night</text>
+<text x="601.3076923076924" y="374" text-anchor="middle" fill="#50524f">2 midday</text>
+<rect x="645.5738461538463" y="306.15793228814454" width="39.77538461538462" height="31.842067711855464" rx="3" fill="#1baf7a"/>
+<text x="665.4615384615386" y="299.15793228814454" text-anchor="middle" font-weight="600" fill="#0d0f12">5.7%</text>
+<text x="665.4615384615386" y="358" text-anchor="middle" fill="#50524f">3 night</text>
+<text x="665.4615384615386" y="374" text-anchor="middle" fill="#50524f">3 midday</text>
+<rect x="709.7276923076923" y="303.0935892743031" width="39.77538461538462" height="34.9064107256969" rx="3" fill="#8f8e87"/>
+<text x="729.6153846153846" y="296.0935892743031" text-anchor="middle" font-weight="600" fill="#0d0f12">6.2%</text>
+<text x="729.6153846153846" y="358" text-anchor="middle" fill="#50524f">8 night</text>
+<text x="729.6153846153846" y="374" text-anchor="middle" fill="#50524f">0 midday</text>
+<rect x="773.8815384615385" y="310.1533908662824" width="39.77538461538462" height="27.846609133717607" rx="3" fill="#1baf7a"/>
+<text x="793.7692307692308" y="303.1533908662824" text-anchor="middle" font-weight="600" fill="#0d0f12">5.0%</text>
+<text x="793.7692307692308" y="358" text-anchor="middle" fill="#50524f">6 night</text>
+<text x="793.7692307692308" y="374" text-anchor="middle" fill="#50524f">2 midday</text>
+<rect x="838.0353846153847" y="311.1192495486497" width="39.77538461538462" height="26.88075045135031" rx="3" fill="#1baf7a"/>
+<text x="857.923076923077" y="304.1192495486497" text-anchor="middle" font-weight="600" fill="#0d0f12">4.8%</text>
+<text x="857.923076923077" y="358" text-anchor="middle" fill="#50524f">4 night</text>
+<text x="857.923076923077" y="374" text-anchor="middle" fill="#50524f">4 midday</text>
+</svg>

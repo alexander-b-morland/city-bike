@@ -3,108 +3,146 @@
 Optimizing city-bike allocation over-night, as the white collars and latte-drinkers sleep
 tight awaiting a full bike rack the next morning.
 
-## The problem
+![Four optimized trucks at work in Oslo at 04:30](report/figures/map_four_trucks.jpg)
 
-By evening some bike stations are full and others are empty. Overnight, one or more
-vehicles drive between stations and move bikes (and possibly swap or recharge e-bike
-batteries). Which stations should each vehicle visit, in what order, and how many bikes
-should it load or unload at each, so that as few stations as possible are empty or full
-when the morning rush starts?
+Oslo's city bikes roll downhill. By evening the stations in the hills are empty and the
+centre is full. This project plans the trucks that carry the bikes back: where each truck
+should go, how many trucks are worth paying for, and when they should work. It uses a
+year of real Oslo Bysykkel trips and real Oslo streets.
 
-The plan, from simple to rich:
+**Read the [report](report/report.md)** for the full story.
 
-1. **Oslo, one night, one vehicle.** Station inventories at closing time, target
-   inventories for the morning, one vehicle with limited capacity and a time budget.
-2. **Several vehicles.**
-3. **E-bikes** that need recharging or battery swaps, if the data supports it.
-4. **Uncertain morning demand**, estimated from historical trips.
+## What we found
 
-Every model is compared against a simple greedy benchmark, for example always moving
-bikes from the fullest station to the emptiest.
+Four weeks of real rides (161,183 of them) were replayed for each policy. A rider is
+*let down* when there is no bike to take or no free dock to park it.
 
-## Deliverables
+| Trucks each night | Optimized | Rule of thumb |
+|---:|---:|---:|
+| 0 | 40.7% let down | 40.7% |
+| 2 | 27.0% | 33.7% |
+| 4 | 12.7% | 26.0% |
+| 5 | 8.5% | 22.6% |
+| 10 | 6.1% | 16.4% |
 
-- A report and slides in `report/`.
-- An animation of the city through one day: stations flash when they run empty or full,
-  and at night the vehicles draw their routes across the map.
+- **Optimization is worth more than doubling the fleet.** Three optimized trucks do as
+  well as six that follow the rule "fullest station to emptiest station". The rule never
+  gets below 16%, however many trucks it has.
+- **The first five trucks do almost all the work.** Each of the first four spares about
+  400 riders a day. After five, more night trucks add little.
+- **Four trucks pay for themselves if a let-down rider costs more than about 9 kr**, at
+  3,000 kr per truck night. A single ride earns about 17 kr.
+- **Some trucks should work at midday.** Night trucks alone never get below 6%. Six
+  trucks split three and three between night and midday reach 5.7%, and eight split
+  four and four reach 4.8%.
+- **Fuel hardly matters.** A truck drives about 50 km a night, around 5% of what it costs.
+  The driver's time is what counts.
 
-## Status
+![Riders let down against the number of trucks](report/figures/fleet_size.svg)
 
-The first model is built and solved: one truck, one night at a time, replayed over four
-weeks of real trips and compared with a rule of thumb and with no truck at all. The
-results and an animated map are in [`report/first-model/`](report/first-model/); open
-`index.html` in a browser. More vehicles, e-bikes and uncertain demand come next.
+## See it move
 
-## Data
+The result pages have an animated map: the city through the day, stations turning red
+when they run out of bikes and blue when they run out of docks, and the trucks driving
+their routes along real streets.
 
-| Source | What | Where |
-|--------|------|-------|
-| Oslo Bysykkel historical trips | One row per trip: start and end time, duration, start and end station with coordinates. Monthly files from April 2016. | <https://oslobysykkel.no/en/open-data/historical> |
-| Oslo Bysykkel GBFS feeds | Station locations and capacities, live bikes and docks available. | <https://oslobysykkel.no/en/open-data/realtime> |
+| Page | What it shows |
+|---|---|
+| [`report/first-model/`](report/first-model/) | One truck, one night at a time |
+| [`report/fleet-size/`](report/fleet-size/) | How many trucks, with a cost calculator and the real Oslo map |
+| [`report/day-shift/`](report/day-shift/) | Night trucks and midday trucks compared |
 
-Both are published under the
-[Norwegian Licence for Open Government Data (NLOD) 2.0](https://data.norge.no/nlod/en/2.0).
-Trondheim and Bergen publish data in the same format, so the model can be moved to
-another city later.
+GitHub shows these as source code. To see them, clone the repository and open the
+`index.html` files in a browser, or turn on GitHub Pages for the repository
+(Settings → Pages → deploy from the `main` branch) and open
+`https://<user>.github.io/city-bike/report/fleet-size/`.
 
-Raw downloads are not committed. They go in `data/raw/`, which is git-ignored.
+## How it works
 
-## Layout
+1. **What each station wants.** From eleven weeks of rides we learn one curve per
+   station: how many riders it lets down over a day, depending on how many bikes it
+   starts with. A hill station wants to start full, a central one nearly empty.
+2. **The model.** Each night at 01:00 a mixed-integer model picks each truck's route and
+   how many bikes to load or unload at each stop, to make the sum of the curves as small
+   as possible. The truck must fit its shift, hold at most 20 bikes and end empty.
+3. **The benchmark.** A rule of thumb: fullest station to emptiest station, until both
+   are half full.
+4. **The test.** Four further weeks of real rides are replayed against the plans. The
+   planner never sees the day it plans for.
 
-| Path         | Purpose                                                  |
-|--------------|----------------------------------------------------------|
-| `src/`       | Data loading, demand curves, simulator, benchmark and model (the `CityBike` package) |
-| `test/`      | Tests for the code in `src/`                             |
-| `data/`      | Input data (small files only; document the source)       |
-| `scripts/`   | Command-line scripts: data download and model runs       |
-| `notebooks/` | Exploratory analysis and experiments                     |
-| `results/`   | Generated output (figures, tables, logs) — not committed |
-| `report/`    | Result pages, written report, slides and the final animation |
+The formulation is written out in the [report](report/report.md#32-the-model-for-one-truck-and-one-night).
 
-## Getting started
+## Run it yourself
 
 You need [Julia](https://julialang.org/downloads/) 1.13 or newer and a Gurobi licence
 (free for academic use). The Gurobi solver itself is downloaded with the Julia package.
+The models are written in JuMP, so another solver such as the open-source HiGHS can be
+swapped in where Gurobi is not available.
 
-Install the dependencies:
+Install the dependencies and run the tests:
 
 ```bash
 julia --project=. -e "using Pkg; Pkg.instantiate()"
 ```
 
-Run the tests:
-
 ```bash
 julia --project=. -e "using Pkg; Pkg.test()"
 ```
 
-Download a year of Oslo trips and a snapshot of the station feeds (about 215 MB, into
-`data/raw/oslo/`):
+Download a year of Oslo trips and the station feed (215 MB), then the streets and map
+features from OpenStreetMap (15 MB). Both go into `data/raw/`, which is not committed:
 
 ```bash
 julia --project=. scripts/download_oslo.jl 2025-11 2026-10
 ```
 
-Print a first look at the data and write per-station summaries to
-`results/exploration/`:
-
 ```bash
-julia --project=. notebooks/explore_oslo.jl
+julia --project=. scripts/download_osm.jl
 ```
 
-Run the first model. It learns station demand from 1 June to 16 August 2026, replays
-17 August to 13 September with no truck, a rule-of-thumb truck and an optimized truck,
-and writes `results/first_model/summary.csv` and the data behind the page in
-`report/first-model/` (about ten minutes):
+Then run the experiments. Each writes to `results/`, which is not committed, and the
+page and figure scripts collect what the pages and the report need into `report/`.
 
-```bash
-julia --project=. scripts/first_model.jl
-```
+| Command | What it does | Time |
+|---|---|---|
+| `julia --project=. notebooks/explore_oslo.jl` | First look at the data | 1 min |
+| `julia --project=. scripts/build_map.jl` | Base map for the pages | 1 min |
+| `julia --project=. scripts/first_model.jl` | One truck, straight-line driving | 20 min |
+| `julia --project=. scripts/fleet_size.jl run optimal 4` | Four weeks with 4 optimized trucks; also `greedy`, `oracle`, `none` | 5 to 25 min each |
+| `julia --project=. scripts/day_shift.jl run 2 2 split` | 2 night trucks and 2 midday trucks | 20 min each |
+| `julia --project=. scripts/sensitivity.jl run capacity 30 4` | Change one assumption | 20 min each |
+| `julia --project=. scripts/fleet_size.jl page` | Collect the runs for the fleet-size page | 1 min |
+| `julia --project=. scripts/figures.jl` | Draw the report's figures | 1 min |
 
-The models are written in JuMP, so another solver such as the open-source HiGHS can be
-swapped in where Gurobi is not available.
+The replays are independent, so several can run at once.
 
-## Licence
+## Layout
+
+| Path         | Purpose                                                  |
+|--------------|----------------------------------------------------------|
+| `src/`       | The `CityBike` package: data loading, demand curves, street network, simulator, benchmark and model |
+| `test/`      | Tests for the code in `src/`                             |
+| `scripts/`   | Data downloads, experiments, page data and figures       |
+| `notebooks/` | Exploratory analysis                                     |
+| `report/`    | The report, its figures and the result pages             |
+| `data/`      | Downloaded data, in `data/raw/` — not committed          |
+| `results/`   | Experiment output — not committed                        |
+
+## Data and licences
+
+| Source | What | Licence |
+|--------|------|---------|
+| [Oslo Bysykkel historical trips](https://oslobysykkel.no/en/open-data/historical) | One row per ride: start and end time, start and end station | [NLOD 2.0](https://data.norge.no/nlod/en/2.0) |
+| [Oslo Bysykkel station feeds](https://oslobysykkel.no/en/open-data/realtime) | Station locations and docks, live bikes available | NLOD 2.0 |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) | Streets, one-way rules, speed limits, coast and parks | ODbL |
 
 Code is released under the [MIT licence](LICENSE). The bike data belongs to Oslo Bysykkel
-and is used under NLOD 2.0.
+and the map data to the OpenStreetMap contributors. `report/map/oslo.js`,
+`report/*/map.js` and the street routes in `report/*/data.js` are derived from
+OpenStreetMap and stay under the ODbL.
+
+## About
+
+A personal project, not coursework. The formulation, code, analysis and report were
+written by Claude (Anthropic's AI model) working with the author, who set the questions
+and steered the choices.

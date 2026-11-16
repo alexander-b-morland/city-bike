@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="760" height="400" fill="#ffffff"/>
+<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">What changes if an assumption is wrong (four optimized night trucks)</text>
+<text x="56" y="48" fill="#85857f">Riders let down over four weeks</text>
+<line x1="56" x2="740" y1="338.0" y2="338.0" stroke="#c3c2b7"/>
+<text x="48" y="342.0" text-anchor="end" fill="#85857f">0%</text>
+<line x1="56" x2="740" y1="282.0" y2="282.0" stroke="#e3e2db"/>
+<text x="48" y="286.0" text-anchor="end" fill="#85857f">5%</text>
+<line x1="56" x2="740" y1="226.0" y2="226.0" stroke="#e3e2db"/>
+<text x="48" y="230.0" text-anchor="end" fill="#85857f">10%</text>
+<line x1="56" x2="740" y1="170.0" y2="170.0" stroke="#e3e2db"/>
+<text x="48" y="174.0" text-anchor="end" fill="#85857f">15%</text>
+<line x1="56" x2="740" y1="113.99999999999999" y2="113.99999999999999" stroke="#e3e2db"/>
+<text x="48" y="117.99999999999999" text-anchor="end" fill="#85857f">20%</text>
+<line x1="56" x2="740" y1="58.0" y2="58.0" stroke="#e3e2db"/>
+<text x="48" y="62.0" text-anchor="end" fill="#85857f">25%</text>
+<rect x="75.75" y="195.78252048913347" width="46.0" height="142.21747951086653" rx="3" fill="#1baf7a"/>
+<text x="98.75" y="188.78252048913347" text-anchor="middle" font-weight="600" fill="#0d0f12">12.7%</text>
+<text x="98.75" y="358" text-anchor="middle" fill="#50524f">Base case</text>
+<rect x="161.25" y="124.75200000000001" width="46.0" height="213.248" rx="3" fill="#8f8e87"/>
+<text x="184.25" y="117.75200000000001" text-anchor="middle" font-weight="600" fill="#0d0f12">19.0%</text>
+<text x="184.25" y="358" text-anchor="middle" fill="#50524f">10 bikes</text>
+<text x="184.25" y="374" text-anchor="middle" fill="#50524f">per truck</text>
+<rect x="246.75" y="219.168" width="46.0" height="118.832" rx="3" fill="#8f8e87"/>
+<text x="269.75" y="212.168" text-anchor="middle" font-weight="600" fill="#0d0f12">10.6%</text>
+<text x="269.75" y="358" text-anchor="middle" fill="#50524f">30 bikes</text>
+<text x="269.75" y="374" text-anchor="middle" fill="#50524f">per truck</text>
+<rect x="332.25" y="65.16800000000002" width="46.0" height="272.832" rx="3" fill="#8f8e87"/>
+<text x="355.25" y="58.16800000000002" text-anchor="middle" font-weight="600" fill="#0d0f12">24.4%</text>
+<text x="355.25" y="358" text-anchor="middle" fill="#50524f">3.0 hour</text>
+<text x="355.25" y="374" text-anchor="middle" fill="#50524f">shift</text>
+<rect x="417.75" y="253.776" width="46.0" height="84.22399999999999" rx="3" fill="#8f8e87"/>
+<text x="440.75" y="246.776" text-anchor="middle" font-weight="600" fill="#0d0f12">7.5%</text>
+<text x="440.75" y="358" text-anchor="middle" fill="#50524f">7.0 hour</text>
+<text x="440.75" y="374" text-anchor="middle" fill="#50524f">shift</text>
+<rect x="503.25" y="93.504" width="46.0" height="244.49599999999998" rx="3" fill="#8f8e87"/>
+<text x="526.25" y="86.504" text-anchor="middle" font-weight="600" fill="#0d0f12">21.8%</text>
+<text x="526.25" y="358" text-anchor="middle" fill="#50524f">1.0 min</text>
+<text x="526.25" y="374" text-anchor="middle" fill="#50524f">per bike</text>
+<rect x="588.75" y="229.92" width="46.0" height="108.08000000000001" rx="3" fill="#8f8e87"/>
+<text x="611.75" y="222.92" text-anchor="middle" font-weight="600" fill="#0d0f12">9.7%</text>
+<text x="611.75" y="358" text-anchor="middle" fill="#50524f">2400</text>
+<text x="611.75" y="374" text-anchor="middle" fill="#50524f">bikes</text>
+<rect x="674.25" y="138.52800000000002" width="46.0" height="199.47199999999998" rx="3" fill="#8f8e87"/>
+<text x="697.25" y="131.52800000000002" text-anchor="middle" font-weight="600" fill="#0d0f12">17.8%</text>
+<text x="697.25" y="358" text-anchor="middle" fill="#50524f">3600</text>
+<text x="697.25" y="374" text-anchor="middle" fill="#50524f">bikes</text>
+</svg>

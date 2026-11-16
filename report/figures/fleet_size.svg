@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">
 <rect width="760" height="400" fill="#ffffff"/>
-<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">Each extra truck helps less than the one before</text>
+<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">The first five trucks do almost all the work</text>
 <text x="56" y="48" fill="#85857f">Riders let down over four weeks</text>
 <line x1="56" x2="590" y1="348.0" y2="348.0" stroke="#c3c2b7"/>
 <text x="48" y="352.0" text-anchor="end" fill="#85857f">0%</text>
@@ -46,13 +46,16 @@
 <circle cx="256.2" cy="305.8" r="3.6" fill="#1baf7a" stroke="#ffffff" stroke-width="1.5"/>
 <circle cx="323.0" cy="311.8" r="3.6" fill="#1baf7a" stroke="#ffffff" stroke-width="1.5"/>
 <circle cx="389.8" cy="312.6" r="3.6" fill="#1baf7a" stroke="#ffffff" stroke-width="1.5"/>
-<polyline points="56.0,112.0 89.4,149.6" fill="none" stroke="#8f8e87" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="6 4"/>
+<polyline points="56.0,112.0 89.4,149.6 122.8,190.1 189.5,267.5 256.2,310.7" fill="none" stroke="#8f8e87" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="6 4"/>
 <circle cx="56.0" cy="112.0" r="3.6" fill="#8f8e87" stroke="#ffffff" stroke-width="1.5"/>
 <circle cx="89.4" cy="149.6" r="3.6" fill="#8f8e87" stroke="#ffffff" stroke-width="1.5"/>
-<rect x="600" y="144.60252632101404" width="10" height="10" rx="2" fill="#8f8e87"/>
-<text x="616" y="153.60252632101404" fill="#50524f">Knowing tomorrow</text>
+<circle cx="122.8" cy="190.1" r="3.6" fill="#8f8e87" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="189.5" cy="267.5" r="3.6" fill="#8f8e87" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="256.2" cy="310.7" r="3.6" fill="#8f8e87" stroke="#ffffff" stroke-width="1.5"/>
 <rect x="600" y="249.03872616839243" width="10" height="10" rx="2" fill="#eb6834"/>
 <text x="616" y="258.03872616839243" fill="#50524f">Rule of thumb</text>
-<rect x="600" y="307.57020901707995" width="10" height="10" rx="2" fill="#1baf7a"/>
-<text x="616" y="316.57020901707995" fill="#50524f">Optimized</text>
+<rect x="600" y="305.7170359156983" width="10" height="10" rx="2" fill="#8f8e87"/>
+<text x="616" y="314.7170359156983" fill="#50524f">Knowing tomorrow</text>
+<rect x="600" y="321.7170359156983" width="10" height="10" rx="2" fill="#1baf7a"/>
+<text x="616" y="330.7170359156983" fill="#50524f">Optimized</text>
 </svg>

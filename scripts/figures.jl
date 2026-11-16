@@ -212,21 +212,20 @@ function main()
 
     # 4. Night against midday shifts.
     if isdir(joinpath(ROOT, "results", "day_shift"))
-        shifts = read_runs("day_shift")
-        base(k) = only(run for run in optimal if count_of(run) == k)
-        rows = Any[]
-        for run in sort(shifts; by = run -> (run["night"] + run["day"], -run["night"], run["mode"]))
-            push!(rows, ("$(run["night"]) night\n$(run["day"]) midday" * (run["mode"] == "full" && run["day"] > 0 && run["night"] > 0 ? "\n(whole-day view)" : ""),
-                         share(run), run["night"] + run["day"], run["mode"], run["night"], run["day"]))
+        shifts = filter(run -> haskey(run, "days"), read_runs("day_shift"))   # skips unfinished runs
+        rows = Any[(run["night"], run["day"], run["mode"], share(run)) for run in shifts]
+        totals = sort(unique(row[1] + row[2] for row in rows))
+        for run in optimal
+            count_of(run) in totals && push!(rows, (count_of(run), 0, "full", share(run)))
         end
-        for k in sort(unique(row[3] for row in rows))
-            pushfirst!(rows, ("$k night\n0 midday", share(base(k)), k, "full", k, 0))
-        end
-        sort!(rows; by = row -> (row[3], -row[5], row[4]))
-        bar_chart("shifts.svg"; title = "The same trucks do more when some of them work at midday", ylabel = "Riders let down over four weeks",
-                  labels = first.(rows), values = [row[2] for row in rows], suffix = "%", width = max(760, 86 * length(rows)), height = 420,
-                  colours = [row[6] == 0 ? GREY : row[4] == "split" ? GREEN : "#9fdcc4" for row in rows], notes = [@sprintf("%.1f%%", row[2]) for row in rows])
-        numbers["shifts"] = [Dict("night" => row[5], "midday" => row[6], "mode" => row[4], "share" => round(row[2]; digits = 1)) for row in rows]
+        sort!(rows; by = row -> (row[1] + row[2], -row[1], row[3]))
+        # The figure shows the runs where every shift plans for the rest of the day.
+        drawn = [row for row in rows if row[3] == "full"]
+        bar_chart("shifts.svg"; title = "The same trucks, split between night and midday", ylabel = "Riders let down over four weeks",
+                  labels = ["$(row[1]) night\n$(row[2]) midday" for row in drawn], values = [row[4] for row in drawn], suffix = "%",
+                  width = max(760, 70 * length(drawn)), height = 400, colours = [row[2] == 0 ? GREY : GREEN for row in drawn],
+                  notes = [@sprintf("%.1f%%", row[4]) for row in drawn])
+        numbers["shifts"] = [Dict("night" => row[1], "midday" => row[2], "mode" => row[3], "share" => round(row[4]; digits = 1)) for row in rows]
     end
 
     # 5. Sensitivity around four optimized night trucks.
@@ -261,6 +260,10 @@ function main()
 (in the hills)"[1:13], RED, collect(0:length(hill) - 1), hill, false),
                          ("Tøyenbekken"[1:11], BLUE, collect(0:length(centre) - 1), centre, false)],
                xticks = [(k, string(k)) for k in 0:5:30])
+    # What the curves say is the best any set of starting levels could do on an average day.
+    numbers["floor"] = Dict("weekday" => round(sum(minimum, case.weekday_curves[1]); digits = 1),
+                            "weekend" => round(sum(minimum, case.weekend_curves[1]); digits = 1),
+                            "bestStartBikes" => sum(argmin(curve) - 1 for curve in case.weekday_curves[1]))
     numbers["curves"] = Dict("hillBest" => argmin(hill) - 1, "hillWorst" => round(maximum(hill); digits = 1), "hillAtBest" => round(minimum(hill); digits = 1),
                              "centreBest" => argmin(centre) - 1, "centreWorst" => round(maximum(centre); digits = 1), "centreAtBest" => round(minimum(centre); digits = 1))
 

@@ -1,0 +1,196 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oslo Truck Shifts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column. The comparison first, then the map to explore, then how it was planned. */
+:root {
+  --bg: #f7f7f4; --surface: #fdfdfc; --ink: #0d0f12; --ink2: #50524f; --muted: #85857f;
+  --grid: #e3e2db; --axis: #c3c2b7; --border: rgba(13,15,18,.12);
+  --greedy: #eb6834; --optimal: #1baf7a; --trucks: #8f8e87;
+  --empty: #e34948; --low: #f2b6b3; --mid: #a9a8a0; --high: #9cc2f0; --full: #2a78d6;
+  --land: #f2f1ec; --landnight: #e4e6ea; --sea: #c9dcef; --park: #dbe8cf; --road1: #ffffff; --road2: #ffffff; --road3: #fbfaf7; --roadedge: #d6d4cb; --route: #14171c;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
+  --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
+  --greedy: #d95926; --optimal: #199e70; --trucks: #6f6e68;
+  --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
+  --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
+  --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
+  --greedy: #d95926; --optimal: #199e70; --trucks: #6f6e68;
+  --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
+  --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; }
+.page { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+section, header { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.01em; }
+h2 { font-size: 24px; }
+p { margin: 0; max-width: 68ch; color: var(--ink2); }
+p strong, li strong { color: var(--ink); font-weight: 600; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.lede { font-size: 18px; color: var(--ink); }
+a { color: inherit; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.pad { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.key { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.line { width: 18px; height: 3px; border-radius: 2px; flex: none; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { font-family: var(--body); font-size: 12px; fill: var(--muted); }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+
+.sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px 28px; }
+.slider { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.slider label { font-size: 13px; color: var(--ink2); display: flex; justify-content: space-between; gap: 12px; }
+.slider output { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.slider input { width: 100%; }
+.slider small { font-size: 12px; color: var(--muted); }
+.verdict { font-size: 18px; color: var(--ink); max-width: 68ch; }
+.verdict b { font-family: var(--display); font-weight: 600; }
+
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; white-space: normal; }
+tr.best td { font-weight: 600; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.btn:hover { border-color: var(--ink2); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--full); outline-offset: 2px; }
+.pick { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink2); }
+.pick input { width: 150px; }
+.pick output { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); min-width: 78px; }
+.clock { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink2); }
+.mapwrap { position: relative; width: 100%; aspect-ratio: 1.5; max-width: 100%; }
+.mapwrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scrub { padding: 10px 16px 4px; }
+.scrub input { width: 100%; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 20px; padding: 6px 16px 10px; font-size: 13px; color: var(--ink2); }
+.facts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.credit { font-size: 11px; color: var(--muted); padding: 0 16px 12px; }
+ul { margin: 0; padding-left: 20px; color: var(--ink2); max-width: 68ch; display: flex; flex-direction: column; gap: 6px; }
+footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
+.rows { display: flex; flex-direction: column; gap: 22px; }
+.group h3 { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--muted); margin: 0 0 8px; }
+.row { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr) 56px; gap: 10px; align-items: center; font-size: 14px; padding: 3px 0; }
+.row .name { color: var(--ink2); }
+.row .track { height: 16px; }
+.row .fill { height: 100%; border-radius: 0 4px 4px 0; min-width: 2px; }
+.row .value { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.row.best .name, .row.best .value { font-weight: 600; color: var(--ink); }
+.pick output { min-width: 190px; }
+</style>
+<div class="page">
+  <header>
+    <span class="eyebrow">Oslo Bysykkel · third model</span>
+    <h1>When should the trucks work?</h1>
+    <p class="lede">Night trucks set the city up for the morning. By the afternoon the bikes have moved again, and no number of night trucks can fix that. Here some of the trucks work at midday instead, from 10:00 to 15:00, between the two rush hours.</p>
+  </header>
+
+  <section>
+    <h2 id="mixHead">The same trucks, split between night and midday</h2>
+    <p id="mixText"></p>
+    <div class="legend">
+      <span><i class="key" style="background:var(--trucks)"></i>All trucks at night</span>
+      <span><i class="key" style="background:var(--optimal)"></i>Some trucks at midday</span>
+    </div>
+    <div class="rows" id="rows"></div>
+    <p>Each bar is the share of riders let down over the same four weeks of real rides. Shorter is better.</p>
+  </section>
+
+  <section>
+    <h2>Watch a day with two shifts</h2>
+    <p>Choose how the trucks are split and press play. Night trucks leave the base at 01:00 and midday trucks at 10:00.</p>
+    <div class="card" id="player" style="overflow:hidden"></div>
+  </section>
+
+  <section>
+    <h2>How the two shifts are planned</h2>
+    <p>Each shift gets its own plan, made when it starts, from where the bikes are at that moment. What changes is how far ahead each plan looks.</p>
+    <ul>
+      <li><strong>The night shift plans for the whole day</strong>, as if no other trucks followed. It sets up the morning rush and does what it can for the afternoon.</li>
+      <li><strong>The midday shift plans for the rest of the day.</strong> It starts from where the morning left the bikes, and its curves count only the riders a station would let down after 10:00.</li>
+      <li><strong>Midday driving is slower.</strong> We add 30% to every driving time for traffic.</li>
+    </ul>
+    <p id="modeText"></p>
+  </section>
+
+  <section>
+    <h2>What to keep in mind</h2>
+    <ul>
+      <li>The midday plan treats every delivery as if it happened at 10:00, although the truck arrives up to five hours later, while riders keep moving bikes. A plan that is renewed at every stop, as the real operator's is, would do better than what is shown here.</li>
+      <li>Trucks, shifts, bikes and riders are otherwise as on the fleet-size page: 20 bikes per truck, five-hour shifts, 3,000 bikes, and every run starts on 17 August with all stations about half full.</li>
+      <li>The solver is stopped after 10 seconds per truck, so better plans may exist.</li>
+    </ul>
+  </section>
+
+  <footer>Trip and station data: Oslo Bysykkel, Norwegian Licence for Open Government Data (NLOD) 2.0. Streets and map: © OpenStreetMap contributors, Open Database Licence. Replay period 17 August to 13 September 2026.</footer>
+</div>
+
+<script src="map.js"></script>
+<script src="data.js"></script>
+<script src="player.js"></script>
+<script>
+(function () {
+  const D = window.DAY_SHIFT, M = window.OSLO_MAP;
+  const S = D.stations.map(([name, lat, lon, cap]) => ({ name, lat, lon, cap }));
+  const $ = (id) => document.getElementById(id);
+  const plural = (n, word) => n + " " + word + (n === 1 ? "" : "s");
+  const name = (r) => r.day === 0 ? (r.night === 0 ? "No trucks" : `${r.night} at night`) : r.night === 0 ? `${r.day} at midday` : `${r.night} at night, ${r.day} at midday`;
+  const RUNS = D.runs.map((run) => {
+    const trips = run.days.reduce((a, d) => a + d.trips, 0), down = run.days.reduce((a, d) => a + d.noBike + d.noDock, 0);
+    return { night: run.night, day: run.day, mode: run.mode, total: run.night + run.day, share: 100 * down / trips, perDay: down / run.days.length, run };
+  });
+  // Runs where the night shift looked only as far as 10:00 are compared in the method section, not in the chart.
+  const shown = RUNS.filter((r) => r.mode === "full");
+  const totals = [...new Set(shown.filter((r) => r.day > 0).map((r) => r.total))].sort((a, b) => a - b);
+  const top = Math.max(...shown.filter((r) => totals.includes(r.total)).map((r) => r.share));
+  let html = "", best = null;
+  for (const total of totals) {
+    const group = shown.filter((r) => r.total === total).sort((a, b) => b.night - a.night), low = group.reduce((a, b) => b.share < a.share ? b : a);
+    const nightOnly = group.find((r) => r.day === 0);
+    if (nightOnly && low !== nightOnly && (!best || nightOnly.share - low.share > best.gain)) best = { total, low, nightOnly, gain: nightOnly.share - low.share };
+    html += `<div class="group"><h3>${plural(total, "truck")} in total</h3>` + group.map((r) =>
+      `<div class="row${r === low ? " best" : ""}"><span class="name">${name(r)}</span><span class="track"><div class="fill" style="width:${(100 * r.share / top).toFixed(1)}%;background:var(--${r.day === 0 ? "trucks" : "optimal"})"></div></span><span class="value">${r.share.toFixed(1)}%</span></div>`).join("") + "</div>";
+  }
+  $("rows").innerHTML = html;
+  const four = shown.filter((r) => r.total === 4), fourBest = four.length ? four.reduce((a, b) => b.share < a.share ? b : a) : null, fourNight = four.find((r) => r.day === 0);
+  if (best) {
+    $("mixHead").textContent = best.gain > 0.5 ? "Moving some trucks to midday lets down fewer riders" : "Moving trucks to midday changes little";
+    $("mixText").innerHTML = (fourBest && fourNight ? `With four trucks, all at night, <strong>${fourNight.share.toFixed(1)}%</strong> of riders are let down. The best split of the same four trucks, ${name(fourBest).toLowerCase()}, gives <strong>${fourBest.share.toFixed(1)}%</strong>. ` : "") +
+      `The largest gain is with ${plural(best.total, "truck")}: ${best.nightOnly.share.toFixed(1)}% with all of them at night against ${best.low.share.toFixed(1)}% with ${name(best.low).toLowerCase()}.`;
+  } else {
+    $("mixHead").textContent = "Keeping all trucks at night works best";
+    $("mixText").textContent = "For every fleet size we tried, no split between night and midday let down fewer riders than keeping all the trucks at night.";
+  }
+  const pairs = RUNS.filter((r) => r.mode === "split").map((s) => [RUNS.find((r) => r.night === s.night && r.day === s.day && r.mode === "full"), s]).filter((p) => p[0]);
+  $("modeText").innerHTML = pairs.slice(0, 1).map(([w, s]) => `We also tried a night shift that only looks as far as 10:00 and leaves the afternoon to the midday trucks. That was worse: with ${name(s).toLowerCase()}, ${s.share.toFixed(1)}% of riders were let down against ${w.share.toFixed(1)}%. The midday trucks cannot move enough bikes in five hours to repair an afternoon the night shift ignored.`).join(" ");
+
+  const mapped = RUNS.filter((r) => r.run.days[0].levels).sort((a, b) => a.total - b.total || b.night - a.night);
+  const player = createMapPlayer($("player"), {
+    stations: S, depot: D.truck.depot, days: D.days, truck: D.truck, legs: D.legs, map: M, pickLabel: "Split",
+    runs: mapped.map((r) => ({ label: name(r), days: r.run.days })),
+    initial: { run: Math.max(0, mapped.findIndex((r) => r.night === 2 && r.day === 2)), day: 3, t: 690 },
+  });
+  window.addEventListener("resize", player.render);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", player.render);
+  new MutationObserver(player.render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(player.render);
+})();
+</script>

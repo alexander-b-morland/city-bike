@@ -215,9 +215,180 @@
         "perDay": 1969.0,
         "share": 34.2,
         "trucks": 1
+      },
+      {
+        "kmPerNight": 100.3,
+        "movedPerNight": 275.0,
+        "perDay": 1567.0,
+        "share": 27.2,
+        "trucks": 2
+      },
+      {
+        "kmPerNight": 201.4,
+        "movedPerNight": 456.0,
+        "perDay": 799.0,
+        "share": 13.9,
+        "trucks": 4
+      },
+      {
+        "kmPerNight": 247.0,
+        "movedPerNight": 515.0,
+        "perDay": 370.0,
+        "share": 6.4,
+        "trucks": 6
       }
     ]
   },
+  "floor": {
+    "bestStartBikes": 2888,
+    "weekday": 342.3,
+    "weekend": 156.7
+  },
+  "sensitivity": [
+    {
+      "parameter": "base",
+      "share": 12.7
+    },
+    {
+      "parameter": "capacity",
+      "share": 19.04,
+      "value": 10.0
+    },
+    {
+      "parameter": "capacity",
+      "share": 10.61,
+      "value": 30.0
+    },
+    {
+      "parameter": "shift",
+      "share": 24.36,
+      "value": 180.0
+    },
+    {
+      "parameter": "shift",
+      "share": 7.52,
+      "value": 420.0
+    },
+    {
+      "parameter": "handling",
+      "share": 21.83,
+      "value": 1.0
+    },
+    {
+      "parameter": "fleet",
+      "share": 9.65,
+      "value": 2400.0
+    },
+    {
+      "parameter": "fleet",
+      "share": 17.81,
+      "value": 3600.0
+    }
+  ],
+  "shifts": [
+    {
+      "midday": 0,
+      "mode": "full",
+      "night": 2,
+      "share": 27.0
+    },
+    {
+      "midday": 1,
+      "mode": "full",
+      "night": 1,
+      "share": 25.4
+    },
+    {
+      "midday": 0,
+      "mode": "full",
+      "night": 4,
+      "share": 12.7
+    },
+    {
+      "midday": 1,
+      "mode": "full",
+      "night": 3,
+      "share": 11.4
+    },
+    {
+      "midday": 2,
+      "mode": "full",
+      "night": 2,
+      "share": 12.2
+    },
+    {
+      "midday": 2,
+      "mode": "split",
+      "night": 2,
+      "share": 15.3
+    },
+    {
+      "midday": 3,
+      "mode": "full",
+      "night": 1,
+      "share": 13.3
+    },
+    {
+      "midday": 4,
+      "mode": "full",
+      "night": 0,
+      "share": 15.0
+    },
+    {
+      "midday": 0,
+      "mode": "full",
+      "night": 6,
+      "share": 7.3
+    },
+    {
+      "midday": 2,
+      "mode": "full",
+      "night": 4,
+      "share": 6.0
+    },
+    {
+      "midday": 2,
+      "mode": "split",
+      "night": 4,
+      "share": 9.8
+    },
+    {
+      "midday": 3,
+      "mode": "full",
+      "night": 3,
+      "share": 5.7
+    },
+    {
+      "midday": 3,
+      "mode": "split",
+      "night": 3,
+      "share": 8.5
+    },
+    {
+      "midday": 0,
+      "mode": "full",
+      "night": 8,
+      "share": 6.2
+    },
+    {
+      "midday": 2,
+      "mode": "full",
+      "night": 6,
+      "share": 5.0
+    },
+    {
+      "midday": 3,
+      "mode": "split",
+      "night": 5,
+      "share": 7.4
+    },
+    {
+      "midday": 4,
+      "mode": "full",
+      "night": 4,
+      "share": 4.8
+    }
+  ],
   "solver": {
     "maxGap": 0.6452,
     "secondsPerNightPerTruck": 7.4

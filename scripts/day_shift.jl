@@ -65,14 +65,15 @@ end
 
 """
 Collect the runs for the page in report/day-shift/. Night-only runs come from
-scripts/fleet_size.jl. Runs with 4 or 8 trucks in total are kept in full for the map;
-the others keep their totals only.
+scripts/fleet_size.jl. Runs with 4 or 8 trucks in total where every shift plans for the rest
+of the day are kept in full for the map; the others keep their totals only.
 """
 function page()
     stations = load_stations(joinpath(ROOT, "data", "raw", "oslo", "gbfs", "station_information.json"))
     roads = load_roads(joinpath(ROOT, "data", "raw", "osm", "roads.json"), stations, TRUCK)
     runs = [JSON.parsefile(joinpath(ROOT, "results", "day_shift", file))
             for file in readdir(joinpath(ROOT, "results", "day_shift")) if endswith(file, ".json")]
+    filter!(run -> haskey(run, "days"), runs)
     fleet = joinpath(ROOT, "results", "fleet_size")
     for file in readdir(fleet)
         startswith(file, "optimal_") || file == "none_0.json" || continue
@@ -82,7 +83,7 @@ function page()
     sort!(runs; by = run -> (run["night"] + run["day"], -run["night"], run["mode"]))
     legs = Dict{String,Vector{Int}}()
     for run in runs
-        if run["night"] + run["day"] in (4, 8) && !(run["mode"] == "full" && run["night"] > 0 && run["day"] > 0)
+        if run["night"] + run["day"] in (4, 8) && run["mode"] == "full"
             collect_legs!(legs, roads, run["days"])
         else
             for day in run["days"]
