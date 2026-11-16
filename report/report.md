@@ -226,8 +226,10 @@ number of rule-of-thumb trucks.
 
 ![The share of riders let down, day by day](figures/four_weeks.svg)
 
-Day by day, each fleet settles at its own level within about a week. Weekends are
-easier than weekdays, because there is no commuter rush.
+Day by day, the runs with no trucks and with one truck collapse within three days and
+stay above 22%. With four trucks the share swings between 2% and 24%: the trucks gain
+ground over quiet weekends and lose it during busy weeks. With eight trucks it stays
+under 10% every day.
 
 ### 4.3 What is it worth?
 

@@ -188,7 +188,7 @@ function main()
     days = Date.(String[day["day"] for day in none["days"]])
     shown = [run for run in optimal if count_of(run) in (0, 1, 4, 8)]
     shades = Dict(0 => GREY, 1 => "#9fdcc4", 4 => "#3fbf90", 8 => "#0b6b49")
-    line_chart("four_weeks.svg"; title = "The system settles within a few days", ylabel = "Riders let down each day", xlabel = "",
+    line_chart("four_weeks.svg"; title = "Day by day: more trucks keep the share lower and steadier", ylabel = "Riders let down each day", xlabel = "",
                series = [(count_of(run) == 0 ? "No trucks" : "$(count_of(run)) optimized truck$(count_of(run) == 1 ? "" : "s")",
                           shades[count_of(run)], collect(1:length(days)), daily_share(run), false) for run in shown],
                suffix = "%", markers = false, xticks = [(k, Dates.format(days[k], "d u")) for k in 1:7:length(days)])
