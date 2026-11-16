@@ -25,13 +25,14 @@ Four weeks of real rides (161,183 of them) were replayed for each policy. A ride
 | 5 | 8.5% | 22.6% |
 | 10 | 6.1% | 16.4% |
 
-- **Optimization is worth more than doubling the fleet.** Three optimized trucks do as
-  well as six that follow the rule "fullest station to emptiest station". The rule never
-  got below 16%, with up to 20 trucks.
+- **Optimized trucks beat the rule of thumb by a wide margin.** Three optimized trucks
+  do as well as six that follow the rule "fullest station to emptiest station". The rule
+  did not get below 16%, with up to 16 trucks.
 - **The first five trucks do almost all the work.** Each of the first four spares about
   400 riders a day. After five, more night trucks add little.
-- **Four trucks pay for themselves if a let-down rider costs more than about 9 kr**, at
-  3,000 kr per truck night. A single ride earns about 17 kr.
+- **Five trucks pay for themselves if a let-down rider costs about one fare.** A single
+  ride earns about 17 kr. Each of the first four trucks pays for itself at 9 kr per
+  let-down rider and the fifth at 13 kr, with a truck night at 3,000 kr (our estimate).
 - **Some trucks should work at midday.** Night trucks alone did not get below 6%, even
   with ten. Six trucks split three and three between night and midday reach 5.7%, and
   eight split four and four reach 4.8%.
@@ -65,8 +66,8 @@ GitHub shows these as source code. To see them, clone the repository and open th
 2. **The model.** Each night at 01:00 a mixed-integer model picks each truck's route and
    how many bikes to load or unload at each stop, to make the sum of the curves as small
    as possible. The truck must fit its shift, hold at most 20 bikes and end empty.
-3. **The benchmark.** A rule of thumb: fullest station to emptiest station, until both
-   are half full.
+3. **The benchmark.** A rule of thumb: load at the fullest station, unload at the
+   emptiest ones, and bring each to half full.
 4. **The test.** Four further weeks of real rides are replayed against the plans. The
    planner never sees the day it plans for.
 

@@ -8,9 +8,9 @@ Interactive versions of the results, with an animated map, are in
 
 ## Summary
 
-Oslo's city bikes roll downhill. Every summer weekday about 900 bikes end the day at a
-different station than they started, leaving the hills empty and the centre full. We
-asked how trucks working at night should move bikes back, how many trucks are worth
+Oslo's city bikes roll downhill. On a summer weekday the stations that lose bikes lose
+about 900 in total, and the stations that gain bikes gain as many. That leaves the hills
+empty and the centre full. We asked how trucks working at night should move bikes back, how many trucks are worth
 paying for, and when they should work.
 
 We learned from eleven weeks of real trips what each station needs, wrote an
@@ -18,18 +18,20 @@ optimization model that plans the trucks' routes and loads, and tested it by rep
 four further weeks of real trips (161,183 rides) that the model had never seen. A rider
 is *let down* when there is no bike to take or no free dock to park it.
 
-- **Without any rebalancing, 40.7% of riders are let down.** The system fills up and
-  empties out within three days.
+- **Without any rebalancing, 40.7% of riders are let down.** Within three days the
+  centre is full and the hills are empty.
 - **Optimized trucks beat a rule of thumb by a wide margin.** Four optimized trucks leave
   12.7% of riders let down. Trucks that follow the rule "fullest station to emptiest
-  station" never got below 16.2%, with up to 20 of them.
+  station" did not get below 16.2%, with up to 16 of them.
 - **The first five trucks do almost all the work.** Five trucks reach 8.5%, ten reach
   6.1%. What is left happens during the day, which night trucks cannot fix.
-- **Four trucks pay for themselves if a let-down rider costs more than about 9 kr.** A
-  single ride earns about 17 kr. The fifth truck needs 13 kr, the sixth 44 kr.
-- **Some of the trucks should work at midday.** Night trucks alone did not get below 6%, even with ten.
-  Six trucks split three at night and three at midday reach 5.7%, better than ten trucks
-  at night, and eight split four and four reach 4.8%.
+- **Five trucks pay for themselves if a let-down rider costs about one fare.** A single
+  ride earns about 17 kr. Each of the first four trucks pays for itself at 9 kr per
+  let-down rider, the fifth at 13 kr and the sixth only at 44 kr. The truck costs are our
+  estimates.
+- **Some of the trucks should work at midday.** Night trucks alone did not get below
+  6%, even with ten. Six trucks split three at night and three at midday reach 5.7%,
+  better than ten trucks at night, and eight split four and four reach 4.8%.
 - **Fuel hardly matters.** A truck drives about 50 km a night. The driver's time is what
   costs, so the model's job is to make every hour of the shift count.
 
@@ -67,7 +69,7 @@ trucks, and the one we start with.
 | OpenStreetMap | 7,900 drivable street segments, one-way rules and speed limits; coast, parks and water for the map | ODbL |
 
 Everything in the model is real data except the points listed under
-[What we assumed](#what-we-assumed). Three gaps in the data shaped the work:
+[What we assumed](#what-we-assumed). Four gaps in the data shaped the work:
 
 - **Stations come and go.** About 2% of the rides in the replay period start or end at
   a station that is no longer in the station feed. Those rides are left out.
@@ -76,7 +78,7 @@ Everything in the model is real data except the points listed under
   real rides then move them.
 - **No record of the operator's own trucks.** The rides we replay happened while the
   real operator was rebalancing around the clock. Our runs with no trucks are therefore
-  worse than real life ever was.
+  worse than the real system.
 - **Demand is understated.** An empty station records no departures, so rides that
   never happened are missing from the history.
 
@@ -112,8 +114,9 @@ as possible.
 
 **Sets and data**
 
-- $N$: the stations worth a visit tonight (the 15 to 20 that gain most from losing
-  bikes and the 15 to 20 that gain most from receiving them); $0$ is the base.
+- $N$: the stations worth a visit tonight: the 15 that gain most from losing bikes,
+  which can only give, and the 15 that gain most from receiving bikes, which can only
+  receive. $0$ is the base.
 - $b_i$: bikes at station $i$ at 01:00. $C_i$: its docks.
 - $F_i(s)$: riders let down tomorrow if station $i$ starts with $s$ bikes.
 - $t_{ij}$: driving minutes from $i$ to $j$ along the streets.
@@ -142,10 +145,14 @@ subject to
 | $\sum_{ij} t_{ij}x_{ij} + 3\sum_i y_i + \tfrac12 \sum_i (p_i + d_i) \le T$ | everything fits in the shift |
 | $0 \le b_i + d_i - p_i \le C_i$ | stations stay within their docks |
 
-A second flow ties the stops into one connected tour. Because each $F_i$ is convex, it
-enters the model as a set of straight-line constraints, with no extra yes/no variables.
-A small penalty per kilometre keeps the route short where riders are not affected. The
-model is written in Julia with JuMP and solved with Gurobi.
+A second single-commodity flow rules out subtours, that is, loops that are not
+connected to the base. Because each $F_i$ is convex, it enters the model as a set of
+straight-line constraints, with no extra yes/no variables. The objective also carries a
+small penalty per kilometre driven (one kilometre counts as 0.05 riders) and a much
+smaller one per minute, so that among plans that are equally good for riders the
+shortest wins. The model is written in Julia with JuMP and solved with Gurobi, which is
+stopped after 10 seconds per truck or when the plan is proven to be within 2% of the best
+possible.
 
 ### 3.3 Several trucks
 
@@ -159,9 +166,17 @@ results below plan one truck at a time.
 ### 3.4 The benchmark
 
 To know what optimization adds, we compare with what a dispatcher might do without a
-model. The **rule of thumb**: drive to the fullest station and load until it is half
-full; drive to the emptiest station and unload until it is half full; repeat until the
-shift is over. With several trucks, each follows the rule on what the others leave.
+model. The **rule of thumb**:
+
+1. Drive to the fullest station, measured by the share of its docks in use. Load bikes
+   until the station is half full or the truck is full.
+2. Drive to the emptiest station and unload until it is half full. Continue to the next
+   emptiest until the truck is empty.
+3. Repeat until the next round no longer fits in the shift. No station is visited twice
+   in a night.
+
+With several trucks, each follows the rule on what the others leave. The rule and the
+model are timed in exactly the same way.
 
 ### 3.5 Testing by replay
 
@@ -172,7 +187,9 @@ A plan is only as good as what happens the next day. We test every policy the sa
 3. Each night the planner sees the inventories at 01:00 and the trucks carry out the
    plan, stop by stop.
 4. Then the real rides of that day are replayed. A rider who finds no bike gives up. A
-   rider who finds no free dock rides on to the nearest station with room.
+   rider who finds no free dock rides on to the nearest station with room. If a station
+   has changed by the time a truck arrives, the truck does as much of its plan as it can,
+   and bikes still on board when the shift ends go to the nearest stations with room.
 5. Repeat for 28 days, to 13 September, and count the riders let down.
 
 The planner never sees the rides of the day it plans for. The same 161,183 rides are
@@ -182,13 +199,17 @@ replayed for every policy, so differences come from the trucks alone.
 
 ### 4.1 One truck is not enough
 
-Our first model used one truck. Over the four weeks it cut the share of riders let down
-from 40.7% to 34.0%, sparing about 390 riders a day. The rule-of-thumb truck managed
-38.5%. In the same five hours the optimized truck moved 135 bikes and the rule-of-thumb
-truck 64, because the rule spends its time on many small drops.
+Our first model used one truck, straight-line driving distances and a guessed base at
+Økern. Over the four weeks it cut the share of riders let down from 40.7% to 34.0%,
+sparing about 390 riders a day. The rule-of-thumb truck managed 38.5%. In the same five
+hours the optimized truck moved 135 bikes and the rule-of-thumb truck 64, because the
+rule spends its time on many small drops.
 
-But about 900 bikes drift out of place every day. One truck moving 135 of them cannot
-hold the line.
+Everything from here on uses real streets and the operator's real base. With those, one
+optimized truck reaches 33.4% and one rule-of-thumb truck 38.1%.
+
+But the stations that lose bikes lose about 900 a day in total. One truck moving 135 to
+140 of them cannot hold the line.
 
 ### 4.2 How many trucks?
 
@@ -213,7 +234,7 @@ Three things stand out.
 straight line down to four trucks, then bends. A fifth truck spares 240 riders a day, a
 sixth 70, and beyond eight nothing more happens.
 
-**There is a floor at about 6%.** However many trucks work at night, about 350 riders a
+**There is a floor at about 6%.** With up to ten trucks at night, about 350 riders a
 day are still let down. Those failures build up during the day: a station that starts
 perfectly still fills or empties by the afternoon. Night trucks cannot reach them. The
 curves say the same thing without any trucks: even if every station started each day at
@@ -224,8 +245,12 @@ on a weekend day.
 full is simply the wrong target. A hill station should start nearly full and a central
 one nearly empty, and the rule cannot know that. Three optimized trucks (19.5%) do as
 well as six rule-of-thumb trucks (19.8%), and four optimized trucks do better than any
-number of rule-of-thumb trucks we tried, up to 20: beyond 12 trucks the rule finds
-nothing more to do.
+number of rule-of-thumb trucks we tried, up to 16: beyond 12 trucks the rule finds
+almost nothing more to do.
+
+Part of this gain comes from knowing what each station needs, and part from routing. A
+rule of thumb that aimed for each station's best level, instead of half full, would do
+better than the one we tested. We did not test one.
 
 ![The share of riders let down, day by day](figures/four_weeks.svg)
 
@@ -264,11 +289,11 @@ only does if a let-down rider costs more than twice that.
 
 ![Total cost a day](figures/cost.svg)
 
-At 25 kr per let-down rider, five optimized trucks are the cheapest fleet, at about
-28,000 kr a day in total. Running no trucks costs 58,500 kr a day in let-down riders.
+At 25 kr per let-down rider, which is one fare plus a little for goodwill, five
+optimized trucks are the cheapest fleet, at about 28,000 kr a day in total. Running no trucks costs 58,500 kr a day in let-down riders.
 The best the rule of thumb can do is six trucks at 47,900 kr a day, so optimization is
 worth about 20,000 kr a day at these prices. The [fleet-size page](fleet-size/) has
-sliders for all three prices.
+sliders for the three prices: a let-down rider, a truck night and a kilometre driven.
 
 **Fuel hardly matters.** An optimized truck drives about 50 km a night, which is roughly
 150 kr, or 5% of what the truck costs that night. The cost is the driver's time. The
@@ -293,9 +318,8 @@ the riders a station would let down during the rest of the day. Midday driving t
 | 6 | 7.3% | 3 + 3: **5.7%** · 4 + 2: 6.0% |
 | 8 | 6.2% | 4 + 4: **4.8%** · 6 + 2: 5.0% |
 
-**Some midday work helps at every fleet size.** Sending one or more of the trucks out at
-midday lets down 1.3 to 1.6 percentage points fewer riders than keeping them all at
-night.
+**Some midday work helps at every fleet size.** The best split at each fleet size lets
+down 1.3 to 1.6 percentage points fewer riders than keeping all the trucks at night.
 
 **Midday trucks get under the night floor.** No number of night trucks got below 6.1%.
 Six trucks split three and three reach 5.7%, and eight split four and four reach 4.8%.
@@ -408,8 +432,8 @@ We looked for how Oslo Bysykkel actually works.
 
 Our numbers are not a description of the real system. The real operator works in the
 daytime too, which our night-only runs do not. What carries over is the comparison: on
-the same rides, a truck that knows what each station needs does the work of two or more
-trucks that follow a simple rule.
+the same rides, three trucks that know what each station needs do the work of six that
+follow a simple rule.
 
 ## 6. Limits
 
@@ -419,8 +443,9 @@ trucks that follow a simple rule.
 - **Each night is planned for one day ahead.** The planner does not consider that
   tonight's plan also sets up the day after.
 - **The solver is stopped after 10 seconds per truck.** On a typical night the worst
-  truck's plan was proven to be within about 6% of the best possible. Better plans may
-  exist, so the optimized results are a floor on what optimization can do, not a ceiling.
+  truck's plan was proven to be within about 6% of the best possible. On the worst night
+  the proof was far weaker (65%), which says the solver's bound was poor that night, not
+  necessarily the plan. Better plans may exist.
   Because the limit is in seconds and several replays ran at once, a rerun on another
   machine will give slightly different plans and numbers. One configuration happened to
   run twice (four midday trucks) and gave 24,150 and 24,101 riders let down.
