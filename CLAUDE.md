@@ -27,6 +27,7 @@ plain files in `results/` so the animation can be built in any tool.
 - `test/` — tests for `src/`
 - `data/` — small input data files, with their source documented; raw downloads go in
   `data/raw/` (git-ignored)
+- `scripts/` — command-line scripts (data download)
 - `notebooks/` — exploration and experiments
 - `results/` — generated output; git-ignored except `.gitkeep`
 - `report/` — written report, slides and the final animation
@@ -57,6 +58,21 @@ video is for a general audience and at most 5 minutes.
 - Live station status (GBFS):
   `https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json`
 - GBFS requests need a `Client-Identifier` header of the form `<org>-<app>`.
+- Download with `julia --project=. scripts/download_oslo.jl 2025-11 2026-10`; explore
+  with `julia --project=. notebooks/explore_oslo.jl`.
+
+What the data can and cannot tell us (found in the first exploration):
+
+- Trips show user rides only. They hold no station inventories, no bike type and none
+  of the operator's own rebalancing moves, so evening inventories must be simulated or
+  collected from the live feed. Each run of the download script saves one live snapshot.
+- Observed trips are censored demand: an empty station records no departures.
+- The live feed splits parked bikes into `bike` and `ebike` per station but gives no
+  battery level, so any recharging model needs an assumed battery process.
+- The system runs all night. 01:00 to 06:00 holds about 2% of summer weekday trips.
+- Trip times are in UTC; convert to Oslo time before any hour-of-day analysis.
+- There are no travel times between stations; vehicle travel times must come from a
+  road network or from straight-line distance with a detour factor.
 - Licence: Norwegian Licence for Open Government Data (NLOD) 2.0. Attribute Oslo
   Bysykkel wherever the data or anything derived from it is shown.
 

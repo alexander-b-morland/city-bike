@@ -30,8 +30,9 @@ bikes from the fullest station to the emptiest.
 
 ## Status
 
-The stack is chosen: Julia with JuMP and the Gurobi solver. The project structure and a
-smoke test exist. No model has been formulated or implemented yet.
+The stack is chosen: Julia with JuMP and the Gurobi solver. The data download and a
+first exploration of the Oslo data exist. No model has been formulated or implemented
+yet.
 
 ## Data
 
@@ -54,6 +55,7 @@ Raw downloads are not committed. They go in `data/raw/`, which is git-ignored.
 | `src/`       | Model, algorithm and data code (the `CityBike` package)  |
 | `test/`      | Tests for the code in `src/`                             |
 | `data/`      | Input data (small files only; document the source)       |
+| `scripts/`   | Command-line scripts, such as the data download          |
 | `notebooks/` | Exploratory analysis and experiments                     |
 | `results/`   | Generated output (figures, tables, logs) — not committed |
 | `report/`    | Written report, slides and the final animation           |
@@ -73,6 +75,20 @@ Run the tests:
 
 ```bash
 julia --project=. -e "using Pkg; Pkg.test()"
+```
+
+Download a year of Oslo trips and a snapshot of the station feeds (about 215 MB, into
+`data/raw/oslo/`):
+
+```bash
+julia --project=. scripts/download_oslo.jl 2025-11 2026-10
+```
+
+Print a first look at the data and write per-station summaries to
+`results/exploration/`:
+
+```bash
+julia --project=. notebooks/explore_oslo.jl
 ```
 
 The models are written in JuMP, so another solver such as the open-source HiGHS can be
