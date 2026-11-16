@@ -1,4 +1,4 @@
-# Replaying real trips against a set of station inventories, with trucks at night.
+# Replaying real trips against a set of station inventories, with trucks at work.
 
 "What happened on one simulated service day."
 struct DayResult
@@ -7,26 +7,28 @@ struct DayResult
     no_bike::Int                  # of those, found the station empty and gave up
     no_dock::Int                  # riders who found their destination full and rode on
     plans::Vector{Plan}           # what each truck was asked to do
-    stops::Vector{Vector{Stop}}   # what each truck actually did
+    starts::Vector{Float64}       # when each truck's shift began, in minutes after 01:00
+    stops::Vector{Vector{Stop}}   # what each truck actually did, timed in minutes after 01:00
     snapshots::Matrix{Int}        # bikes per station (columns) at regular times (rows)
 end
 
 let_down(result::DayResult) = result.no_bike + result.no_dock
 
 # Event kinds, in the order they are handled when they share a timestamp.
-const SNAPSHOT, TRUCK, RETURN, PICKUP = 1, 2, 3, 4
+const SNAPSHOT, SHIFT, TRUCK, RETURN, PICKUP = 1, 2, 3, 4, 5
 
 """
 Replay `trips` over the service `days`, starting from the inventories `bikes`.
 
-At 01:00 each night `planner(day, bikes)` is asked for one `Plan` per truck, and the
-trucks then carry them out stop by stop during the night. A rider who finds no bike gives
-up. A rider who finds no free dock rides on to the nearest station with room. Returns
-one `DayResult` per day; `bikes` is updated in place.
+A shift starts at each of `shifts`, given in minutes after 01:00. At that moment
+`planner(day, bikes, shift)` is asked for one `Plan` per truck, where `shift` is the
+shift's number, and the trucks then carry the plans out stop by stop. A rider who finds
+no bike gives up. A rider who finds no free dock rides on to the nearest station with
+room. Returns one `DayResult` per day; `bikes` is updated in place.
 """
 function simulate!(bikes::Vector{Int}, stations::Vector{Station}, trips::Vector{Trip},
                    days::Vector{Date}, truck::Truck, planner;
-                   snapshot_every::Period = Minute(30), bike_kmh::Real = 12.0)
+                   shifts::Vector{<:Real} = [0.0], snapshot_every::Period = Minute(30), bike_kmh::Real = 12.0)
     n = length(stations)
     nearest = [sortperm([haversine(a, b) for b in stations]) for a in stations]
     by_day = Dict(day => Trip[] for day in days)
@@ -38,22 +40,20 @@ function simulate!(bikes::Vector{Int}, stations::Vector{Station}, trips::Vector{
     # Events are (time, kind, sequence, station, a, b). For a pickup, `a` is the trip's
     # number. For a return, `b` is 1 once the rider has been counted as let down. For a
     # truck stop, `a` is the planned change and `b` the truck; station 0 ends its shift.
-    # Bikes still on the road at 01:00 stay in the queue and arrive during the next day.
+    # For a shift start, `a` is the shift's number. Bikes still on the road at 01:00 stay
+    # in the queue and arrive during the next day.
     queue = BinaryMinHeap{Tuple{DateTime,Int,Int,Int,Int,Int}}()
     sequence = 0
     add!(time, kind, station, a = 0, b = 0) = push!(queue, (time, kind, sequence += 1, station, a, b))
-    after_minutes(opening, minutes) = opening + Millisecond(round(Int, 60_000 * minutes))
+    later(time, minutes) = time + Millisecond(round(Int, 60_000 * minutes))
 
     results = DayResult[]
     for day in days
         opening = DateTime(day) + DAY_START
         closing = opening + Day(1)
-        plans = planner(day, copy(bikes))
-        for (number, plan) in enumerate(plans)
-            for stop in plan.stops
-                add!(after_minutes(opening, stop.done), TRUCK, stop.station, stop.change, number)
-            end
-            add!(after_minutes(opening, plan.minutes), TRUCK, 0, 0, number)
+        minutes_in(time) = (time - opening) / Millisecond(60_000)
+        for (number, start) in enumerate(shifts)
+            add!(later(opening, start), SHIFT, 0, number)
         end
         today = by_day[day]
         for (index, trip) in enumerate(today)
@@ -64,13 +64,22 @@ function simulate!(bikes::Vector{Int}, stations::Vector{Station}, trips::Vector{
 
         snapshots = zeros(Int, length(ticks), n)
         row = no_bike = no_dock = 0
-        load, last_stop = zeros(Int, length(plans)), zeros(Int, length(plans))
-        done = [Stop[] for _ in plans]
+        plans, starts, done = Plan[], Float64[], Vector{Stop}[]
+        load, last_stop = Int[], Int[]
 
         while !isempty(queue) && first(queue)[1] < closing
             time, kind, _, station, a, b = pop!(queue)
             if kind == SNAPSHOT
                 snapshots[row += 1, :] = bikes
+            elseif kind == SHIFT
+                for plan in planner(day, copy(bikes), a)
+                    push!(plans, plan); push!(starts, minutes_in(time)); push!(done, Stop[])
+                    push!(load, 0); push!(last_stop, 0)
+                    for stop in plan.stops
+                        add!(later(time, stop.done), TRUCK, stop.station, stop.change, length(plans))
+                    end
+                    add!(later(time, plan.minutes), TRUCK, 0, 0, length(plans))
+                end
             elseif kind == PICKUP
                 if bikes[station] == 0
                     no_bike += 1
@@ -94,7 +103,7 @@ function simulate!(bikes::Vector{Int}, stations::Vector{Station}, trips::Vector{
                 bikes[station] += change
                 load[b] -= change
                 last_stop[b] = station
-                push!(done[b], Stop(station, change, (time - opening) / Millisecond(60_000)))
+                push!(done[b], Stop(station, change, minutes_in(time)))
             elseif load[b] > 0
                 # End of shift: any bikes still on board go to the nearest stations with room.
                 for other in nearest[last_stop[b]]
@@ -103,11 +112,11 @@ function simulate!(bikes::Vector{Int}, stations::Vector{Station}, trips::Vector{
                     put > 0 || continue
                     bikes[other] += put
                     load[b] -= put
-                    push!(done[b], Stop(other, put, (time - opening) / Millisecond(60_000)))
+                    push!(done[b], Stop(other, put, minutes_in(time)))
                 end
             end
         end
-        push!(results, DayResult(day, length(today), no_bike, no_dock, plans, done, snapshots))
+        push!(results, DayResult(day, length(today), no_bike, no_dock, plans, starts, done, snapshots))
     end
     return results
 end

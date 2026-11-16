@@ -34,7 +34,7 @@ function main(args)
     optimizer() = Gurobi.Optimizer(environment)
     nights = Dict{Tuple{String,Date},Solution}()
 
-    planner(policy) = function (day, bikes)
+    planner(policy) = function (day, bikes, shift)
         policy == "none" && return Plan[]
         night = plan_night(TRUCK, stations, travel, bikes, curves_for(case, day);
                            trucks = 1, method = policy == "greedy" ? :greedy : :optimal, optimizer)
@@ -77,7 +77,7 @@ function main(args)
                         "depot" => [TRUCK.depot_lat, TRUCK.depot_lon]),
         "stations" => [[station.name, round(station.lat; digits = 5), round(station.lon; digits = 5), station.capacity]
                        for station in stations],
-        "weekdayCurves" => [round.(curve; digits = 2) for curve in case.weekday_curves],
+        "weekdayCurves" => [round.(curve; digits = 2) for curve in case.weekday_curves[1]],
         "policies" => Dict(policy => [Dict(
             "trips" => result.trips, "noBike" => result.no_bike, "noDock" => result.no_dock,
             "km" => round(plan_of(result).km; digits = 1), "minutes" => round(plan_of(result).minutes),

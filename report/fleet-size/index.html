@@ -1,0 +1,476 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oslo Truck Fleet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column. Answer first (chart), then the money, then the map to explore. */
+:root {
+  --bg: #f7f7f4; --surface: #fdfdfc; --ink: #0d0f12; --ink2: #50524f; --muted: #85857f;
+  --grid: #e3e2db; --axis: #c3c2b7; --border: rgba(13,15,18,.12);
+  --greedy: #eb6834; --optimal: #1baf7a; --trucks: #8f8e87;
+  --empty: #e34948; --low: #f2b6b3; --mid: #a9a8a0; --high: #9cc2f0; --full: #2a78d6;
+  --land: #f2f1ec; --landnight: #e4e6ea; --sea: #c9dcef; --park: #dbe8cf; --road1: #ffffff; --road2: #ffffff; --road3: #fbfaf7; --roadedge: #d6d4cb; --route: #14171c;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
+  --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
+  --greedy: #d95926; --optimal: #199e70; --trucks: #6f6e68;
+  --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
+  --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
+  --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
+  --greedy: #d95926; --optimal: #199e70; --trucks: #6f6e68;
+  --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
+  --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; }
+.page { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+section, header { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.01em; }
+h2 { font-size: 24px; }
+p { margin: 0; max-width: 68ch; color: var(--ink2); }
+p strong, li strong { color: var(--ink); font-weight: 600; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.lede { font-size: 18px; color: var(--ink); }
+a { color: inherit; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.pad { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.key { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.line { width: 18px; height: 3px; border-radius: 2px; flex: none; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { font-family: var(--body); font-size: 12px; fill: var(--muted); }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+
+.sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px 28px; }
+.slider { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.slider label { font-size: 13px; color: var(--ink2); display: flex; justify-content: space-between; gap: 12px; }
+.slider output { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.slider input { width: 100%; }
+.slider small { font-size: 12px; color: var(--muted); }
+.verdict { font-size: 18px; color: var(--ink); max-width: 68ch; }
+.verdict b { font-family: var(--display); font-weight: 600; }
+
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; white-space: normal; }
+tr.best td { font-weight: 600; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.btn:hover { border-color: var(--ink2); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--full); outline-offset: 2px; }
+.pick { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink2); }
+.pick input { width: 150px; }
+.pick output { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); min-width: 78px; }
+.clock { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink2); }
+.mapwrap { position: relative; width: 100%; aspect-ratio: 1.5; max-width: 100%; }
+.mapwrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scrub { padding: 10px 16px 4px; }
+.scrub input { width: 100%; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 20px; padding: 6px 16px 10px; font-size: 13px; color: var(--ink2); }
+.facts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.credit { font-size: 11px; color: var(--muted); padding: 0 16px 12px; }
+ul { margin: 0; padding-left: 20px; color: var(--ink2); max-width: 68ch; display: flex; flex-direction: column; gap: 6px; }
+footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Oslo Bysykkel · second model</span>
+    <h1>How many night trucks does Oslo need?</h1>
+    <p class="lede">One truck could not keep up. Here several trucks work the same night, driving real Oslo streets from the operator's base at Kværnerveien. We replay the same four weeks for each fleet size and count the riders let down: no bike to take, or no free dock to park it.</p>
+  </header>
+
+  <section>
+    <h2 id="curveHead">The first few trucks do almost all the work</h2>
+    <p id="curveText"></p>
+    <div class="legend">
+      <span><i class="line" style="background:var(--optimal)"></i>Optimized trucks</span>
+      <span><i class="line" style="background:var(--greedy)"></i>Rule-of-thumb trucks</span>
+      <span id="oracleKey" hidden><i class="line" style="background:repeating-linear-gradient(90deg,var(--ink2) 0 5px,transparent 5px 9px)"></i>Optimized trucks that know tomorrow's trips</span>
+    </div>
+    <p id="oracleText" hidden></p>
+    <div class="chart" id="curve"><div class="tip" id="curveTip" hidden></div></div>
+  </section>
+
+  <section>
+    <h2>What is it worth?</h2>
+    <p>A truck costs money every night. A let-down rider costs something too: a lost fare, and a customer who trusts the bikes a little less. Nobody knows that second number, so set it yourself and see which fleet is cheapest.</p>
+    <div class="card pad">
+      <div class="sliders">
+        <div class="slider"><label for="riderCost">One let-down rider costs <output id="riderCostOut"></output></label>
+          <input type="range" id="riderCost" min="0" max="150" step="1" value="25"><small>A typical single ride earns about 17 kr.</small></div>
+        <div class="slider"><label for="truckCost">One truck for one night costs <output id="truckCostOut"></output></label>
+          <input type="range" id="truckCost" min="1000" max="6000" step="100" value="3000"><small>Driver for a night shift plus the van. Our estimate.</small></div>
+        <div class="slider"><label for="kmCost">Driving one km costs <output id="kmCostOut"></output></label>
+          <input type="range" id="kmCost" min="0" max="12" step="0.5" value="3"><small>Fuel or electricity, tyres and wear.</small></div>
+      </div>
+      <p class="verdict" id="verdict"></p>
+      <div class="legend">
+        <span><i class="key" style="background:var(--optimal)"></i>Let-down riders</span>
+        <span><i class="key" style="background:var(--trucks)"></i>Trucks and driving</span>
+        <span><i class="dot" style="background:var(--greedy)"></i>Total with rule-of-thumb trucks</span>
+      </div>
+      <div class="chart" id="cost"><div class="tip" id="costTip" hidden></div></div>
+    </div>
+    <p>The table shows the same thing without the sliders: what each added truck achieves, and how much a let-down rider must cost before that truck pays for itself.</p>
+    <div class="tablewrap"><table id="steps"></table></div>
+    <p id="fuelText"></p>
+  </section>
+
+  <section>
+    <h2>Watch the trucks work</h2>
+    <p>Choose a fleet size and press play. The trucks leave the base at 01:00 and follow real streets. Stations turn red when they run out of bikes and blue when they have no free docks.</p>
+    <div class="card" style="overflow:hidden">
+      <div class="bar">
+        <div class="pick"><label for="fleet">Trucks</label><input type="range" id="fleet" min="0" max="1" step="1" value="0"><output id="fleetOut"></output></div>
+        <button type="button" class="btn" id="play">Play</button>
+        <button type="button" class="btn" id="speed" aria-label="Playback speed">Speed 1×</button>
+        <div class="clock"><span class="chip" id="phase"></span><span id="clock"></span></div>
+      </div>
+      <div class="mapwrap" id="mapwrap">
+        <canvas id="map" role="img" aria-label="Map of Oslo with bike stations coloured by how full they are and the night trucks' routes along the streets"></canvas>
+        <div class="tip" id="maptip" hidden></div>
+      </div>
+      <div class="scrub"><input type="range" id="scrub" min="0" max="1343" step="1" value="0" aria-label="Day and time"></div>
+      <div class="facts" id="facts"></div>
+      <div class="legend" style="padding:0 16px 8px">
+        <span><i class="dot" style="background:var(--empty)"></i>No bikes</span>
+        <span><i class="dot" style="background:var(--low)"></i>Under 20% full</span>
+        <span><i class="dot" style="background:var(--mid)"></i>Fine</span>
+        <span><i class="dot" style="background:var(--high)"></i>Over 80% full</span>
+        <span><i class="dot" style="background:var(--full)"></i>No free docks</span>
+        <span><i class="line" style="background:var(--route)"></i>Truck routes</span>
+      </div>
+      <div class="credit">Map data © OpenStreetMap contributors. Bike data: Oslo Bysykkel, NLOD 2.0.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How Oslo Bysykkel does it in real life</h2>
+    <ul>
+      <li><strong>The base.</strong> The operator, Urban Infrastructure Partner, has its head office, warehouse and operations centre at Kværnerveien 5, east of the centre. Our trucks start and end there. <a href="https://urbaninfrastructure.no/drift/?lang=en">Source</a></li>
+      <li><strong>The system.</strong> About 3,000 bikes, both ordinary and electric, at around 260 stations inside Ring 3. <a href="https://oslobysykkel.no/en/terms-of-use">Source</a></li>
+      <li><strong>The crews.</strong> Teams of mechanics and drivers of specially adapted trucks. In summer much of the repair work is done at the stations. In 2018 the operator wrote that it had vehicles out around the clock, every day. <a href="https://urbaninfrastructure.no/drift/?lang=en">Source</a></li>
+      <li><strong>Planning.</strong> Researchers at NTNU built an optimization model with the operator in which a driver gets a new plan at every station. In their tests it cut problems by 41% against no rebalancing and by 24% against the operator's practice at the time. <a href="https://norwegianscitechnews.com/2022/08/making-bike-sharing-work/">Source</a></li>
+      <li><strong>Not published.</strong> We found no public figure for how many trucks the operator runs or how many bikes a truck carries. The 20 bikes per truck used here is our assumption.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What we assumed</h2>
+    <ul>
+      <li>Trucks work only at night, from 01:00 to 06:00, and nobody moves bikes during the day. The real operator works around the clock, so real life looks better than every line on this page.</li>
+      <li>Each truck holds 20 bikes. A stop costs 3 minutes plus half a minute per bike. Trucks drive at 70% of the speed limit along OpenStreetMap streets, respecting one-way streets.</li>
+      <li>Trucks are planned one at a time: each gets the best plan given what the trucks before it will do. On test nights this came within 1% of planning all trucks together.</li>
+      <li>The fleet is 3,000 bikes and every run starts with all stations about half full on 17 August 2026.</li>
+      <li>A rider who finds no bike gives up. A rider who finds no free dock rides on to the nearest station with room. Both count as let down.</li>
+      <li>The planner learns from trips between 1 June and 16 August and never sees the day it plans for.</li>
+      <li>The costs are ours, not the operator's. A truck night of 3,000 kr assumes about 5.5 paid hours at 450 kr including employer costs and night supplement, plus about 500 kr for the van.</li>
+    </ul>
+  </section>
+
+  <footer>Trip and station data: Oslo Bysykkel, Norwegian Licence for Open Government Data (NLOD) 2.0. Streets and map: © OpenStreetMap contributors, Open Database Licence. Replay period 17 August to 13 September 2026.</footer>
+</div>
+
+<script src="map.js"></script>
+<script src="data.js"></script>
+<script>
+(function () {
+  const D = window.FLEET_SIZE, M = window.OSLO_MAP;
+  const S = D.stations.map(([name, lat, lon, cap]) => ({ name, lat, lon, cap }));
+  const N = S.length, SNAPS = 48, DAYS = D.days.length, SHIFT = D.truck.shift;
+  const $ = (id) => document.getElementById(id);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const fmt = (n) => Math.round(n).toLocaleString("en-US");
+  const kr = (n) => fmt(n) + " kr";
+  const dayDate = (d) => new Date(D.days[d] + "T00:00:00");
+
+  // ---------- one summary row per run
+  const RUNS = {};
+  for (const run of D.runs) {
+    const trips = run.days.reduce((a, r) => a + r.trips, 0), down = run.days.reduce((a, r) => a + r.noBike + r.noDock, 0);
+    const km = run.days.reduce((a, r) => a + r.trucks.reduce((b, t) => b + t.km, 0), 0) / DAYS;
+    const policy = run.policy === "none" ? ["optimal", "greedy"] : [run.policy];
+    for (const p of policy) (RUNS[p] = RUNS[p] || []).push({ k: run.trucks, share: 100 * down / trips, perDay: down / DAYS, km, run });
+  }
+  for (const p in RUNS) RUNS[p].sort((a, b) => a.k - b.k);
+  const OPT = RUNS.optimal, GRE = RUNS.greedy || [], ORA = RUNS.oracle ? [OPT[0]].concat(RUNS.oracle) : [];
+  const greedyAt = (k) => GRE.find((r) => r.k === k);
+
+  // ---------- small SVG helpers
+  const NS = "http://www.w3.org/2000/svg";
+  function el(parent, tag, attrs, text) {
+    const node = document.createElementNS(NS, tag);
+    for (const key in attrs) node.setAttribute(key, attrs[key]);
+    if (text !== undefined) node.textContent = text;
+    parent.appendChild(node); return node;
+  }
+  function niceMax(v) { const step = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 2, 2.5, 5, 10]) if (m * step >= v) return m * step; return 10 * step; }
+
+  // ---------- riders let down against number of trucks
+  function drawCurve() {
+    const host = $("curve"); host.querySelectorAll("svg").forEach((n) => n.remove());
+    const w = host.clientWidth; if (!w) return;
+    const h = Math.max(250, Math.min(360, w * 0.45)), m = { l: 44, r: w >= 620 ? 128 : 16, t: 12, b: 44 };
+    const svg = el(host, "svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "img", "aria-label": "Share of riders let down against the number of night trucks" });
+    const maxK = Math.max(...OPT.map((r) => r.k), ...GRE.map((r) => r.k)), top = niceMax(Math.max(...OPT.map((r) => r.share)));
+    const x = (k) => m.l + (w - m.l - m.r) * k / maxK, y = (v) => m.t + (h - m.t - m.b) * (1 - v / top);
+    for (let i = 0; i <= 5; i++) { const v = top * i / 5;
+      el(svg, "line", { x1: m.l, x2: w - m.r, y1: y(v), y2: y(v), stroke: i ? "var(--grid)" : "var(--axis)", "stroke-width": 1 });
+      el(svg, "text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end" }, v + "%"); }
+    for (let k = 0; k <= maxK; k += maxK > 12 ? 2 : 1) el(svg, "text", { x: x(k), y: h - 24, "text-anchor": "middle" }, k);
+    el(svg, "text", { x: (m.l + w - m.r) / 2, y: h - 4, "text-anchor": "middle" }, "Trucks working each night");
+    const ends = [];
+    for (const [rows, color, name, dash] of [[GRE, "greedy", "Rule of thumb"], [ORA, "ink2", "Knowing tomorrow", "5 4"], [OPT, "optimal", "Optimized"]]) {
+      if (!rows.length) continue;
+      el(svg, "polyline", { points: rows.map((r) => x(r.k) + "," + y(r.share)).join(" "), fill: "none", stroke: `var(--${color})`, "stroke-width": 2, "stroke-linejoin": "round", "stroke-dasharray": dash || "" });
+      for (const r of rows) el(svg, dash ? "rect" : "circle", dash ? { x: x(r.k) - 3.5, y: y(r.share) - 3.5, width: 7, height: 7, fill: `var(--${color})`, stroke: "var(--bg)", "stroke-width": 1.5 } : { cx: x(r.k), cy: y(r.share), r: 4, fill: `var(--${color})`, stroke: "var(--bg)", "stroke-width": 2 });
+      const last = rows[rows.length - 1]; ends.push({ name, x: x(last.k), y: y(last.share) });
+    }
+    ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) if (Math.abs(ends[i].x - ends[i - 1].x) < 60) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 15);
+    if (w >= 620) for (const e of ends) el(svg, "text", { x: e.x + 10, y: e.y + 4, style: "fill:var(--ink2)" }, e.name);
+    const cross = el(svg, "line", { y1: m.t, y2: h - m.b, stroke: "var(--ink2)", "stroke-width": 1, visibility: "hidden" });
+    const hit = el(svg, "rect", { x: m.l, y: m.t, width: w - m.l - m.r, height: h - m.t - m.b, fill: "transparent" });
+    const tip = $("curveTip"), ks = [...new Set(OPT.concat(GRE).map((r) => r.k))].sort((a, b) => a - b);
+    hit.addEventListener("mousemove", (e) => {
+      const px = e.clientX - svg.getBoundingClientRect().left, k = ks.reduce((a, b) => Math.abs(x(b) - px) < Math.abs(x(a) - px) ? b : a);
+      const o = OPT.find((r) => r.k === k), g = greedyAt(k), f = ORA.find((r) => r.k === k);
+      cross.setAttribute("x1", x(k)); cross.setAttribute("x2", x(k)); cross.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${k} truck${k === 1 ? "" : "s"}</b>` + (o ? `<br>Optimized: ${o.share.toFixed(1)}% let down` : "") + (g && k ? `<br>Rule of thumb: ${g.share.toFixed(1)}%` : "") + (f && k ? `<br>Knowing tomorrow: ${f.share.toFixed(1)}%` : "");
+      tip.hidden = false; tip.style.left = Math.max(0, Math.min(w - tip.offsetWidth, x(k) + 12)) + "px"; tip.style.top = m.t + "px"; });
+    hit.addEventListener("mouseleave", () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); });
+  }
+  // How many rule-of-thumb trucks does it take to match k optimized ones?
+  function greedyMatch(share) {
+    for (let i = 1; i < GRE.length; i++) if (GRE[i].share <= share) {
+      const a = GRE[i - 1], b = GRE[i]; return a.k + (b.k - a.k) * (a.share - share) / (a.share - b.share); }
+    return null;
+  }
+  function curveText() {
+    const none = OPT[0], one = OPT.find((r) => r.k === 1), last = OPT[OPT.length - 1], pick = OPT.find((r) => r.k === 4) || OPT[Math.floor(OPT.length / 2)];
+    const match = greedyMatch(pick.share), most = GRE[GRE.length - 1];
+    const flat = OPT.find((r, i) => i > 0 && i < OPT.length - 1 && (r.share - OPT[i + 1].share) / (OPT[i + 1].k - r.k) < 1.5) || last;
+    $("curveHead").textContent = `The first ${flat.k} trucks do almost all the work`;
+    $("curveText").innerHTML = `With no trucks, <strong>${none.share.toFixed(1)}%</strong> of riders are let down. The first optimized truck brings that to ${one.share.toFixed(1)}%, ${flat.k} trucks bring it to <strong>${flat.share.toFixed(1)}%</strong>, and after that more trucks add little: ${last.k} trucks reach ${last.share.toFixed(1)}%. What is left happens during the day, when no trucks work. ` +
+      (match ? `Optimization is worth many trucks: ${pick.k} optimized trucks do as well as about <strong>${match.toFixed(0)} rule-of-thumb trucks</strong>.`
+             : `Optimization is worth many trucks: ${pick.k} optimized trucks (${pick.share.toFixed(1)}%) do better than ${most.k} rule-of-thumb trucks (${most.share.toFixed(1)}%).`);
+    if (ORA.length > 1) {
+      const f = ORA[ORA.length - 1], o = OPT.find((r) => r.k === f.k);
+      $("oracleKey").hidden = $("oracleText").hidden = false;
+      const gain = o.share - f.share;
+      $("oracleText").innerHTML = `The dashed line shows trucks that plan with tomorrow's real trips instead of history. With ${f.k} truck${f.k === 1 ? "" : "s"} the share goes from ${o.share.toFixed(1)}% to ${f.share.toFixed(1)}%. ` +
+        (gain > 0.5 ? `So a perfect demand forecast would be worth at most ${gain.toFixed(1)} percentage points.`
+                    : `So a perfect forecast of tomorrow would not help. What holds the trucks back is how many bikes they can move in a night, not what they know about demand.`);
+    }
+  }
+
+  // ---------- costs
+  const cost = (r, v) => ({ riders: r.perDay * v.rider, trucks: r.k * v.truck + r.km * v.km });
+  const total = (r, v) => { const c = cost(r, v); return c.riders + c.trucks; };
+  const values = () => ({ rider: +$("riderCost").value, truck: +$("truckCost").value, km: +$("kmCost").value });
+  function drawCost() {
+    const v = values();
+    $("riderCostOut").textContent = kr(v.rider); $("truckCostOut").textContent = kr(v.truck); $("kmCostOut").textContent = v.km.toFixed(1) + " kr";
+    const best = OPT.reduce((a, b) => total(b, v) < total(a, v) ? b : a), bestG = GRE.length ? GRE.reduce((a, b) => total(b, v) < total(a, v) ? b : a) : null;
+    const edge = best === OPT[OPT.length - 1] ? ` More than ${best.k} trucks might be cheaper still; we did not test more.` : "";
+    $("verdict").innerHTML = `Cheapest fleet: <b>${best.k} optimized truck${best.k === 1 ? "" : "s"}</b>, at ${kr(total(best, v))} a day in total.` + edge +
+      (bestG ? ` The best the rule of thumb can do is ${bestG.k} truck${bestG.k === 1 ? "" : "s"} at ${kr(total(bestG, v))} a day, so optimizing saves <b>${kr(total(bestG, v) - total(best, v))} a day</b>.` : "");
+    const host = $("cost"); host.querySelectorAll("svg").forEach((n) => n.remove());
+    const w = host.clientWidth; if (!w) return;
+    const h = Math.max(240, Math.min(320, w * 0.4)), m = { l: 64, r: 12, t: 22, b: 44 };
+    const svg = el(host, "svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "img", "aria-label": "Total daily cost for each fleet size" });
+    const top = niceMax(Math.max(1, ...OPT.map((r) => total(r, v)), ...OPT.map((r) => greedyAt(r.k) ? total(greedyAt(r.k), v) : 0)));
+    const band = (w - m.l - m.r) / OPT.length, bw = Math.min(24, band * 0.6), y = (c) => m.t + (h - m.t - m.b) * (1 - c / top);
+    for (let i = 0; i <= 4; i++) { const c = top * i / 4;
+      el(svg, "line", { x1: m.l, x2: w - m.r, y1: y(c), y2: y(c), stroke: i ? "var(--grid)" : "var(--axis)", "stroke-width": 1 });
+      el(svg, "text", { x: m.l - 8, y: y(c) + 4, "text-anchor": "end" }, fmt(c)); }
+    el(svg, "text", { x: m.l - 56, y: 10 }, "Kroner a day");
+    el(svg, "text", { x: (m.l + w - m.r) / 2, y: h - 4, "text-anchor": "middle" }, "Trucks working each night");
+    const tip = $("costTip");
+    OPT.forEach((r, i) => {
+      const cx = m.l + band * (i + 0.5), c = cost(r, v), g = greedyAt(r.k);
+      el(svg, "rect", { x: cx - bw / 2, y: y(c.trucks), width: bw, height: Math.max(0, y(0) - y(c.trucks)), fill: "var(--trucks)" });
+      el(svg, "rect", { x: cx - bw / 2, y: y(c.trucks + c.riders), width: bw, height: Math.max(0, y(c.trucks) - y(c.trucks + c.riders) - (c.trucks ? 2 : 0)), fill: "var(--optimal)", rx: 3 });
+      if (g && r.k) el(svg, "circle", { cx, cy: y(total(g, v)), r: 4.5, fill: "var(--greedy)", stroke: "var(--surface)", "stroke-width": 2 });
+      el(svg, "text", { x: cx, y: h - 24, "text-anchor": "middle", style: r === best ? "fill:var(--ink);font-weight:600" : "" }, r.k);
+      if (r === best) el(svg, "text", { x: cx, y: y(c.trucks + c.riders) - 8, "text-anchor": "middle", style: "fill:var(--ink);font-weight:600" }, "Cheapest");
+      const hit = el(svg, "rect", { x: cx - band / 2, y: m.t, width: band, height: h - m.t - m.b, fill: "transparent" });
+      hit.addEventListener("mousemove", () => {
+        tip.innerHTML = `<b>${r.k} truck${r.k === 1 ? "" : "s"}</b><br>Let-down riders: ${kr(c.riders)}<br>Trucks and driving: ${kr(c.trucks)}<br>Total: ${kr(c.riders + c.trucks)}` + (g && r.k ? `<br>Rule of thumb total: ${kr(total(g, v))}` : "");
+        tip.hidden = false; tip.style.left = Math.max(0, Math.min(w - tip.offsetWidth, cx + band / 2)) + "px"; tip.style.top = m.t + "px"; });
+      hit.addEventListener("mouseleave", () => { tip.hidden = true; });
+    });
+    // what each added truck achieves
+    let rows = "";
+    for (let i = 1; i < OPT.length; i++) {
+      const a = OPT[i - 1], b = OPT[i], added = b.k - a.k, spared = (a.perDay - b.perDay) / added, extra = v.truck + (b.km - a.km) / added * v.km;
+      const label = added === 1 ? `Truck ${b.k}` : `Trucks ${a.k + 1} to ${b.k}, each`;
+      rows += `<tr class="${b === best ? "best" : ""}"><td>${label}</td><td>${fmt(b.perDay)}</td><td>${b.share.toFixed(1)}%</td><td>${fmt(spared)}</td><td>${spared > 0 ? kr(extra / spared) : "never"}</td></tr>`;
+    }
+    $("steps").innerHTML = `<thead><tr><th>Added truck</th><th>Riders let down a day with it</th><th>Share</th><th>Riders it spares a day</th><th>Pays for itself if a let-down rider costs more than</th></tr></thead>` +
+      `<tbody><tr><td>No trucks</td><td>${fmt(OPT[0].perDay)}</td><td>${OPT[0].share.toFixed(1)}%</td><td>–</td><td>–</td></tr>${rows}</tbody>`;
+    const one = OPT.find((r) => r.k === 1) || OPT[1], perTruckKm = one.km / Math.max(1, one.k);
+    $("fuelText").innerHTML = `Driving is a small part of the bill. A truck covers about <strong>${fmt(perTruckKm)} km</strong> a night, which costs ${kr(perTruckKm * v.km)} at ${v.km.toFixed(1)} kr per km, or ${(100 * perTruckKm * v.km / (v.truck + perTruckKm * v.km)).toFixed(0)}% of what the truck costs that night. The driver's time is what counts, so the model's job is to make every hour of the shift move as many useful bikes as possible.`;
+  }
+  ["riderCost", "truckCost", "kmCost"].forEach((id) => $(id).addEventListener("input", drawCost));
+
+  // ---------- map
+  const MAPPED = OPT.filter((r) => r.run.days[0].levels);
+  const state = { fleet: Math.min(MAPPED.length - 1, Math.max(0, MAPPED.findIndex((r) => r.k === 4))), day: 3, t: 210, playing: false, speed: 1 };
+  const canvas = $("map"), ctx = canvas.getContext("2d"), wrap = $("mapwrap"), base = document.createElement("canvas");
+  const VIEW = { lat0: 59.8945, lat1: 59.9560, lon0: 10.6440, lon1: 10.8210 }, K = Math.cos(59.92 * Math.PI / 180);
+  let W = 0, H = 0, proj = null, colors = {}, legCache = {};
+  const level = (run, d, k, i) => { const c = run.days[d].levels.charCodeAt(k * N + i); return c < 58 ? c - 48 : c < 91 ? c - 29 : c - 87; };
+  function readColors() { for (const n of ["surface", "ink", "ink2", "muted", "optimal", "empty", "low", "mid", "high", "full", "land", "landnight", "sea", "park", "road1", "road2", "road3", "roadedge", "route"]) colors[n] = css("--" + n); }
+  function resize() {
+    const ratio = window.devicePixelRatio || 1;
+    W = wrap.clientWidth; H = wrap.clientHeight; if (!W || !H) return false;
+    for (const c of [canvas, base]) { c.width = Math.round(W * ratio); c.height = Math.round(H * ratio); }
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const scale = Math.max(W / ((VIEW.lon1 - VIEW.lon0) * K), H / (VIEW.lat1 - VIEW.lat0));
+    const ox = (W - (VIEW.lon1 - VIEW.lon0) * K * scale) / 2, oy = (H - (VIEW.lat1 - VIEW.lat0) * scale) / 2;
+    proj = (lat, lon) => [ox + (lon - VIEW.lon0) * K * scale, H - oy - (lat - VIEW.lat0) * scale];
+    for (const s of S) [s.x, s.y] = proj(s.lat, s.lon);
+    legCache = {}; drawBase(ratio); return true;
+  }
+  function trace(g, numbers, lat0, lon0, unit) {
+    let x = numbers[0], y = numbers[1], p = proj(lat0 + y * unit, lon0 + x * unit);
+    g.moveTo(p[0], p[1]);
+    for (let i = 2; i < numbers.length; i += 2) { x += numbers[i]; y += numbers[i + 1]; p = proj(lat0 + y * unit, lon0 + x * unit); g.lineTo(p[0], p[1]); }
+  }
+  function drawBase(ratio) {
+    const g = base.getContext("2d"), [south, west, north, east] = M.box, u = M.unit;
+    g.setTransform(ratio, 0, 0, ratio, 0, 0);
+    g.fillStyle = colors.land; g.fillRect(0, 0, W, H);
+    const fillAll = (lines, color) => { g.fillStyle = color; g.beginPath(); for (const l of lines) { trace(g, l, south, west, u); g.closePath(); } g.fill(); };
+    fillAll(M.parks, colors.park);
+    g.fillStyle = colors.sea;
+    const rows = M.sea.rows, dLat = (north - south) / rows.length, dLon = (east - west) / M.sea.columns;
+    rows.forEach((runs, r) => { for (let i = 0; i < runs.length; i += 2) {
+      const a = proj(north - r * dLat, west + runs[i] * dLon), b = proj(north - (r + 1) * dLat, west + (runs[i] + runs[i + 1]) * dLon);
+      g.fillRect(a[0], a[1], b[0] - a[0] + 0.6, b[1] - a[1] + 0.6); } });
+    fillAll(M.lakes, colors.sea);
+    const strokeAll = (lines, color, width, dash) => { g.strokeStyle = color; g.lineWidth = width; g.lineJoin = g.lineCap = "round"; g.setLineDash(dash || []); g.beginPath(); for (const l of lines) trace(g, l, south, west, u); g.stroke(); g.setLineDash([]); };
+    strokeAll(M.rivers, colors.sea, 2.5);
+    const z = Math.max(0.6, W / 1000);
+    for (const [name, width] of [["minor", 1.6], ["medium", 2.6], ["major", 3.6]]) strokeAll(M.roads[name], colors.roadedge, (width + 1.2) * z);
+    strokeAll(M.roads.minor, colors.road3, 1.6 * z); strokeAll(M.roads.medium, colors.road2, 2.6 * z); strokeAll(M.roads.major, colors.road1, 3.6 * z);
+    strokeAll(M.roads.tunnel, colors.roadedge, 1.5 * z, [4, 4]);
+    g.font = "500 12px Inter, system-ui, sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = colors.land;
+    for (const [text, lat, lon] of [["Oslofjord", 59.9005, 10.722], ["Nydalen", 59.9515, 10.7665], ["Majorstuen", 59.9305, 10.713], ["Skøyen", 59.9245, 10.682], ["Grünerløkka", 59.9245, 10.7585], ["Bygdøy", 59.906, 10.682], ["Tøyen", 59.9165, 10.772], ["Blindern", 59.9415, 10.7215]]) {
+      const [x, y] = proj(lat, lon); if (text !== "Oslofjord") g.strokeText(text, x, y); g.fillStyle = colors.ink2; g.fillText(text, x, y); }
+  }
+  // A truck's night as legs along the streets, with times.
+  function legPoints(a, b) {
+    const key = a + ">" + b; if (legCache[key]) return legCache[key];
+    const numbers = D.legs[key], pts = []; let x = numbers[0], y = numbers[1], length = 0;
+    pts.push(proj(y / 1e5, x / 1e5));
+    for (let i = 2; i < numbers.length; i += 2) { x += numbers[i]; y += numbers[i + 1]; const p = proj(y / 1e5, x / 1e5); length += Math.hypot(p[0] - pts[pts.length - 1][0], p[1] - pts[pts.length - 1][1]); pts.push(p); }
+    return (legCache[key] = { pts, length });
+  }
+  function drawTruck(truck, t) {
+    const start = truck.start || 0;
+    let from = N, leave = start, position = null;
+    const stops = truck.stops.concat([[N, 0, start + truck.minutes]]);
+    ctx.beginPath();
+    for (let s = 0; s < stops.length; s++) {
+      const [to, change, done] = stops[s], home = s === stops.length - 1;
+      if (t <= leave) break;
+      const arrive = home ? Math.max(leave, done) : Math.max(leave, done - D.truck.stopMinutes - D.truck.bikeMinutes * Math.abs(change));
+      if (to !== from) {
+        const leg = legPoints(from, to), f = arrive > leave ? Math.min(1, (t - leave) / (arrive - leave)) : 1;
+        let left = leg.length * f; ctx.moveTo(leg.pts[0][0], leg.pts[0][1]); position = leg.pts[0];
+        for (let i = 1; i < leg.pts.length; i++) {
+          const a = leg.pts[i - 1], b = leg.pts[i], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+          if (d >= left) { const q = d ? left / d : 0; position = [a[0] + (b[0] - a[0]) * q, a[1] + (b[1] - a[1]) * q]; ctx.lineTo(position[0], position[1]); break; }
+          ctx.lineTo(b[0], b[1]); left -= d; position = b; }
+      }
+      from = to; leave = home ? Infinity : done;
+    }
+    ctx.stroke();
+    return t >= start && t < start + truck.minutes ? position : null;
+  }
+  function draw() {
+    const row = MAPPED[state.fleet], run = row.run, { day, t } = state, r = run.days[day];
+    const night = t < SHIFT, k = Math.min(SNAPS - 1, Math.floor(t / 30));
+    const working = r.trucks.some((truck) => t >= (truck.start || 0) && t < (truck.start || 0) + truck.minutes);
+    ctx.drawImage(base, 0, 0, W, H);
+    if (night) { ctx.fillStyle = "rgba(20,30,60,0.10)"; ctx.fillRect(0, 0, W, H); }
+    ctx.lineWidth = Math.max(1.6, 2.2 * W / 1000); ctx.lineJoin = ctx.lineCap = "round"; ctx.strokeStyle = colors.route; ctx.globalAlpha = working ? 0.9 : 0.28;
+    const positions = r.trucks.map((truck) => drawTruck(truck, t));
+    ctx.globalAlpha = 1;
+    const depot = proj(D.truck.depot[0], D.truck.depot[1]);
+    let empty = 0, full = 0; const small = W < 520 ? 0.75 : 1;
+    for (let i = 0; i < N; i++) {
+      const s = S[i], b = level(run, day, k, i), share = b / s.cap;
+      let radius = (2.2 + Math.sqrt(s.cap) * 0.55) * small, fill = colors.mid;
+      if (b === 0) { fill = colors.empty; radius += 1.5; empty++; } else if (b === s.cap) { fill = colors.full; radius += 1.5; full++; }
+      else if (share < 0.2) fill = colors.low; else if (share > 0.8) fill = colors.high;
+      ctx.beginPath(); ctx.arc(s.x, s.y, radius, 0, 7); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = colors.land; ctx.stroke();
+    }
+    ctx.fillStyle = colors.route; ctx.fillRect(depot[0] - 5, depot[1] - 5, 10, 10);
+    ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.textAlign = "left"; ctx.lineWidth = 3; ctx.strokeStyle = colors.land; ctx.strokeText("Base", depot[0] + 9, depot[1] + 4); ctx.fillStyle = colors.ink; ctx.fillText("Base", depot[0] + 9, depot[1] + 4);
+    for (const p of positions) if (p) { ctx.beginPath(); ctx.arc(p[0], p[1], 6 * small, 0, 7); ctx.fillStyle = colors.optimal; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = colors.route; ctx.stroke(); }
+    const clock = new Date(dayDate(day).getTime() + (60 + t) * 60000);
+    $("clock").textContent = clock.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) + " · " + String(clock.getHours()).padStart(2, "0") + ":" + String(clock.getMinutes()).padStart(2, "0");
+    $("phase").textContent = working ? (night ? "Night shift" : "Trucks at work") : night ? "Night" : "Riders on the road";
+    const moved = r.trucks.reduce((a, truck) => a + truck.stops.reduce((b, s) => b + Math.max(s[1], 0), 0), 0), km = r.trucks.reduce((a, truck) => a + truck.km, 0);
+    $("facts").innerHTML = `<span>Stations with no bikes now: <b>${empty}</b></span><span>Stations with no free docks now: <b>${full}</b></span>` +
+      `<span>Riders let down this day: <b>${fmt(r.noBike + r.noDock)}</b> of ${fmt(r.trips)}</span>` +
+      (r.trucks.length ? `<span>Trucks this night: <b>${fmt(moved)}</b> bikes moved, ${fmt(km)} km driven</span>` : "<span>No trucks this night</span>");
+    $("scrub").value = day * SNAPS + k; $("scrub").setAttribute("aria-valuetext", $("clock").textContent);
+  }
+  $("fleet").max = MAPPED.length - 1; $("fleet").value = state.fleet;
+  const fleetLabel = () => { const k = MAPPED[state.fleet].k; $("fleetOut").textContent = k === 0 ? "None" : k + (k === 1 ? " truck" : " trucks"); $("fleet").setAttribute("aria-valuetext", $("fleetOut").textContent); };
+  $("fleet").addEventListener("input", (e) => { state.fleet = +e.target.value; fleetLabel(); draw(); });
+  $("scrub").addEventListener("input", (e) => { const v = +e.target.value; state.day = Math.floor(v / SNAPS); state.t = (v % SNAPS) * 30; draw(); });
+  $("speed").addEventListener("click", () => { state.speed = state.speed === 1 ? 3 : state.speed === 3 ? 8 : 1; $("speed").textContent = "Speed " + state.speed + "×"; });
+  let last = 0;
+  function tick(now) {
+    if (!state.playing) return;
+    const dt = Math.min(100, now - last) / 1000; last = now;
+    const slow = MAPPED[state.fleet].run.days[state.day].trucks.some((truck) => state.t >= (truck.start || 0) && state.t < (truck.start || 0) + truck.minutes);
+    state.t += dt * state.speed * (slow ? 30 : 130);
+    if (state.t >= 1440) { if (state.day === DAYS - 1) { state.t = 1439; setPlaying(false); } else { state.day++; state.t -= 1440; } }
+    draw(); requestAnimationFrame(tick);
+  }
+  function setPlaying(on) {
+    state.playing = on; $("play").textContent = on ? "Pause" : "Play";
+    if (on) { if (state.day === DAYS - 1 && state.t >= 1439) { state.day = 0; state.t = 0; } last = performance.now(); requestAnimationFrame(tick); }
+  }
+  $("play").addEventListener("click", () => setPlaying(!state.playing));
+  canvas.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+    let best = -1, dist = 144;
+    for (let i = 0; i < N; i++) { const d = (S[i].x - x) ** 2 + (S[i].y - y) ** 2; if (d < dist) { dist = d; best = i; } }
+    const tip = $("maptip"); if (best < 0) { tip.hidden = true; return; }
+    const run = MAPPED[state.fleet].run, b = level(run, state.day, Math.min(SNAPS - 1, Math.floor(state.t / 30)), best);
+    const change = run.days[state.day].trucks.reduce((a, truck) => a + truck.stops.reduce((c, s) => c + (s[0] === best ? s[1] : 0), 0), 0);
+    tip.innerHTML = `<b>${S[best].name}</b><br>${b} bikes, ${S[best].cap - b} free docks` + (change ? `<br>Trucks ${change > 0 ? "added " + change : "took " + -change} tonight` : "");
+    tip.hidden = false; tip.style.left = Math.max(4, Math.min(W - tip.offsetWidth - 4, S[best].x + 10)) + "px"; tip.style.top = Math.max(4, S[best].y - 60) + "px";
+  });
+  canvas.addEventListener("mouseleave", () => { $("maptip").hidden = true; });
+
+  function renderAll() { readColors(); drawCurve(); curveText(); drawCost(); fleetLabel(); if (resize()) draw(); }
+  renderAll();
+  window.addEventListener("resize", renderAll);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderAll);
+})();
+</script>

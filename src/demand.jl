@@ -21,27 +21,36 @@ end
 
 """
 The time-ordered pickup and return events at every station on every service day in
-`days`. `events[station][k]` holds the events of `days[k]`.
+`days`. `events[station][k]` holds the events of `days[k]`. Only events from `from` to
+`until` minutes after the service day starts are kept.
 """
-function station_events(trips::Vector{Trip}, n_stations::Integer, days::Vector{Date})
+function station_events(trips::Vector{Trip}, n_stations::Integer, days::Vector{Date};
+                        from::Real = 0, until::Real = 1440)
     slot = Dict(day => index for (index, day) in enumerate(days))
     timed = [[Tuple{DateTime,Int8}[] for _ in days] for _ in 1:n_stations]
+    function record!(station, time, change)
+        day = service_day(time)
+        k = get(slot, day, 0)
+        k > 0 || return
+        minute = (time - (DateTime(day) + DAY_START)) / Millisecond(60_000)
+        from <= minute < until && push!(timed[station][k], (time, Int8(change)))
+    end
     for trip in trips
-        k = get(slot, service_day(trip.start), 0)
-        k > 0 && push!(timed[trip.from][k], (trip.start, Int8(-1)))
-        k = get(slot, service_day(trip.stop), 0)
-        k > 0 && push!(timed[trip.to][k], (trip.stop, Int8(1)))
+        record!(trip.from, trip.start, -1)
+        record!(trip.to, trip.stop, 1)
     end
     return [[Int8[change for (_, change) in sort!(day)] for day in station] for station in timed]
 end
 
 """
 For every station, the average number of riders let down per day for each possible
-starting level. `curves[station][b + 1]` is the average when the day starts with `b`
-bikes, taken over the given `days` of history.
+starting level. `curves[station][b + 1]` is the average when the station holds `b` bikes
+`from` minutes into the service day and nobody rebalances it before `until`, taken over
+the given `days` of history.
 """
-function failure_curves(trips::Vector{Trip}, stations::Vector{Station}, days::Vector{Date})
-    events = station_events(trips, length(stations), days)
+function failure_curves(trips::Vector{Trip}, stations::Vector{Station}, days::Vector{Date};
+                        from::Real = 0, until::Real = 1440)
+    events = station_events(trips, length(stations), days; from, until)
     return [[sum(failures(day, start, station.capacity) for day in events[index]; init = 0) /
              length(days) for start in 0:station.capacity]
             for (index, station) in enumerate(stations)]

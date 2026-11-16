@@ -28,6 +28,9 @@ end
     @test curves[1] == [6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0]            # wants six bikes
     @test curves[2] == [0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6]            # wants six free docks
     @test all(is_convex, curves)
+    # The rides leave between 08:00 and 08:10, that is 420 to 430 minutes after 01:00.
+    @test failure_curves(trips, stations, [day]; until = 420)[1] == zeros(11)
+    @test failure_curves(trips, stations, [day]; from = 424)[1][1] == 4
     @test !is_convex([0.0, 1.0, 1.0, 3.0, 3.0])
     @test convex_envelope([3.0, 0.0, 2.0, 0.0, 3.0]) == [3.0, 0.0, 0.0, 0.0, 3.0]
 end
@@ -116,13 +119,13 @@ end
              Trip(2, 1, at(8, 0), at(8, 10)),     # station 1 is full: rider rides on
              Trip(3, 4, at(9, 0), at(9, 10))]
     bikes = [10, 5, 5, 0]
-    idle = simulate!(bikes, stations, trips, [day], truck, (day, bikes) -> Plan[])
+    idle = simulate!(bikes, stations, trips, [day], truck, (day, bikes, shift) -> Plan[])
     @test sum(bikes) == 20
     @test (idle[1].trips, idle[1].no_bike, idle[1].no_dock) == (3, 1, 1)
     @test size(idle[1].snapshots) == (48, 4)
 
     bikes = [10, 5, 5, 0]
-    rule(day, bikes) = [greedy_plan(truck, stations, travel, bikes)]
+    rule(day, bikes, shift) = [greedy_plan(truck, stations, travel, bikes)]
     moved = simulate!(bikes, stations, trips, [day], truck, rule)
     @test sum(bikes) == 20
     @test let_down(moved[1]) == 0                 # the truck fixed both stations overnight
@@ -130,8 +133,15 @@ end
 
     # Two trucks working the same night each keep their own load.
     bikes = [10, 10, 0, 0]
-    pair(day, bikes) = [timed_plan(truck, travel, [1 => -5, 3 => 5]), timed_plan(truck, travel, [2 => -5, 4 => 5])]
+    pair(day, bikes, shift) = [timed_plan(truck, travel, [1 => -5, 3 => 5]), timed_plan(truck, travel, [2 => -5, 4 => 5])]
     both = simulate!(bikes, stations, Trip[], [day], truck, pair)
     @test bikes == [5, 5, 5, 5]
     @test length(both[1].stops) == 2
+
+    # A second shift at 10:00 sees what riders did in the morning and fixes it.
+    bikes = [10, 5, 5, 0]
+    late = simulate!(bikes, stations, trips, [day], truck, rule; shifts = [0.0, 540.0])
+    @test late[1].starts == [0.0, 540.0]
+    @test all(540 < stop.done < 660 for stop in late[1].stops[2])
+    @test sum(bikes) == 20
 end

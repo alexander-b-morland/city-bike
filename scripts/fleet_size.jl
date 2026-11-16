@@ -4,6 +4,7 @@
 #   julia --project=. scripts/fleet_size.jl run optimal 3    # 3 optimized trucks
 #   julia --project=. scripts/fleet_size.jl run greedy 3     # 3 rule-of-thumb trucks
 #   julia --project=. scripts/fleet_size.jl run none 0       # no trucks
+#   julia --project=. scripts/fleet_size.jl run oracle 3     # 3 trucks that know tomorrow's trips
 #   julia --project=. scripts/fleet_size.jl page             # collect the runs for the page
 #
 # Each run writes results/fleet_size/<policy>_<trucks>.json. The runs are independent, so
@@ -36,34 +37,14 @@ function replay(policy::AbstractString, trucks::Integer)
     stations = case.stations
     roads = load_roads(joinpath(ROOT, "data", "raw", "osm", "roads.json"), stations, TRUCK)
     environment = Gurobi.Env()
-    optimizer() = Gurobi.Optimizer(environment)
-    nights = Dict{Date,Solution}()
-    function planner(day, bikes)
-        trucks == 0 && return Plan[]
-        night = policy == "greedy" ?
-                plan_night(TRUCK, stations, roads.travel, bikes, curves_for(case, day); trucks, method = :greedy) :
-                plan_night(TRUCK, stations, roads.travel, bikes, curves_for(case, day); trucks, optimizer, SOLVER...)
-        isempty(problems(night.plans, TRUCK, stations, bikes)) || error("invalid plan on $day")
-        nights[day] = night
-        return night.plans
-    end
-    seconds = @elapsed results = simulate!(even_start(stations, FLEET), stations, case.trips, collect(REPLAY), TRUCK, planner)
+    seconds = @elapsed results, nights = night_replay(case, roads.travel, TRUCK, collect(REPLAY); trucks, policy = Symbol(policy),
+                                                      fleet = FLEET, optimizer = () -> Gurobi.Optimizer(environment), solver = SOLVER)
     total, failed = sum(result.trips for result in results), sum(let_down(result) for result in results)
     @printf("%s with %d trucks: %d of %d riders let down (%.1f%%), %.0f s\n", policy, trucks, failed, total, 100 * failed / total, seconds)
 
-    night_of(day) = get(nights, day, Solution())
     mkpath(OUT)
     open(joinpath(OUT, "$(policy)_$(trucks).json"), "w") do io
-        JSON.print(io, Dict(
-            "policy" => policy, "trucks" => trucks,
-            "days" => [Dict(
-                "day" => string(result.day), "trips" => result.trips, "noBike" => result.no_bike, "noDock" => result.no_dock,
-                "expected" => round(night_of(result.day).expected_saved; digits = 1),
-                "gap" => round(night_of(result.day).gap; digits = 4), "seconds" => round(night_of(result.day).seconds; digits = 1),
-                "trucks" => [Dict("km" => round(plan.km; digits = 2), "minutes" => round(plan.minutes; digits = 1),
-                                  "stops" => [[stop.station - 1, stop.change, round(stop.done; digits = 1)] for stop in stops])
-                             for (plan, stops) in zip(result.plans, result.stops)],
-                "levels" => encode_levels(result.snapshots)) for result in results]))
+        JSON.print(io, Dict("policy" => policy, "trucks" => trucks, "days" => day_records(results, nights)))
     end
 end
 
@@ -90,14 +71,14 @@ function page()
     legs = Dict{String,Vector{Int}}()
     summary = []
     for run in runs
-        mapped = run["policy"] != "greedy"      # the page maps the optimized trucks only
+        mapped = run["policy"] in ("optimal", "none")      # the page maps the optimized trucks only
         for day in run["days"]
             mapped || delete!(day, "levels")
             for truck in day["trucks"]
                 mapped || (truck["stops"] = length(truck["stops"]); continue)
                 previous = home
                 for stop in vcat(truck["stops"], [[home - 1, 0, 0]])
-                    place = stop[1] + 1
+                    place = Int(stop[1]) + 1
                     previous == place || get!(() -> encode_route(route(roads, previous, place)), legs, "$(previous - 1)>$(place - 1)")
                     previous = place
                 end
@@ -121,6 +102,7 @@ function page()
         JSON.print(io, data)
         println(io, ";")
     end
+    cp(joinpath(ROOT, "report", "map", "oslo.js"), joinpath(target, "map.js"); force = true)
     @printf("%d runs, %d street legs, %.1f MB in %s\n", length(runs), length(legs), filesize(file) / 1e6, file)
 end
 
@@ -129,5 +111,5 @@ if length(ARGS) == 3 && ARGS[1] == "run"
 elseif ARGS == ["page"]
     page()
 else
-    error("usage: fleet_size.jl run <optimal|greedy|none> <trucks>   or   fleet_size.jl page")
+    error("usage: fleet_size.jl run <optimal|greedy|oracle|none> <trucks>   or   fleet_size.jl page")
 end
