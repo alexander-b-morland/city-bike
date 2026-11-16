@@ -254,8 +254,10 @@ kilometre driven.
 | Trucks 9 and 10, each | 4 | 854 kr |
 
 A single ride earns about 17 kr (8 kr to unlock and 1 kr a minute, for a typical
-9-minute ride). So on lost fares alone, **five trucks pay for themselves**, and a sixth
-only does if goodwill is worth another 27 kr per let-down rider.
+9-minute ride). That is a yardstick, not a measurement: a rider who finds no bike is a
+lost fare, while a rider who finds no dock has paid and is only annoyed. If a let-down
+rider costs about one fare on average, **five trucks pay for themselves**, and a sixth
+only does if a let-down rider costs more than twice that.
 
 ![Total cost a day](figures/cost.svg)
 

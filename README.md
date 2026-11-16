@@ -112,6 +112,7 @@ page and figure scripts collect what the pages and the report need into `report/
 | `julia --project=. scripts/day_shift.jl run 2 2 split` | 2 night trucks and 2 midday trucks | 20 min each |
 | `julia --project=. scripts/sensitivity.jl run capacity 30 4` | Change one assumption | 20 min each |
 | `julia --project=. scripts/fleet_size.jl page` | Collect the runs for the fleet-size page | 1 min |
+| `julia --project=. scripts/day_shift.jl page` | Collect the runs for the day-shift page | 1 min |
 | `julia --project=. scripts/figures.jl` | Draw the report's figures | 1 min |
 
 The replays are independent, so several can run at once.
