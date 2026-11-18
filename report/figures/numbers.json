@@ -2,58 +2,58 @@
   "cost": {
     "cheapest": 5,
     "greedyCheapest": 6,
-    "greedyTotal": 47935.0,
+    "greedyTotal": 46588.0,
     "steps": [
       {
-        "breakEven": 7.6,
+        "breakEven": 7.0,
         "from": 0,
         "sparedPerTruck": 417.0,
         "to": 1
       },
       {
-        "breakEven": 8.6,
+        "breakEven": 8.0,
         "from": 1,
         "sparedPerTruck": 370.0,
         "to": 2
       },
       {
-        "breakEven": 7.3,
+        "breakEven": 6.8,
         "from": 2,
         "sparedPerTruck": 430.0,
         "to": 3
       },
       {
-        "breakEven": 8.0,
+        "breakEven": 7.4,
         "from": 3,
         "sparedPerTruck": 394.0,
         "to": 4
       },
       {
-        "breakEven": 13.1,
+        "breakEven": 12.1,
         "from": 4,
         "sparedPerTruck": 240.0,
         "to": 5
       },
       {
-        "breakEven": 43.5,
+        "breakEven": 40.2,
         "from": 5,
         "sparedPerTruck": 72.0,
         "to": 6
       },
       {
-        "breakEven": 104.3,
+        "breakEven": 96.5,
         "from": 6,
         "sparedPerTruck": 30.0,
         "to": 8
       },
       {
-        "breakEven": 853.9,
+        "breakEven": 786.8,
         "from": 8,
         "sparedPerTruck": 4.0,
         "to": 10
       }
     ],
-    "total": 28044.0
+    "total": 26886.0
   },
   "curves": {
     "centreAtBest": 9.2,
@@ -392,5 +392,10 @@
   "solver": {
     "maxGap": 0.6452,
     "secondsPerNightPerTruck": 7.4
+  },
+  "truckShift": {
+    "day": 1966.0,
+    "night": 2753.0,
+    "perKm": 3.3000000000000003
   }
 }

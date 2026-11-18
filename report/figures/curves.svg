@@ -1,31 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">
-<rect width="760" height="400" fill="#ffffff"/>
-<text x="56" y="22" font-size="15" font-weight="600" fill="#0d0f12">What each station wants: riders let down by how the day starts</text>
-<text x="56" y="48" fill="#85857f">Riders let down that day</text>
-<line x1="56" x2="590" y1="348.0" y2="348.0" stroke="#c3c2b7"/>
-<text x="48" y="352.0" text-anchor="end" fill="#85857f">0</text>
-<line x1="56" x2="590" y1="290.0" y2="290.0" stroke="#e3e2db"/>
-<text x="48" y="294.0" text-anchor="end" fill="#85857f">10</text>
-<line x1="56" x2="590" y1="232.0" y2="232.0" stroke="#e3e2db"/>
-<text x="48" y="236.0" text-anchor="end" fill="#85857f">20</text>
-<line x1="56" x2="590" y1="174.0" y2="174.0" stroke="#e3e2db"/>
-<text x="48" y="178.0" text-anchor="end" fill="#85857f">30</text>
-<line x1="56" x2="590" y1="115.99999999999999" y2="115.99999999999999" stroke="#e3e2db"/>
-<text x="48" y="119.99999999999999" text-anchor="end" fill="#85857f">40</text>
-<line x1="56" x2="590" y1="58.0" y2="58.0" stroke="#e3e2db"/>
-<text x="48" y="62.0" text-anchor="end" fill="#85857f">50</text>
-<text x="56.0" y="368" text-anchor="middle" fill="#85857f">0</text>
-<text x="145.0" y="368" text-anchor="middle" fill="#85857f">5</text>
-<text x="234.0" y="368" text-anchor="middle" fill="#85857f">10</text>
-<text x="323.0" y="368" text-anchor="middle" fill="#85857f">15</text>
-<text x="412.0" y="368" text-anchor="middle" fill="#85857f">20</text>
-<text x="501.0" y="368" text-anchor="middle" fill="#85857f">25</text>
-<text x="590.0" y="368" text-anchor="middle" fill="#85857f">30</text>
-<text x="323.0" y="390" text-anchor="middle" fill="#85857f">Bikes at the station when the day starts (both have 30 docks)</text>
-<polyline points="56.0,223.6 73.8,229.3 91.6,235.0 109.4,240.3 127.2,245.7 145.0,251.1 162.8,256.4 180.6,261.6 198.4,266.9 216.2,272.2 234.0,277.3 251.8,282.4 269.6,287.5 287.4,292.4 305.2,297.3 323.0,301.9 340.8,306.2 358.6,310.2 376.4,314.0 394.2,317.6 412.0,320.9 429.8,324.0 447.6,326.8 465.4,329.0 483.2,330.8 501.0,332.5 518.8,334.1 536.6,335.5 554.4,336.7 572.2,337.2 590.0,335.5" fill="none" stroke="#e34948" stroke-width="2.2" stroke-linejoin="round" />
-<polyline points="56.0,294.9 73.8,291.7 91.6,287.3 109.4,282.7 127.2,278.0 145.0,273.0 162.8,268.1 180.6,263.0 198.4,257.8 216.2,252.6 234.0,247.2 251.8,241.8 269.6,236.3 287.4,230.6 305.2,224.9 323.0,219.2 340.8,213.5 358.6,207.9 376.4,202.2 394.2,196.4 412.0,190.6 429.8,184.8 447.6,179.0 465.4,173.2 483.2,167.4 501.0,161.6 518.8,155.8 536.6,150.0 554.4,144.2 572.2,138.4 590.0,132.6" fill="none" stroke="#2a78d6" stroke-width="2.2" stroke-linejoin="round" />
-<rect x="600" y="127.55636363636361" width="10" height="10" rx="2" fill="#2a78d6"/>
-<text x="616" y="136.5563636363636" fill="#50524f">Tøyenbekke</text>
-<rect x="600" y="330.4509090909091" width="10" height="10" rx="2" fill="#e34948"/>
-<text x="616" y="339.4509090909091" fill="#50524f">Stavangergata</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340" width="720" height="340" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12">
+<title>What each station wants: riders let down by how the day starts</title><rect width="720" height="340" fill="#ffffff"/>
+<text x="48" y="22" fill="#6f6f6f">Riders let down that day</text>
+<text x="40" y="298.0" text-anchor="end" fill="#6f6f6f">0</text>
+<line x1="48" x2="588" y1="242.0" y2="242.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="246.0" text-anchor="end" fill="#6f6f6f">10</text>
+<line x1="48" x2="588" y1="190.0" y2="190.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="194.0" text-anchor="end" fill="#6f6f6f">20</text>
+<line x1="48" x2="588" y1="138.0" y2="138.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="142.0" text-anchor="end" fill="#6f6f6f">30</text>
+<line x1="48" x2="588" y1="86.0" y2="86.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="90.0" text-anchor="end" fill="#6f6f6f">40</text>
+<line x1="48" x2="588" y1="34.0" y2="34.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="38.0" text-anchor="end" fill="#6f6f6f">50</text>
+<line x1="48" x2="588" y1="294.0" y2="294.0" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="48.0" x2="48.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="48.0" y="312.0" text-anchor="middle" fill="#6f6f6f">0</text>
+<line x1="138.0" x2="138.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="138.0" y="312.0" text-anchor="middle" fill="#6f6f6f">5</text>
+<line x1="228.0" x2="228.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="228.0" y="312.0" text-anchor="middle" fill="#6f6f6f">10</text>
+<line x1="318.0" x2="318.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="318.0" y="312.0" text-anchor="middle" fill="#6f6f6f">15</text>
+<line x1="408.0" x2="408.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="408.0" y="312.0" text-anchor="middle" fill="#6f6f6f">20</text>
+<line x1="498.0" x2="498.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="498.0" y="312.0" text-anchor="middle" fill="#6f6f6f">25</text>
+<line x1="588.0" x2="588.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="588.0" y="312.0" text-anchor="middle" fill="#6f6f6f">30</text>
+<text x="318.0" y="334" text-anchor="middle" fill="#6f6f6f">Bikes at the station when the day starts (both have 30 docks)</text>
+<polyline points="48.0,182.4 66.0,187.5 84.0,192.6 102.0,197.5 120.0,202.3 138.0,207.1 156.0,211.8 174.0,216.6 192.0,221.3 210.0,226.0 228.0,230.7 246.0,235.2 264.0,239.7 282.0,244.2 300.0,248.5 318.0,252.7 336.0,256.6 354.0,260.2 372.0,263.6 390.0,266.8 408.0,269.7 426.0,272.4 444.0,275.0 462.0,277.0 480.0,278.6 498.0,280.1 516.0,281.5 534.0,282.7 552.0,283.9 570.0,284.4 588.0,282.7" fill="none" stroke="#b5473c" stroke-width="1.6" stroke-linejoin="round" />
+<polyline points="48.0,246.3 66.0,243.5 84.0,239.5 102.0,235.5 120.0,231.2 138.0,226.8 156.0,222.3 174.0,217.8 192.0,213.2 210.0,208.4 228.0,203.6 246.0,198.8 264.0,193.9 282.0,188.8 300.0,183.7 318.0,178.6 336.0,173.5 354.0,168.3 372.0,163.2 390.0,158.0 408.0,152.8 426.0,147.6 444.0,142.4 462.0,137.2 480.0,132.0 498.0,126.8 516.0,121.6 534.0,116.4 552.0,111.2 570.0,106.0 588.0,100.8" fill="none" stroke="#2f6399" stroke-width="1.6" stroke-linejoin="round" />
+<text x="596" y="104.8" fill="#2f6399">Tøyenbekken</text>
+<text x="596" y="286.7" fill="#b5473c">Stavangergata</text>
 </svg>

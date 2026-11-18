@@ -2,28 +2,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oslo Truck Fleet</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 <style>
 /* Layout: one reading column. Answer first (chart), then the money, then the map to explore. */
 :root {
   --bg: #f7f7f4; --surface: #fdfdfc; --ink: #0d0f12; --ink2: #50524f; --muted: #85857f;
   --grid: #e3e2db; --axis: #c3c2b7; --border: rgba(13,15,18,.12);
-  --greedy: #eb6834; --optimal: #1baf7a; --trucks: #8f8e87;
+  --greedy: #8a8a8a; --optimal: #1f3a5f; --trucks: #c4c4c4;
   --empty: #e34948; --low: #f2b6b3; --mid: #a9a8a0; --high: #9cc2f0; --full: #2a78d6;
   --land: #f2f1ec; --landnight: #e4e6ea; --sea: #c9dcef; --park: #dbe8cf; --road1: #ffffff; --road2: #ffffff; --road3: #fbfaf7; --roadedge: #d6d4cb; --route: #14171c;
-  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --display: "Inter", "Segoe UI", system-ui, sans-serif;
   --body: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
   --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
-  --greedy: #d95926; --optimal: #199e70; --trucks: #6f6e68;
+  --greedy: #9a9a9a; --optimal: #8fb0d9; --trucks: #55554f;
   --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
   --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
   --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
-  --greedy: #d95926; --optimal: #199e70; --trucks: #6f6e68;
+  --greedy: #9a9a9a; --optimal: #8fb0d9; --trucks: #55554f;
   --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
   --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark }
 
@@ -32,25 +32,25 @@ body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body);
 .page { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
 section, header { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15; }
-h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.01em; }
-h2 { font-size: 24px; }
+h1 { font-size: clamp(28px, 4.4vw, 40px); letter-spacing: -.015em; }
+h2 { font-size: 21px; }
 p { margin: 0; max-width: 68ch; color: var(--ink2); }
 p strong, li strong { color: var(--ink); font-weight: 600; }
 .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
 .lede { font-size: 18px; color: var(--ink); }
 a { color: inherit; }
 
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; }
 .pad { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink2); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-.key { width: 10px; height: 10px; border-radius: 2px; flex: none; }
-.line { width: 18px; height: 3px; border-radius: 2px; flex: none; }
+.key { width: 10px; height: 10px; flex: none; }
+.line { width: 18px; height: 2px; flex: none; }
 .chart { position: relative; width: 100%; }
 .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 svg text { font-family: var(--body); font-size: 12px; fill: var(--muted); }
-.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 6px 10px; border-radius: 2px; white-space: nowrap; z-index: 2; }
 
 .sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px 28px; }
 .slider { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -69,14 +69,14 @@ th { font-weight: 500; color: var(--muted); font-size: 12px; white-space: normal
 tr.best td { font-weight: 600; }
 
 .bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 3px; cursor: pointer; }
 .btn:hover { border-color: var(--ink2); }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--full); outline-offset: 2px; }
 .pick { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink2); }
 .pick input { width: 150px; }
 .pick output { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); min-width: 78px; }
 .clock { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink2); }
+.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 2px; border: 1px solid var(--border); color: var(--ink2); }
 .mapwrap { position: relative; width: 100%; aspect-ratio: 1.5; max-width: 100%; }
 .mapwrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .scrub { padding: 10px 16px 4px; }
@@ -101,7 +101,7 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     <div class="legend">
       <span><i class="line" style="background:var(--optimal)"></i>Optimized trucks</span>
       <span><i class="line" style="background:var(--greedy)"></i>Rule-of-thumb trucks</span>
-      <span id="oracleKey" hidden><i class="line" style="background:repeating-linear-gradient(90deg,var(--ink2) 0 5px,transparent 5px 9px)"></i>Optimized trucks that know tomorrow's trips</span>
+      <span id="oracleKey" hidden><i class="line" style="background:repeating-linear-gradient(90deg,var(--optimal) 0 4px,transparent 4px 7px)"></i>Optimized trucks that know tomorrow's trips</span>
     </div>
     <p id="oracleText" hidden></p>
     <div class="chart" id="curve"><div class="tip" id="curveTip" hidden></div></div>
@@ -109,21 +109,24 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
 
   <section>
     <h2>What is it worth?</h2>
-    <p>A truck costs money every night. A let-down rider costs something too: a lost fare, and a customer who trusts the bikes a little less. Nobody knows that second number, so set it yourself and see which fleet is cheapest.</p>
+    <p>A truck costs money every night: mostly the driver, a little for driving. A let-down rider costs something too: a lost fare, and a customer who trusts the bikes a little less. Nobody knows that second number, so set it yourself and see which fleet is cheapest. The cost of the truck itself (lease and insurance) is left out.</p>
     <div class="card pad">
       <div class="sliders">
         <div class="slider"><label for="riderCost">One let-down rider costs <output id="riderCostOut"></output></label>
           <input type="range" id="riderCost" min="0" max="150" step="1" value="25"><small>A typical single ride earns about 17 kr.</small></div>
-        <div class="slider"><label for="truckCost">One truck for one night costs <output id="truckCostOut"></output></label>
-          <input type="range" id="truckCost" min="1000" max="6000" step="100" value="3000"><small>Driver for a night shift plus the van. Our estimate.</small></div>
+        <div class="slider"><label for="wage">Driver's hourly wage by day <output id="wageOut"></output></label>
+          <input type="range" id="wage" min="200" max="400" step="5" value="250"><small>The legal minimum for goods drivers is 244.50 kr.</small></div>
+        <div class="slider"><label for="night">Supplement for night work <output id="nightOut"></output></label>
+          <input type="range" id="night" min="0" max="100" step="5" value="40"><small>Comparable agreements pay a fixed sum or up to 40%.</small></div>
         <div class="slider"><label for="kmCost">Driving one km costs <output id="kmCostOut"></output></label>
           <input type="range" id="kmCost" min="0" max="12" step="0.5" value="3"><small>Fuel or electricity, tyres and wear.</small></div>
       </div>
+      <div class="tablewrap"><table id="breakdown"></table></div>
       <p class="verdict" id="verdict"></p>
       <div class="legend">
         <span><i class="key" style="background:var(--optimal)"></i>Let-down riders</span>
         <span><i class="key" style="background:var(--trucks)"></i>Trucks and driving</span>
-        <span><i class="dot" style="background:var(--greedy)"></i>Total with rule-of-thumb trucks</span>
+        <span><i class="dot" style="background:var(--surface);border:1.5px solid var(--ink2);box-sizing:border-box"></i>Total with rule-of-thumb trucks</span>
       </div>
       <div class="chart" id="cost"><div class="tip" id="costTip" hidden></div></div>
     </div>
@@ -158,7 +161,7 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
       <li>The fleet is 3,000 bikes and every run starts with all stations about half full on 17 August 2026.</li>
       <li>A rider who finds no bike gives up. A rider who finds no free dock rides on to the nearest station with room. Both count as let down.</li>
       <li>The planner learns from trips between 1 June and 16 August and never sees the day it plans for.</li>
-      <li>The costs are ours, not the operator's. A truck night of 3,000 kr assumes about 5.5 paid hours at 450 kr including employer costs and night supplement, plus about 500 kr for the van.</li>
+      <li>The costs are ours, not the operator's. A night shift is 5.5 paid hours: five on the road and half an hour at the base. The daytime wage of 250 kr is just above the legal minimum for goods drivers, 244.50 kr from November 2026. On top come 12% holiday pay, 14.1% employer's contribution and 2% pension, about 30% together, and 10% overhead. The price of the vehicle is not included.</li>
     </ul>
   </section>
 
@@ -213,11 +216,11 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     for (let k = 0; k <= maxK; k += maxK > 12 ? 2 : 1) el(svg, "text", { x: x(k), y: h - 24, "text-anchor": "middle" }, k);
     el(svg, "text", { x: (m.l + w - m.r) / 2, y: h - 4, "text-anchor": "middle" }, "Trucks working each night");
     const ends = [];
-    for (const [rows, color, name, dash] of [[GRE, "greedy", "Rule of thumb"], [ORA, "ink2", "Knowing tomorrow", "5 4"], [OPT, "optimal", "Optimized"]]) {
+    for (const [rows, color, name, dash] of [[GRE, "greedy", "Rule of thumb"], [ORA, "optimal", "Knowing tomorrow", "4 3"], [OPT, "optimal", "Optimized"]]) {
       if (!rows.length) continue;
-      el(svg, "polyline", { points: rows.map((r) => x(r.k) + "," + y(r.share)).join(" "), fill: "none", stroke: `var(--${color})`, "stroke-width": 2, "stroke-linejoin": "round", "stroke-dasharray": dash || "" });
-      for (const r of rows) el(svg, dash ? "rect" : "circle", dash ? { x: x(r.k) - 3.5, y: y(r.share) - 3.5, width: 7, height: 7, fill: `var(--${color})`, stroke: "var(--bg)", "stroke-width": 1.5 } : { cx: x(r.k), cy: y(r.share), r: 4, fill: `var(--${color})`, stroke: "var(--bg)", "stroke-width": 2 });
-      const last = rows[rows.length - 1]; ends.push({ name, x: x(last.k), y: y(last.share) });
+      el(svg, "polyline", { points: rows.map((r) => x(r.k) + "," + y(r.share)).join(" "), fill: "none", stroke: `var(--${color})`, "stroke-width": dash ? 1.2 : 1.6, "stroke-linejoin": "round", "stroke-dasharray": dash || "" });
+      if (!dash) for (const r of rows) el(svg, "circle", { cx: x(r.k), cy: y(r.share), r: 2.6, fill: `var(--${color})` });
+      const last = rows[rows.length - 1]; if (!dash) ends.push({ name, x: x(last.k), y: y(last.share) });
     }
     ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) if (Math.abs(ends[i].x - ends[i - 1].x) < 60) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 15);
     if (w >= 620) for (const e of ends) el(svg, "text", { x: e.x + 10, y: e.y + 4, style: "fill:var(--ink2)" }, e.name);
@@ -256,10 +259,24 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
   // ---------- costs
   const cost = (r, v) => ({ riders: r.perDay * v.rider, trucks: r.k * v.truck + r.km * v.km });
   const total = (r, v) => { const c = cost(r, v); return c.riders + c.trucks; };
-  const values = () => ({ rider: +$("riderCost").value, truck: +$("truckCost").value, km: +$("kmCost").value });
+  // One truck, one night: the driver's paid hours with the night supplement and social
+  // costs, plus driving, plus overhead on everything. The vehicle itself is left out.
+  const HOURS = 5.5, SOCIAL = 0.30, OVERHEAD = 0.10;
+  function values() {
+    const wage = +$("wage").value, night = +$("night").value / 100, perKm = +$("kmCost").value;
+    const pay = HOURS * wage * (1 + night), social = pay * SOCIAL;
+    return { rider: +$("riderCost").value, wage, night, perKm, pay, social, truck: (pay + social) * (1 + OVERHEAD), km: perKm * (1 + OVERHEAD) };
+  }
   function drawCost() {
     const v = values();
-    $("riderCostOut").textContent = kr(v.rider); $("truckCostOut").textContent = kr(v.truck); $("kmCostOut").textContent = v.km.toFixed(1) + " kr";
+    $("riderCostOut").textContent = kr(v.rider); $("wageOut").textContent = kr(v.wage); $("nightOut").textContent = Math.round(100 * v.night) + "%"; $("kmCostOut").textContent = v.perKm.toFixed(1) + " kr";
+    const oneKm = (OPT.find((r) => r.k === 1) || OPT[1]).km, driving = oneKm * v.perKm, overhead = (v.pay + v.social + driving) * OVERHEAD;
+    $("breakdown").innerHTML = `<thead><tr><th>One truck, one night</th><th>Kroner</th></tr></thead><tbody>` +
+      `<tr><td>Driver's pay: ${HOURS} hours at ${kr(v.wage * (1 + v.night))}</td><td>${fmt(v.pay)}</td></tr>` +
+      `<tr><td>Holiday pay, employer's contribution and pension (${Math.round(100 * SOCIAL)}%)</td><td>${fmt(v.social)}</td></tr>` +
+      `<tr><td>Driving: ${fmt(oneKm)} km at ${v.perKm.toFixed(1)} kr</td><td>${fmt(driving)}</td></tr>` +
+      `<tr><td>Overhead for planning and administration (${Math.round(100 * OVERHEAD)}%)</td><td>${fmt(overhead)}</td></tr>` +
+      `<tr class="best"><td>Total</td><td>${fmt(v.pay + v.social + driving + overhead)}</td></tr></tbody>`;
     const best = OPT.reduce((a, b) => total(b, v) < total(a, v) ? b : a), bestG = GRE.length ? GRE.reduce((a, b) => total(b, v) < total(a, v) ? b : a) : null;
     const edge = best === OPT[OPT.length - 1] ? ` More than ${best.k} trucks might be cheaper still; we did not test more.` : "";
     $("verdict").innerHTML = `Cheapest fleet: <b>${best.k} optimized truck${best.k === 1 ? "" : "s"}</b>, at ${kr(total(best, v))} a day in total.` + edge +
@@ -279,8 +296,8 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     OPT.forEach((r, i) => {
       const cx = m.l + band * (i + 0.5), c = cost(r, v), g = greedyAt(r.k);
       el(svg, "rect", { x: cx - bw / 2, y: y(c.trucks), width: bw, height: Math.max(0, y(0) - y(c.trucks)), fill: "var(--trucks)" });
-      el(svg, "rect", { x: cx - bw / 2, y: y(c.trucks + c.riders), width: bw, height: Math.max(0, y(c.trucks) - y(c.trucks + c.riders) - (c.trucks ? 2 : 0)), fill: "var(--optimal)", rx: 3 });
-      if (g && r.k) el(svg, "circle", { cx, cy: y(total(g, v)), r: 4.5, fill: "var(--greedy)", stroke: "var(--surface)", "stroke-width": 2 });
+      el(svg, "rect", { x: cx - bw / 2, y: y(c.trucks + c.riders), width: bw, height: Math.max(0, y(c.trucks) - y(c.trucks + c.riders) - (c.trucks ? 2 : 0)), fill: "var(--optimal)" });
+      if (g && r.k) el(svg, "circle", { cx, cy: y(total(g, v)), r: 4, fill: "var(--surface)", stroke: "var(--ink2)", "stroke-width": 1.5 });
       el(svg, "text", { x: cx, y: h - 24, "text-anchor": "middle", style: r === best ? "fill:var(--ink);font-weight:600" : "" }, r.k);
       if (r === best) el(svg, "text", { x: cx, y: y(c.trucks + c.riders) - 8, "text-anchor": "middle", style: "fill:var(--ink);font-weight:600" }, "Cheapest");
       const hit = el(svg, "rect", { x: cx - band / 2, y: m.t, width: band, height: h - m.t - m.b, fill: "transparent" });
@@ -299,9 +316,9 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     $("steps").innerHTML = `<thead><tr><th>Added truck</th><th>Riders let down a day with it</th><th>Share</th><th>Riders it spares a day</th><th>Pays for itself if a let-down rider costs more than</th></tr></thead>` +
       `<tbody><tr><td>No trucks</td><td>${fmt(OPT[0].perDay)}</td><td>${OPT[0].share.toFixed(1)}%</td><td>–</td><td>–</td></tr>${rows}</tbody>`;
     const one = OPT.find((r) => r.k === 1) || OPT[1], perTruckKm = one.km / Math.max(1, one.k);
-    $("fuelText").innerHTML = `Driving is a small part of the bill. A truck covers about <strong>${fmt(perTruckKm)} km</strong> a night, which costs ${kr(perTruckKm * v.km)} at ${v.km.toFixed(1)} kr per km, or ${(100 * perTruckKm * v.km / (v.truck + perTruckKm * v.km)).toFixed(0)}% of what the truck costs that night. The driver's time is what counts, so the model's job is to make every hour of the shift move as many useful bikes as possible.`;
+    $("fuelText").innerHTML = `Driving is a small part of the bill. A truck covers about <strong>${fmt(perTruckKm)} km</strong> a night, which costs ${kr(perTruckKm * v.perKm)} at ${v.perKm.toFixed(1)} kr per km, or ${(100 * perTruckKm * v.km / (v.truck + perTruckKm * v.km)).toFixed(0)}% of what the truck costs that night. The driver's time is what counts, so the model's job is to make every hour of the shift move as many useful bikes as possible.`;
   }
-  ["riderCost", "truckCost", "kmCost"].forEach((id) => $(id).addEventListener("input", drawCost));
+  ["riderCost", "wage", "night", "kmCost"].forEach((id) => $(id).addEventListener("input", drawCost));
 
   // ---------- map
   const MAPPED = OPT.filter((r) => r.run.days[0].levels);

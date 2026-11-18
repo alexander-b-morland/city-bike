@@ -2,26 +2,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oslo Night Truck</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 <style>
 /* Layout: one reading column; the map player is the widest thing on the page and sits high. */
 :root {
   --bg: #f7f7f4; --surface: #fdfdfc; --night: #e9edf3; --ink: #0d0f12; --ink2: #50524f; --muted: #85857f;
   --grid: #e3e2db; --axis: #c3c2b7; --border: rgba(13,15,18,.12);
-  --none: #85857f; --greedy: #eb6834; --optimal: #1baf7a;
+  --none: #b8b8b8; --greedy: #7a7a7a; --optimal: #1f3a5f;
   --empty: #e34948; --low: #f2b6b3; --mid: #c6c5bd; --high: #a8caf2; --full: #2a78d6;
-  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --display: "Inter", "Segoe UI", system-ui, sans-serif;
   --body: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0e0f10; --surface: #1a1b1b; --night: #11141b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
   --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
-  --none: #8d8c85; --greedy: #d95926; --optimal: #199e70;
+  --none: #5e5e5a; --greedy: #a3a3a3; --optimal: #8fb0d9;
   --empty: #e66767; --low: #7c3d3d; --mid: #4b4b47; --high: #2e4f7a; --full: #3987e5; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #0e0f10; --surface: #1a1b1b; --night: #11141b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
   --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
-  --none: #8d8c85; --greedy: #d95926; --optimal: #199e70;
+  --none: #5e5e5a; --greedy: #a3a3a3; --optimal: #8fb0d9;
   --empty: #e66767; --low: #7c3d3d; --mid: #4b4b47; --high: #2e4f7a; --full: #3987e5; color-scheme: dark }
 
 body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body);
@@ -29,8 +29,8 @@ body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body);
 .page { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
 section, header { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15; }
-h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.01em; }
-h2 { font-size: 24px; }
+h1 { font-size: clamp(28px, 4.4vw, 40px); letter-spacing: -.015em; }
+h2 { font-size: 21px; }
 h3 { font-size: 16px; font-weight: 500; }
 p { margin: 0; max-width: 68ch; color: var(--ink2); }
 p strong { color: var(--ink); font-weight: 600; }
@@ -38,26 +38,26 @@ p strong { color: var(--ink); font-weight: 600; }
 .lede { font-size: 18px; color: var(--ink); }
 
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
 .tile .who { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); }
 .tile .big { font-family: var(--display); font-size: 40px; font-weight: 600; line-height: 1.1; }
 .tile .sub { font-size: 13px; color: var(--muted); }
 .key { width: 10px; height: 10px; border-radius: 2px; flex: none; }
 
-.player { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.player { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
 .bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
 .seg button { border: 0; background: transparent; color: var(--ink2); font: 500 13px var(--body); padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 .seg button + button { border-left: 1px solid var(--border); }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
-.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.btn { border: 1px solid var(--border); background: transparent; color: var(--ink); font: 500 13px var(--body); padding: 8px 14px; border-radius: 3px; cursor: pointer; }
 .btn:hover, .seg button:hover { border-color: var(--ink2); }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--full); outline-offset: 2px; }
 .clock { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink2); }
+.chip { font: 500 12px var(--body); padding: 3px 8px; border-radius: 2px; border: 1px solid var(--border); color: var(--ink2); }
 .mapwrap { position: relative; width: 100%; aspect-ratio: 1.46; max-width: 100%; }
 .mapwrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 5px 9px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 5px 9px; border-radius: 2px; white-space: nowrap; z-index: 2; }
 .scrub { padding: 10px 16px 4px; }
 .scrub input { width: 100%; }
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 20px; padding: 6px 16px 14px; font-size: 13px; color: var(--ink2); }
@@ -68,7 +68,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--full); outl
 .line { width: 18px; height: 3px; border-radius: 2px; flex: none; }
 
 .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .panel small { color: var(--muted); font-size: 13px; }
 .panel small b { color: var(--ink); font-weight: 600; }
 .chart { position: relative; width: 100%; }
@@ -80,7 +80,7 @@ th, td { text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--gr
 th:first-child, td:first-child { text-align: left; }
 th { font-weight: 500; color: var(--muted); font-size: 12px; }
 ul { margin: 0; padding-left: 20px; color: var(--ink2); max-width: 68ch; display: flex; flex-direction: column; gap: 6px; }
-details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 12px 16px; }
 summary { cursor: pointer; font-weight: 500; }
 .math { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre; color: var(--ink); margin: 12px 0 0; }
 footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
@@ -386,8 +386,8 @@ Subject to  Σ_j x_ij = Σ_j x_ji = y_i                 one way in, one way out 
     for (let d = 0; d < DAYS; d += 7) el(svg, "text", { x: x(d), y: h - 8, "text-anchor": d ? "middle" : "start" }, dayName(d));
     const ends = [];
     for (const p of POLICIES) {
-      el(svg, "polyline", { points: D.days.map((_, d) => x(d) + "," + y(share(p, d))).join(" "), fill: "none", stroke: `var(--${p})`, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" });
-      el(svg, "circle", { cx: x(DAYS - 1), cy: y(share(p, DAYS - 1)), r: 4, fill: `var(--${p})`, stroke: "var(--bg)", "stroke-width": 2 });
+      el(svg, "polyline", { points: D.days.map((_, d) => x(d) + "," + y(share(p, d))).join(" "), fill: "none", stroke: `var(--${p})`, "stroke-width": 1.6, "stroke-linejoin": "round", "stroke-linecap": "round" });
+      el(svg, "circle", { cx: x(DAYS - 1), cy: y(share(p, DAYS - 1)), r: 2.6, fill: `var(--${p})` });
       ends.push({ p, y: y(share(p, DAYS - 1)) });
     }
     if (wide) { ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 15);

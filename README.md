@@ -31,11 +31,12 @@ Four weeks of real rides (161,183 of them) were replayed for each policy. A ride
 - **The first five trucks do almost all the work.** Each of the first four spares about
   400 riders a day. After five, more night trucks add little.
 - **Five trucks pay for themselves if a let-down rider costs about one fare.** A single
-  ride earns about 17 kr. Each of the first four trucks pays for itself at 9 kr per
-  let-down rider and the fifth at 13 kr, with a truck night at 3,000 kr (our estimate).
+  ride earns about 17 kr. Each of the first four trucks pays for itself at 8 kr per
+  let-down rider and the fifth at 12 kr. A night shift costs about 2,900 kr, built up
+  from the legal minimum wage, a night supplement, social costs and overhead.
 - **Some trucks should work at midday.** Night trucks alone did not get below 6%, even
   with ten. Six trucks split three and three between night and midday reach 5.7%, and
-  eight split four and four reach 4.8%.
+  cost less, because a midday shift carries no night supplement.
 - **Fuel hardly matters.** A truck drives about 50 km a night, around 5% of what it costs.
   The driver's time is what counts.
 
@@ -114,6 +115,8 @@ page and figure scripts collect what the pages and the report need into `report/
 | `julia --project=. scripts/sensitivity.jl run capacity 30 4` | Change one assumption | 20 min each |
 | `julia --project=. scripts/fleet_size.jl page` | Collect the runs for the fleet-size page | 1 min |
 | `julia --project=. scripts/day_shift.jl page` | Collect the runs for the day-shift page | 1 min |
+| `julia --project=. scripts/foresight_check.jl 4` | Compare planning from history with knowing tomorrow, night by night | 30 min |
+| `julia --project=. scripts/solver_study.jl 4 60` | Replay with 60 seconds of solver time per truck | 2 hours |
 | `julia --project=. scripts/figures.jl` | Draw the report's figures | 1 min |
 
 The replays are independent, so several can run at once.

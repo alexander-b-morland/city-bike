@@ -50,8 +50,10 @@ Gurobi needs a licence file on the machine; it is never committed.
 
 Assumptions that are not from data: fleet of 3,000 bikes spread evenly at the start,
 truck of 20 bikes, 3 minutes per stop, half a minute per bike, driving at 70% of the
-speed limit, no daytime rebalancing unless a midday shift is modelled, truck night of
-3,000 kr and 3 kr per km.
+speed limit, no daytime rebalancing unless a midday shift is modelled. Costs: a shift is
+5.5 paid hours at 250 kr (legal minimum for goods drivers is 244.50 kr from 6 November
+2026), 40% more at night, 30% social costs, 3 kr per km and 10% overhead; the vehicle
+itself is left out. That gives about 2,900 kr for a night shift and 2,100 kr by day.
 
 Things learned the hard way:
 
@@ -63,6 +65,14 @@ Things learned the hard way:
 - On this Windows machine a single shell command longer than about 8,000 characters is
   cut off. Write long files with the editor tools, not with a heredoc.
 - The laptop sleeps when the lid is closed; long runs stop until it wakes.
+
+## How results should look
+
+The user wants figures, pages and the report to look professional and minimal, not
+generated: one typeface, navy and grey, thin lines, small plain markers, square bars and
+corners, no titles drawn inside charts (use numbered captions in the text), and few bold
+lead-ins in prose. Formulas go in display equations outside tables, because inline maths
+in tables did not render in the user's viewer.
 
 ## Layout
 
