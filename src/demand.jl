@@ -22,18 +22,22 @@ end
 """
 The time-ordered pickup and return events at every station on every service day in
 `days`. `events[station][k]` holds the events of `days[k]`. Only events from `from` to
-`until` minutes after the service day starts are kept.
+`until` minutes after the service day starts are kept. `until` may be more than 1440, so
+that the events run on into the following days.
 """
 function station_events(trips::Vector{Trip}, n_stations::Integer, days::Vector{Date};
                         from::Real = 0, until::Real = 1440)
     slot = Dict(day => index for (index, day) in enumerate(days))
     timed = [[Tuple{DateTime,Int8}[] for _ in days] for _ in 1:n_stations]
     function record!(station, time, change)
-        day = service_day(time)
-        k = get(slot, day, 0)
-        k > 0 || return
-        minute = (time - (DateTime(day) + DAY_START)) / Millisecond(60_000)
-        from <= minute < until && push!(timed[station][k], (time, Int8(change)))
+        latest = service_day(time)
+        for back in 0:ceil(Int, until / 1440) - 1
+            day = latest - Day(back)
+            k = get(slot, day, 0)
+            k > 0 || continue
+            minute = (time - (DateTime(day) + DAY_START)) / Millisecond(60_000)
+            from <= minute < until && push!(timed[station][k], (time, Int8(change)))
+        end
     end
     for trip in trips
         record!(trip.from, trip.start, -1)
@@ -46,7 +50,8 @@ end
 For every station, the average number of riders let down per day for each possible
 starting level. `curves[station][b + 1]` is the average when the station holds `b` bikes
 `from` minutes into the service day and nobody rebalances it before `until`, taken over
-the given `days` of history.
+the given `days` of history. With `until = 2880` the curve covers the day and the day
+after it, counted from each of the `days`.
 """
 function failure_curves(trips::Vector{Trip}, stations::Vector{Station}, days::Vector{Date};
                         from::Real = 0, until::Real = 1440)

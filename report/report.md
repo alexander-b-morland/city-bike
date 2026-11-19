@@ -20,7 +20,10 @@ bike to take or no free dock to park in.
 3. Five night trucks do almost all that night work can do (8.5%). Ten reach 6.1%.
 4. Moving some trucks to a midday shift does better and costs less. Three night trucks
    and three midday trucks reach 5.7%, and are the cheapest fleet we found.
-5. A night truck shift costs about 2,900 kr, nearly all of it the driver. Each of the
+5. Plans that look two days ahead instead of one do better with the same trucks: four
+   night trucks let down 9.9% of riders instead of 12.4%, and 8.9% when they look a week
+   ahead.
+6. A night truck shift costs about 2,900 kr, nearly all of it the driver. Each of the
    first four trucks pays for itself if a let-down rider costs 8 kr or more.
 
 Interactive versions of the results, with an animated map, are in
@@ -109,7 +112,8 @@ day, and full it lets down 37.
 Each curve is convex: every extra bike helps a little less than the one before, until it
 starts to hurt. We checked this for all 261 stations. It keeps the model below linear.
 And because the curves are averages over many past days, minimising their sum minimises
-the expected number of riders let down the next day.
+the expected number of riders let down the next day. Section 4.5 extends the curves to
+cover several days.
 
 ### 3.2 The model for one truck
 
@@ -355,20 +359,89 @@ them.
 So the result is not a paradox. It shows that the planner is short-sighted, and the plan
 from history has the same weakness in a milder form. On an average night the first truck
 expects to spare 217 riders the next day. In the replay it spares 417 a day, because each
-night's work carries over to the following days. A plan that looked two days ahead should
-gain from this.
+night's work carries over to the following days. Section 4.5 tests plans that look
+further ahead.
 
-### 4.5 Sensitivity
+### 4.5 Looking further ahead
+
+Section 4.4 showed that the planner is short-sighted, so we changed what a station's
+curve counts. In place of the riders a station lets down the coming day, the curve counts
+the riders it lets down over the coming two days, or the coming week, if no truck comes
+back to it. It is learned the same way: every run of consecutive days in the training
+period is replayed at the station alone, once for each starting level. Days are grouped
+by which of them are weekdays, so the two-day curve for a Friday night is learned from
+Fridays and the Saturdays after them. The longer curves are still convex, so the model
+is unchanged. Only the curves it is given differ.
+
+The longer curves change the value of a bike where a station drains slowly.
+Tøyenbekken fills within a day whatever its starting level, so its second day adds about
+the same number of let-down riders at every level and the plan does not change. At
+Stavangergata the one-day curve flattens above 20 bikes: the 25th bike spares 0.3 riders
+the coming day. Over two days it spares 0.9, because the station needs it on the second
+morning.
+
+![Riders let down by how far ahead the plans look](figures/look_ahead.svg)
+
+*Figure 7. Share of riders let down over four weeks, by the number of night trucks, for
+plans that look one day, two days and a week ahead.*
+
+*Table 7. Share of riders let down, by how far ahead the plans look.*
+
+| Trucks each night | One day | Two days | A week |
+|---:|---:|---:|---:|
+| 1 | 33.3% | 33.6% | 34.0% |
+| 2 | 26.8% | 25.8% | 26.0% |
+| 3 | 19.2% | 17.1% | 16.0% |
+| 4 | 12.4% | 9.9% | 8.9% |
+| 5 | 8.5% | 6.9% | 6.8% |
+| 6 | 7.0% | 6.2% | 6.5% |
+| 8 | 6.2% | 6.1% | 6.7% |
+
+With three to five trucks, looking ahead is worth a great deal. Four trucks let down
+12.4% of riders when they look one day ahead, 9.9% with two days and 8.9% with a week.
+That is 28% fewer riders let down with the same trucks, drivers and hours, and four
+trucks that look a week ahead do nearly as well as five that look one day ahead (8.5%).
+Most of the gain comes from the second day. With four trucks we also tried three days
+(9.2%) and two weeks (8.8%).
+
+Looking ahead does not help at the two ends. With one truck all three columns are within
+one point, and the longer horizons are slightly worse. We have not tested why. With
+eight trucks a week ahead is worse than one day, 6.7% against 6.2%. The longer curve
+assumes that no truck comes back to the station. With eight trucks that is far from
+true: the trucks return every night and have time to spare, so what matters is tomorrow,
+and a plan that gives up some of tomorrow for the days after loses.
+
+A weight on the later days sits between the two. With the week-long curve and the days
+after the first counted at half weight, four trucks let down 9.0% and eight trucks 6.3%.
+That keeps nearly all of the gain with four trucks and removes most of the loss with
+eight. We ran only these two cases.
+
+Two days ahead is the safe choice. It is never more than 0.4 points worse than one day
+and up to 2.4 points better. A week is best with three and four trucks.
+
+The one-day column differs a little from Table 3 because of how the solver is stopped.
+In Table 3 it may stop before the 10 seconds are up, once its plan is proven to be
+within 2% of the best, measured on the riders let down at the stations it considers.
+Longer curves are higher, which makes that test looser the further ahead the plan looks.
+For this comparison the test is switched off in all three columns.
+
+Three cautions. We chose nothing in advance, so Table 7 reports every horizon we ran, and
+picking the best one from it is a choice made on the test weeks. The two-day curves that
+start on a Friday, Saturday or Sunday, and all the week-long curves, are learned from
+only 10 or 11 runs of days each. And the shift, sensitivity and rule-of-thumb results in
+this report still use plans that look one day ahead.
+
+### 4.6 Sensitivity
 
 We changed one assumption at a time and replayed the four weeks with four optimized night
 trucks.
 
 ![Sensitivity of the result to the assumptions](figures/sensitivity.svg)
 
-*Figure 7. Share of riders let down with four optimized night trucks when one assumption
+*Figure 8. Share of riders let down with four optimized night trucks when one assumption
 is changed.*
 
-*Table 7. Sensitivity to the assumptions, four optimized night trucks.*
+*Table 8. Sensitivity to the assumptions, four optimized night trucks.*
 
 | Assumption changed | Riders let down |
 |---|---:|
@@ -401,18 +474,24 @@ These runs change the size of the numbers, so the fleet sizes and break-even pri
 this report are estimates for the base case. We did not rerun the rule of thumb under
 each change.
 
-### 4.6 Solver time
+### 4.7 Solver time
 
 The solver is stopped after 10 seconds per truck. On a typical night the worst truck's
 plan was then proven to be within about 6% of the best possible. On the worst night the
 proof was far weaker, 65%, which says the solver's bound was poor that night and not
 necessarily the plan.
 
-To see what the limit costs, we replayed the one-truck case with 60 seconds per truck and
-a tighter target. The plans were then proven to within 1% on a typical night, and the
-share of riders let down went from 33.4% to 33.3% (53,909 riders to 53,628). Six times
-the solver time bought half a percent fewer riders let down. We have run this check for
-one truck.
+To see what the limit costs, we replayed two cases with 60 seconds per truck and a tighter
+target. With one truck the plans were then proven to within 1% on a typical night, and
+the share of riders let down went from 33.4% to 33.3% (53,909 riders to 53,628). With
+four trucks the proof went from 6% to 3% on a typical night, and the share let down from
+12.7% to 12.0% (20,467 riders to 19,368), at about four minutes of solving per night
+instead of 40 seconds.
+
+So the short limit costs almost nothing with one truck and about 5% of the let-down
+riders with four. That is small beside the step from four trucks to five (12.7% to
+8.5%), but a real operator has the whole evening to plan and should let the solver run.
+The long runs shared the machine with other runs, so the comparison is approximate.
 
 ## 5. Costs
 
@@ -430,7 +509,7 @@ fixed sum per hour or up to 40% of the wage. We use 40%. On top of pay come holi
 base. We add 3 kr per kilometre for energy, tyres and wear, and 10% overhead for planning
 and administration.
 
-*Table 8. Cost of one truck shift, in kroner.*
+*Table 9. Cost of one truck shift, in kroner.*
 
 | | Night shift | Midday shift |
 |---|---:|---:|
@@ -456,7 +535,7 @@ and is only annoyed. It understates it in another: a rider let down often enough
 using the system. We therefore turn the question around and ask how much a let-down rider
 must cost before a truck pays for itself.
 
-*Table 9. What each added night truck achieves, and the cost per let-down rider at which
+*Table 10. What each added night truck achieves, and the cost per let-down rider at which
 it pays for itself.*
 
 | Added truck | Riders it spares a day | Pays for itself if a let-down rider costs more than |
@@ -477,7 +556,7 @@ The first four trucks pay for themselves if a let-down rider costs 8 kr, the fif
 
 ![Total cost a day](figures/cost.svg)
 
-*Figure 8. Total cost a day, trucks plus let-down riders at 25 kr each, by the number of
+*Figure 9. Total cost a day, trucks plus let-down riders at 25 kr each, by the number of
 optimized night trucks.*
 
 At 25 kr per let-down rider, which is one fare plus a little for goodwill, five optimized
@@ -485,10 +564,17 @@ night trucks are the cheapest night-only fleet, at about 26,900 kr a day. Runnin
 trucks costs 58,500 kr a day in let-down riders. The best the rule of thumb can do is six
 trucks at 46,600 kr a day.
 
-Splitting the trucks between night and midday is cheaper still, because a midday shift
-costs about 800 kr less and the split lets down fewer riders.
+Plans that look further ahead (section 4.5) lower this without adding a truck. Five
+night trucks that look two days ahead cost about 24,500 kr a day in total, and so do
+four that look a week ahead. That is 2,300 kr a day less than the best fleet that looks
+one day ahead.
 
-*Table 10. Cost a day at 25 kr per let-down rider, for six trucks.*
+Splitting the trucks between night and midday is also cheaper, because a midday shift
+costs about 800 kr less and the split lets down fewer riders. Table 11 uses plans that
+look one day ahead. We have not yet combined the split with plans that look further
+ahead.
+
+*Table 11. Cost a day at 25 kr per let-down rider, for six trucks.*
 
 | Trucks | Riders let down a day | Trucks, kr a day | Let-down riders, kr a day | Total, kr a day |
 |---|---:|---:|---:|---:|
@@ -526,15 +612,16 @@ Stations are judged one at a time. A station's curve assumes its riders arrive a
 did in history. In the replay, a rider let down at one station changes what happens at
 the next. The replay captures this; the planner does not.
 
-Each plan looks one day ahead. It gives no value to where the bikes are left for the day
-after, and section 4.4 shows that this matters.
+Outside section 4.5, each plan looks one day ahead and gives no value to where the bikes
+are left for the day after. The longer curves of section 4.5 go to the other extreme and
+assume that no truck returns. The truth lies between, and depends on the fleet.
 
 Only some stations are considered. A station can give bikes only if losing them helps the
 station itself, and the model looks at the 15 best givers and the 15 best receivers. A
 station that could give bikes at no cost to itself is left out. This matters most when
 bikes are scarce.
 
-The solver is stopped early (section 4.6), and because the limit is in seconds, a rerun
+The solver is stopped early (section 4.7), and because the limit is in seconds, a rerun
 gives slightly different plans and numbers. One configuration happened to run twice, four
 midday trucks, and gave 24,150 and 24,101 riders let down.
 
@@ -551,7 +638,9 @@ The costs are our estimates, not the operator's.
 
 - Plan through the day: let each truck's shift start at any hour, with pay that depends
   on the hour, and choose the shift times as well as the routes.
-- Plan two days ahead, so that tonight's plan weighs where it leaves the system.
+- Repeat the shift and sensitivity experiments with plans that look two days ahead.
+- Value the later days by what tomorrow's trucks can be expected to repair, instead of
+  assuming that none come.
 - Renew the plan at every stop, as the operator does, instead of once per shift.
 - Add e-bike batteries, so that truck time is shared between moving bikes and swapping
   batteries.
@@ -560,7 +649,7 @@ The costs are our estimates, not the operator's.
 
 ## Appendix. Assumptions
 
-*Table 11. Assumptions that do not come from the data.*
+*Table 12. Assumptions that do not come from the data.*
 
 | Assumption | Value | Basis |
 |---|---|---|

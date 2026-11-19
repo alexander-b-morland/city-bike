@@ -1,15 +1,23 @@
 # Shared set-up for the replay experiments in scripts/.
 
 """
-The stations, the trips, and the demand curves learned from the training period. There
-is one set of curves per planning window, for weekdays and for weekends.
+The stations, the trips, and the demand curves learned from the training period. The
+curves look `horizon` days ahead. `curves[pattern][window]` holds the curves for one
+planning window and for days with the same pattern of weekdays and weekend days ahead of
+them (see `day_pattern`).
 """
 struct Case
     stations::Vector{Station}
     trips::Vector{Trip}
-    weekday_curves::Vector{Vector{Vector{Float64}}}
-    weekend_curves::Vector{Vector{Vector{Float64}}}
+    horizon::Int
+    curves::Dict{Vector{Bool},Vector{Vector{Vector{Float64}}}}
 end
+
+"""
+Which of the `horizon` days from `day` on are weekdays. With a horizon of two days a
+Friday is `[true, false]`: a weekday followed by a weekend day.
+"""
+day_pattern(day::Date, horizon::Integer) = [is_weekday(day + Day(ahead)) for ahead in 0:horizon - 1]
 
 """
 Load the Oslo data under `root` and learn the demand curves from the `training` days.
@@ -17,20 +25,34 @@ The trips cover both the training days and the `replay` days that follow them.
 
 `windows` lists the stretches of the service day, as (from, until) minutes after 01:00,
 that plans are made for. The default is one plan for the whole day.
+
+With `horizon` above 1, a window that runs to the end of the day runs on through the
+following days, `horizon` days in all, as if no truck came in between. `later` is the
+weight on the riders let down after the first day, from 0 (ignore them) to 1 (count them
+in full).
 """
-function load_case(root::AbstractString, training, replay; windows = [(0, 1440)])
+function load_case(root::AbstractString, training, replay; windows = [(0, 1440)], horizon::Integer = 1, later::Real = 1.0)
+    0 <= later <= 1 || error("the weight on later days must be between 0 and 1")
     stations = load_stations(joinpath(root, "data", "raw", "oslo", "gbfs", "station_information.json"))
     trips = load_trips(joinpath(root, "data", "raw", "oslo", "trips"), stations, first(training), last(replay))
-    learn(days) = [failure_curves(trips, stations, days; from, until) for (from, until) in windows]
-    weekday, weekend = learn(filter(is_weekday, collect(training))), learn(filter(!is_weekday, collect(training)))
-    all(is_convex, Iterators.flatten(weekday)) && all(is_convex, Iterators.flatten(weekend)) ||
-        error("a demand curve is not convex")
-    return Case(stations, trips, weekday, weekend)
+    # A curve that starts on one of the last training days would run into the replay.
+    starts = collect(training)[1:end - (horizon - 1)]
+    curves = Dict{Vector{Bool},Vector{Vector{Vector{Float64}}}}()
+    for pattern in unique(day_pattern.(starts, horizon))
+        days = filter(day -> day_pattern(day, horizon) == pattern, starts)
+        curves[pattern] = map(windows) do (from, until)
+            first_day = failure_curves(trips, stations, days; from, until)
+            (horizon == 1 || until < 1440) && return first_day
+            all_days = failure_curves(trips, stations, days; from, until = 1440 * horizon)
+            return [(1 - later) .* near .+ later .* far for (near, far) in zip(first_day, all_days)]
+        end
+    end
+    all(is_convex, Iterators.flatten(Iterators.flatten(values(curves)))) || error("a demand curve is not convex")
+    return Case(stations, trips, horizon, curves)
 end
 
-"The curves that describe `day` (weekday or weekend) for the given planning window."
-curves_for(case::Case, day::Date, window::Integer = 1) =
-    (is_weekday(day) ? case.weekday_curves : case.weekend_curves)[window]
+"The curves that describe `day` and the days the case looks ahead, for the given planning window."
+curves_for(case::Case, day::Date, window::Integer = 1) = case.curves[day_pattern(day, case.horizon)][window]
 
 "Spread `fleet` bikes over the stations in proportion to their docks."
 function even_start(stations::Vector{Station}, fleet::Integer)

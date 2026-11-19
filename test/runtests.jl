@@ -31,6 +31,12 @@ end
     # The rides leave between 08:00 and 08:10, that is 420 to 430 minutes after 01:00.
     @test failure_curves(trips, stations, [day]; until = 420)[1] == zeros(11)
     @test failure_curves(trips, stations, [day]; from = 424)[1][1] == 4
+    # The same six rides again the next morning: over two days the station wants twelve bikes.
+    both = vcat(trips, [Trip(1, 2, trip.start + Day(1), trip.stop + Day(1)) for trip in trips])
+    @test failure_curves(both, stations, [day])[1] == curves[1]
+    @test failure_curves(both, stations, [day]; until = 2880)[1] == 12:-1:2
+    @test failure_curves(both, stations, [day]; until = 2880)[2] == 2:12
+    @test failure_curves(both, stations, [day, day + Day(1)]; until = 2880)[1] == (collect(12:-1:2) .+ curves[1]) ./ 2
     @test !is_convex([0.0, 1.0, 1.0, 3.0, 3.0])
     @test convex_envelope([3.0, 0.0, 2.0, 0.0, 3.0]) == [3.0, 0.0, 0.0, 0.0, 3.0]
 end

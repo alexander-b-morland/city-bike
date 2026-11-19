@@ -244,6 +244,365 @@
     "weekday": 342.3,
     "weekend": 156.7
   },
+  "lookAhead": [
+    {
+      "horizon": 1,
+      "kmPerNight": 49.2,
+      "movedPerNight": 139.0,
+      "perDay": 1914.0,
+      "share": 33.3,
+      "total": 50770.0,
+      "trucks": 1
+    },
+    {
+      "horizon": 1,
+      "kmPerNight": 106.3,
+      "movedPerNight": 261.0,
+      "perDay": 1542.0,
+      "share": 26.8,
+      "total": 44418.0,
+      "trucks": 2
+    },
+    {
+      "horizon": 1,
+      "kmPerNight": 161.1,
+      "movedPerNight": 371.0,
+      "perDay": 1104.0,
+      "share": 19.2,
+      "total": 36386.0,
+      "trucks": 3
+    },
+    {
+      "horizon": 1,
+      "kmPerNight": 211.9,
+      "movedPerNight": 470.0,
+      "perDay": 711.0,
+      "share": 12.4,
+      "total": 29484.0,
+      "trucks": 4
+    },
+    {
+      "horizon": 1,
+      "kmPerNight": 261.4,
+      "movedPerNight": 546.0,
+      "perDay": 489.0,
+      "share": 8.5,
+      "total": 26846.0,
+      "trucks": 5
+    },
+    {
+      "horizon": 1,
+      "kmPerNight": 301.9,
+      "movedPerNight": 602.0,
+      "perDay": 402.0,
+      "share": 7.0,
+      "total": 27552.0,
+      "trucks": 6
+    },
+    {
+      "horizon": 1,
+      "kmPerNight": 367.9,
+      "movedPerNight": 667.0,
+      "perDay": 356.0,
+      "share": 6.2,
+      "total": 32142.0,
+      "trucks": 8
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 47.5,
+      "movedPerNight": 152.0,
+      "perDay": 1934.0,
+      "share": 33.6,
+      "total": 51260.0,
+      "trucks": 1
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 106.5,
+      "movedPerNight": 281.0,
+      "perDay": 1484.0,
+      "share": 25.8,
+      "total": 42946.0,
+      "trucks": 2
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 163.5,
+      "movedPerNight": 399.0,
+      "perDay": 987.0,
+      "share": 17.1,
+      "total": 33474.0,
+      "trucks": 3
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 215.1,
+      "movedPerNight": 496.0,
+      "perDay": 573.0,
+      "share": 9.9,
+      "total": 26035.0,
+      "trucks": 4
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 264.0,
+      "movedPerNight": 570.0,
+      "perDay": 395.0,
+      "share": 6.9,
+      "total": 24513.0,
+      "trucks": 5
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 304.3,
+      "movedPerNight": 627.0,
+      "perDay": 359.0,
+      "share": 6.2,
+      "total": 26506.0,
+      "trucks": 6
+    },
+    {
+      "horizon": 2,
+      "kmPerNight": 379.4,
+      "movedPerNight": 695.0,
+      "perDay": 349.0,
+      "share": 6.1,
+      "total": 32007.0,
+      "trucks": 8
+    },
+    {
+      "horizon": 3,
+      "kmPerNight": 218.1,
+      "movedPerNight": 503.0,
+      "perDay": 530.0,
+      "share": 9.2,
+      "total": 24991.0,
+      "trucks": 4
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 50.0,
+      "movedPerNight": 148.0,
+      "perDay": 1956.0,
+      "share": 34.0,
+      "total": 51829.0,
+      "trucks": 1
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 105.5,
+      "movedPerNight": 286.0,
+      "perDay": 1495.0,
+      "share": 26.0,
+      "total": 43232.0,
+      "trucks": 2
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 165.3,
+      "movedPerNight": 411.0,
+      "perDay": 921.0,
+      "share": 16.0,
+      "total": 31839.0,
+      "trucks": 3
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 219.5,
+      "movedPerNight": 506.0,
+      "perDay": 511.0,
+      "share": 8.9,
+      "total": 24521.0,
+      "trucks": 4
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 263.4,
+      "movedPerNight": 578.0,
+      "perDay": 394.0,
+      "share": 6.8,
+      "total": 24487.0,
+      "trucks": 5
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 305.6,
+      "movedPerNight": 630.0,
+      "perDay": 376.0,
+      "share": 6.5,
+      "total": 26914.0,
+      "trucks": 6
+    },
+    {
+      "horizon": 7,
+      "kmPerNight": 385.6,
+      "movedPerNight": 697.0,
+      "perDay": 384.0,
+      "share": 6.7,
+      "total": 32905.0,
+      "trucks": 8
+    },
+    {
+      "horizon": 14,
+      "kmPerNight": 218.4,
+      "movedPerNight": 509.0,
+      "perDay": 507.0,
+      "share": 8.8,
+      "total": 24401.0,
+      "trucks": 4
+    }
+  ],
+  "lookAheadSteps": {
+    "1": [
+      {
+        "breakEven": 6.8,
+        "from": 0,
+        "sparedPerTruck": 428.0,
+        "to": 1
+      },
+      {
+        "breakEven": 7.9,
+        "from": 1,
+        "sparedPerTruck": 372.0,
+        "to": 2
+      },
+      {
+        "breakEven": 6.7,
+        "from": 2,
+        "sparedPerTruck": 439.0,
+        "to": 3
+      },
+      {
+        "breakEven": 7.4,
+        "from": 3,
+        "sparedPerTruck": 393.0,
+        "to": 4
+      },
+      {
+        "breakEven": 13.1,
+        "from": 4,
+        "sparedPerTruck": 222.0,
+        "to": 5
+      },
+      {
+        "breakEven": 33.1,
+        "from": 5,
+        "sparedPerTruck": 87.0,
+        "to": 6
+      },
+      {
+        "breakEven": 126.3,
+        "from": 6,
+        "sparedPerTruck": 23.0,
+        "to": 8
+      }
+    ],
+    "14": [
+      {
+        "breakEven": 6.4,
+        "from": 0,
+        "sparedPerTruck": 459.0,
+        "to": 4
+      }
+    ],
+    "2": [
+      {
+        "breakEven": 7.1,
+        "from": 0,
+        "sparedPerTruck": 408.0,
+        "to": 1
+      },
+      {
+        "breakEven": 6.5,
+        "from": 1,
+        "sparedPerTruck": 450.0,
+        "to": 2
+      },
+      {
+        "breakEven": 5.9,
+        "from": 2,
+        "sparedPerTruck": 497.0,
+        "to": 3
+      },
+      {
+        "breakEven": 7.1,
+        "from": 3,
+        "sparedPerTruck": 414.0,
+        "to": 4
+      },
+      {
+        "breakEven": 16.4,
+        "from": 4,
+        "sparedPerTruck": 177.0,
+        "to": 5
+      },
+      {
+        "breakEven": 80.8,
+        "from": 5,
+        "sparedPerTruck": 36.0,
+        "to": 6
+      },
+      {
+        "breakEven": 569.2,
+        "from": 6,
+        "sparedPerTruck": 5.0,
+        "to": 8
+      }
+    ],
+    "3": [
+      {
+        "breakEven": 6.5,
+        "from": 0,
+        "sparedPerTruck": 453.0,
+        "to": 4
+      }
+    ],
+    "7": [
+      {
+        "breakEven": 7.6,
+        "from": 0,
+        "sparedPerTruck": 386.0,
+        "to": 1
+      },
+      {
+        "breakEven": 6.4,
+        "from": 1,
+        "sparedPerTruck": 461.0,
+        "to": 2
+      },
+      {
+        "breakEven": 5.1,
+        "from": 2,
+        "sparedPerTruck": 574.0,
+        "to": 3
+      },
+      {
+        "breakEven": 7.2,
+        "from": 3,
+        "sparedPerTruck": 410.0,
+        "to": 4
+      },
+      {
+        "breakEven": 24.7,
+        "from": 4,
+        "sparedPerTruck": 117.0,
+        "to": 5
+      },
+      {
+        "breakEven": 155.4,
+        "from": 5,
+        "sparedPerTruck": 19.0,
+        "to": 6
+      },
+      {
+        "breakEven": -651.4,
+        "from": 6,
+        "sparedPerTruck": -4.0,
+        "to": 8
+      }
+    ]
+  },
   "sensitivity": [
     {
       "parameter": "base",

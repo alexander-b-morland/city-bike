@@ -26,7 +26,8 @@ Gurobi needs a licence file on the machine; it is never committed.
   down over a day as a function of the bikes it holds when the day starts, learned by
   replaying historical days at that station alone. The curves are convex, which keeps
   the model linear. Weekdays and weekends have separate curves, and a curve can cover
-  part of a day (for a midday shift).
+  part of a day (for a midday shift) or several days (`load_case(...; horizon)`), as if
+  no truck came back. Multi-day curves are grouped by which of the days are weekdays.
 - **Streets** (`src/roads.jl`): driving times and routes on the OpenStreetMap network
   from the operator's base at Kværnerveien 5, respecting one-way streets.
 - **Simulator** (`src/simulate.jl`): replays real trips against station inventories. A
@@ -39,7 +40,8 @@ Gurobi needs a licence file on the machine; it is never committed.
   under 1% on test nights.
 - **Experiments** (`src/experiment.jl`, `scripts/`): `first_model.jl` (one truck,
   straight lines), `fleet_size.jl` (how many trucks, plus `oracle`), `day_shift.jl`
-  (night and midday shifts), `sensitivity.jl`, `figures.jl` (report figures).
+  (night and midday shifts), `sensitivity.jl`, `look_ahead.jl` (plans that value each
+  station over 2 or 7 days), `figures.jl` (report figures).
 - A service day runs 01:00 to 01:00. Night trucks work 01:00 to 06:00.
 - Planners must only use trips from before the replay period. Never let a planner see
   the trips of the day it plans for (the `oracle` policy does so on purpose).
@@ -60,7 +62,11 @@ Things learned the hard way:
 - Replays stop Gurobi after 10 seconds per truck, so results depend a little on machine
   load. Do not compare runs made under very different load without saying so.
 - A night shift that plans only as far as the next shift does worse than one that plans
-  for the whole day.
+  for the whole day. Planning two days ahead is better still with 2 to 8 trucks; a week
+  ahead is best with 3 or 4 trucks and worse than one day with 8.
+- Gurobi's relative gap is measured on the summed curves, so the same `gap` is a looser
+  test when the curves cover more days. Compare horizons with `gap = 0`, as
+  `look_ahead.jl` does. The older experiments still use `gap = 0.02`.
 - Julia's `Downloads` gives up on slow servers; the Overpass download uses `curl`.
 - On this Windows machine a single shell command longer than about 8,000 characters is
   cut off. Write long files with the editor tools, not with a heredoc.

@@ -37,6 +37,10 @@ Four weeks of real rides (161,183 of them) were replayed for each policy. A ride
 - **Some trucks should work at midday.** Night trucks alone did not get below 6%, even
   with ten. Six trucks split three and three between night and midday reach 5.7%, and
   cost less, because a midday shift carries no night supplement.
+- **Plans should look further ahead than tomorrow.** A bike moved tonight still helps the
+  day after. When each station is valued over two days instead of one, four trucks let
+  down 9.9% of riders instead of 12.4%, and 8.9% when valued over a week. That is nearly
+  what a fifth truck would add, at no cost. It helps most with three to five trucks.
 - **Fuel hardly matters.** A truck drives about 50 km a night, around 5% of what it costs.
   The driver's time is what counts.
 
@@ -51,7 +55,7 @@ their routes along real streets.
 | Page | What it shows |
 |---|---|
 | [`report/first-model/`](report/first-model/) | One truck, one night at a time |
-| [`report/fleet-size/`](report/fleet-size/) | How many trucks, with a cost calculator and the real Oslo map |
+| [`report/fleet-size/`](report/fleet-size/) | How many trucks, how far ahead to plan, with a cost calculator and the real Oslo map |
 | [`report/day-shift/`](report/day-shift/) | Night trucks and midday trucks compared |
 
 GitHub shows these as source code. To see them, clone the repository and open the
@@ -72,7 +76,7 @@ GitHub shows these as source code. To see them, clone the repository and open th
 4. **The test.** Four further weeks of real rides are replayed against the plans. The
    planner never sees the day it plans for.
 
-The formulation is written out in the [report](report/report.md#32-the-model-for-one-truck-and-one-night).
+The formulation is written out in the [report](report/report.md#32-the-model-for-one-truck).
 
 ## Run it yourself
 
@@ -113,6 +117,7 @@ page and figure scripts collect what the pages and the report need into `report/
 | `julia --project=. scripts/fleet_size.jl run optimal 4` | Four weeks with 4 optimized trucks; also `greedy`, `oracle`, `none` | 5 to 25 min each |
 | `julia --project=. scripts/day_shift.jl run 2 2 split` | 2 night trucks and 2 midday trucks | 20 min each |
 | `julia --project=. scripts/sensitivity.jl run capacity 30 4` | Change one assumption | 20 min each |
+| `julia --project=. scripts/look_ahead.jl run 2 4` | 4 trucks whose plans look 2 days ahead; `table` lists the runs | 5 to 40 min each |
 | `julia --project=. scripts/fleet_size.jl page` | Collect the runs for the fleet-size page | 1 min |
 | `julia --project=. scripts/day_shift.jl page` | Collect the runs for the day-shift page | 1 min |
 | `julia --project=. scripts/foresight_check.jl 4` | Compare planning from history with knowing tomorrow, night by night | 30 min |

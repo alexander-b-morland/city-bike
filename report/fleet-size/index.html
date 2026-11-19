@@ -8,7 +8,7 @@
 :root {
   --bg: #f7f7f4; --surface: #fdfdfc; --ink: #0d0f12; --ink2: #50524f; --muted: #85857f;
   --grid: #e3e2db; --axis: #c3c2b7; --border: rgba(13,15,18,.12);
-  --greedy: #8a8a8a; --optimal: #1f3a5f; --trucks: #c4c4c4;
+  --greedy: #8a8a8a; --optimal: #1f3a5f; --between: #5f82a8; --trucks: #c4c4c4;
   --empty: #e34948; --low: #f2b6b3; --mid: #a9a8a0; --high: #9cc2f0; --full: #2a78d6;
   --land: #f2f1ec; --landnight: #e4e6ea; --sea: #c9dcef; --park: #dbe8cf; --road1: #ffffff; --road2: #ffffff; --road3: #fbfaf7; --roadedge: #d6d4cb; --route: #14171c;
   --display: "Inter", "Segoe UI", system-ui, sans-serif;
@@ -17,13 +17,13 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
   --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
-  --greedy: #9a9a9a; --optimal: #8fb0d9; --trucks: #55554f;
+  --greedy: #9a9a9a; --optimal: #8fb0d9; --between: #5d7da3; --trucks: #55554f;
   --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
   --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #0e0f10; --surface: #1a1b1b; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8d8c85;
   --grid: #2c2c2a; --axis: #3a3a37; --border: rgba(255,255,255,.12);
-  --greedy: #9a9a9a; --optimal: #8fb0d9; --trucks: #55554f;
+  --greedy: #9a9a9a; --optimal: #8fb0d9; --between: #5d7da3; --trucks: #55554f;
   --empty: #e66767; --low: #8a4444; --mid: #6b6a65; --high: #3b6396; --full: #3987e5;
   --land: #1c1d1f; --landnight: #131418; --sea: #0f1f31; --park: #1b2a1d; --road1: #3d3e41; --road2: #343538; --road3: #2a2b2e; --roadedge: #17181a; --route: #f4f3ee; color-scheme: dark }
 
@@ -105,6 +105,16 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     </div>
     <p id="oracleText" hidden></p>
     <div class="chart" id="curve"><div class="tip" id="curveTip" hidden></div></div>
+  </section>
+
+  <section id="aheadSection" hidden>
+    <h2>Plans that look further ahead</h2>
+    <p id="aheadText"></p>
+    <div class="legend" id="aheadKey"></div>
+    <div class="chart" id="ahead"><div class="tip" id="aheadTip" hidden></div></div>
+    <div class="tablewrap"><table id="aheadTable"></table></div>
+    <p id="aheadCost"></p>
+    <p>Everything else on this page uses plans that look one day ahead. In these runs every truck's plan gets the full ten seconds of solver time, which is why the one-day figures differ a little from the chart above.</p>
   </section>
 
   <section>
@@ -256,6 +266,60 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     }
   }
 
+  // ---------- plans that look further ahead
+  const AHEAD = {};
+  for (const r of D.lookAhead || []) (AHEAD[r.horizon] = AHEAD[r.horizon] || []).push({ k: r.trucks, share: 100 * r.down / r.trips, perDay: r.down / DAYS, km: r.km / DAYS });
+  const SHOWN = [[1, "greedy", "One day ahead"], [2, "between", "Two days ahead"], [7, "optimal", "A week ahead"]]
+    .filter(([h]) => AHEAD[h] && AHEAD[h].length > 1).map(([h, color, name]) => ({ h, color, name, rows: [OPT[0]].concat(AHEAD[h]) }));
+  const DAYS_AHEAD = (h) => ({ 1: "one day", 2: "two days", 3: "three days", 7: "a week", 14: "two weeks" })[h] || h + " days";
+  function drawAhead() {
+    if (SHOWN.length < 2) return;
+    $("aheadSection").hidden = false;
+    const near = SHOWN[0], far = SHOWN[SHOWN.length - 1], ks = [...new Set(SHOWN.flatMap((s) => s.rows.map((r) => r.k)))].sort((a, b) => a - b);
+    const at = (s, k) => s.rows.find((r) => r.k === k);
+    // the fleet size where looking ahead helps most, and every horizon tried at that size
+    const peak = ks.filter((k) => at(near, k) && at(far, k)).reduce((a, b) => at(near, b).share - at(far, b).share > at(near, a).share - at(far, a).share ? b : a);
+    const tried = Object.keys(AHEAD).map(Number).sort((a, b) => a - b).filter((h) => AHEAD[h].find((r) => r.k === peak));
+    const fewer = near.rows.find((r) => r.k > peak && r.share <= at(far, peak).share + 0.5);
+    $("aheadText").innerHTML = `A bike moved tonight still helps the day after tomorrow. The plans above ignore that: they count only the riders spared the coming day. Here each station is valued over several days, as if no truck came back to it. With ${peak} trucks, the share of riders let down is ` +
+      tried.map((h, i) => `${i === tried.length - 1 && i ? "and " : ""}${h === near.h || h === far.h ? "<strong>" : ""}${AHEAD[h].find((r) => r.k === peak).share.toFixed(1)}%${h === near.h || h === far.h ? "</strong>" : ""} ${i ? "with " + DAYS_AHEAD(h) : "when the plans look " + DAYS_AHEAD(h) + " ahead"}`).join(", ") + `.` +
+      (fewer ? ` That is about what ${fewer.k} trucks manage when they look one day ahead (${fewer.share.toFixed(1)}%), so looking ahead is worth roughly ${fewer.k - peak === 1 ? "a truck" : (fewer.k - peak) + " trucks"}.` : "");
+    $("aheadKey").innerHTML = SHOWN.map((s) => `<span><i class="line" style="background:var(--${s.color})"></i>${s.name}</span>`).join("");
+    $("aheadTable").innerHTML = `<thead><tr><th>Trucks each night</th>${SHOWN.map((s) => `<th>${s.name}</th>`).join("")}</tr></thead><tbody>` +
+      ks.map((k) => `<tr><td>${k}</td>${SHOWN.map((s) => `<td>${at(s, k) ? at(s, k).share.toFixed(1) + "%" : "–"}</td>`).join("")}</tr>`).join("") + `</tbody>`;
+    const v = values(), cheapest = (s) => s.rows.reduce((a, b) => total(b, v) < total(a, v) ? b : a), a = cheapest(near), b = cheapest(far);
+    $("aheadCost").innerHTML = `At the prices set below, the cheapest fleet with plans that look ${DAYS_AHEAD(far.h)} ahead is <strong>${b.k} truck${b.k === 1 ? "" : "s"}</strong> at ${kr(total(b, v))} a day. Looking one day ahead it is ${a.k} truck${a.k === 1 ? "" : "s"} at ${kr(total(a, v))}.`;
+
+    const host = $("ahead"); host.querySelectorAll("svg").forEach((n) => n.remove());
+    const w = host.clientWidth; if (!w) return;
+    const h = Math.max(250, Math.min(340, w * 0.42)), m = { l: 44, r: w >= 620 ? 128 : 16, t: 12, b: 44 };
+    const svg = el(host, "svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "img", "aria-label": "Share of riders let down by fleet size, for plans that look one day, two days and a week ahead" });
+    const maxK = ks[ks.length - 1], top = niceMax(OPT[0].share);
+    const x = (k) => m.l + (w - m.l - m.r) * k / maxK, y = (s) => m.t + (h - m.t - m.b) * (1 - s / top);
+    for (let i = 0; i <= 5; i++) { const s = top * i / 5;
+      el(svg, "line", { x1: m.l, x2: w - m.r, y1: y(s), y2: y(s), stroke: i ? "var(--grid)" : "var(--axis)", "stroke-width": 1 });
+      el(svg, "text", { x: m.l - 8, y: y(s) + 4, "text-anchor": "end" }, s + "%"); }
+    for (let k = 0; k <= maxK; k++) el(svg, "text", { x: x(k), y: h - 24, "text-anchor": "middle" }, k);
+    el(svg, "text", { x: (m.l + w - m.r) / 2, y: h - 4, "text-anchor": "middle" }, "Trucks working each night");
+    const ends = [];
+    for (const s of SHOWN) {
+      el(svg, "polyline", { points: s.rows.map((r) => x(r.k) + "," + y(r.share)).join(" "), fill: "none", stroke: `var(--${s.color})`, "stroke-width": 1.6, "stroke-linejoin": "round" });
+      for (const r of s.rows) el(svg, "circle", { cx: x(r.k), cy: y(r.share), r: 2.6, fill: `var(--${s.color})` });
+      ends.push({ name: s.name, y: y(s.rows[s.rows.length - 1].share) });
+    }
+    ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 15);
+    const lift = Math.max(0, ends[ends.length - 1].y - (h - m.b - 2));
+    if (w >= 620) for (const e of ends) el(svg, "text", { x: w - m.r + 10, y: e.y - lift + 4, style: "fill:var(--ink2)" }, e.name);
+    const cross = el(svg, "line", { y1: m.t, y2: h - m.b, stroke: "var(--ink2)", "stroke-width": 1, visibility: "hidden" });
+    const hit = el(svg, "rect", { x: m.l, y: m.t, width: w - m.l - m.r, height: h - m.t - m.b, fill: "transparent" }), tip = $("aheadTip");
+    hit.addEventListener("mousemove", (e) => {
+      const px = e.clientX - svg.getBoundingClientRect().left, k = ks.reduce((a, b) => Math.abs(x(b) - px) < Math.abs(x(a) - px) ? b : a);
+      cross.setAttribute("x1", x(k)); cross.setAttribute("x2", x(k)); cross.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${k} truck${k === 1 ? "" : "s"}</b>` + SHOWN.filter((s) => at(s, k)).map((s) => `<br>${s.name}: ${at(s, k).share.toFixed(1)}% let down`).join("");
+      tip.hidden = false; tip.style.left = Math.max(0, Math.min(w - tip.offsetWidth, x(k) + 12)) + "px"; tip.style.top = m.t + "px"; });
+    hit.addEventListener("mouseleave", () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); });
+  }
+
   // ---------- costs
   const cost = (r, v) => ({ riders: r.perDay * v.rider, trucks: r.k * v.truck + r.km * v.km });
   const total = (r, v) => { const c = cost(r, v); return c.riders + c.trucks; };
@@ -318,7 +382,7 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     const one = OPT.find((r) => r.k === 1) || OPT[1], perTruckKm = one.km / Math.max(1, one.k);
     $("fuelText").innerHTML = `Driving is a small part of the bill. A truck covers about <strong>${fmt(perTruckKm)} km</strong> a night, which costs ${kr(perTruckKm * v.perKm)} at ${v.perKm.toFixed(1)} kr per km, or ${(100 * perTruckKm * v.km / (v.truck + perTruckKm * v.km)).toFixed(0)}% of what the truck costs that night. The driver's time is what counts, so the model's job is to make every hour of the shift move as many useful bikes as possible.`;
   }
-  ["riderCost", "wage", "night", "kmCost"].forEach((id) => $(id).addEventListener("input", drawCost));
+  ["riderCost", "wage", "night", "kmCost"].forEach((id) => $(id).addEventListener("input", () => { drawCost(); drawAhead(); }));
 
   // ---------- map
   const MAPPED = OPT.filter((r) => r.run.days[0].levels);
@@ -328,7 +392,7 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     initial: { run: Math.max(0, MAPPED.findIndex((r) => r.k === 4)), day: 3, t: 210 },
   });
 
-  function renderAll() { drawCurve(); curveText(); drawCost(); player.render(); }
+  function renderAll() { drawCurve(); curveText(); drawAhead(); drawCost(); player.render(); }
   renderAll();
   window.addEventListener("resize", renderAll);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);

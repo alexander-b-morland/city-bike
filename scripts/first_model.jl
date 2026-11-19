@@ -77,7 +77,7 @@ function main(args)
                         "depot" => [TRUCK.depot_lat, TRUCK.depot_lon]),
         "stations" => [[station.name, round(station.lat; digits = 5), round(station.lon; digits = 5), station.capacity]
                        for station in stations],
-        "weekdayCurves" => [round.(curve; digits = 2) for curve in case.weekday_curves[1]],
+        "weekdayCurves" => [round.(curve; digits = 2) for curve in curves_for(case, first(REPLAY))],
         "policies" => Dict(policy => [Dict(
             "trips" => result.trips, "noBike" => result.no_bike, "noDock" => result.no_dock,
             "km" => round(plan_of(result).km; digits = 1), "minutes" => round(plan_of(result).minutes),

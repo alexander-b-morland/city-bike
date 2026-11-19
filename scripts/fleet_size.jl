@@ -8,7 +8,8 @@
 #   julia --project=. scripts/fleet_size.jl page             # collect the runs for the page
 #
 # Each run writes results/fleet_size/<policy>_<trucks>.json. The runs are independent, so
-# several can be started at the same time. `page` writes report/fleet-size/data.js.
+# several can be started at the same time. `page` writes report/fleet-size/data.js, and
+# includes the totals from scripts/look_ahead.jl if those runs have been made.
 #
 # Trucks are planned one at a time: each gets the best plan given what the trucks before
 # it will already have done. Driving times follow the street network from the operator's
@@ -70,13 +71,22 @@ function page()
     end
     summary = runs
 
+    # Totals of the runs where the plans look further ahead (scripts/look_ahead.jl).
+    ahead_dir = joinpath(ROOT, "results", "look_ahead")
+    ahead = [JSON.parsefile(joinpath(ahead_dir, file)) for file in (isdir(ahead_dir) ? readdir(ahead_dir) : String[]) if endswith(file, ".json")]
+    look_ahead = [Dict("horizon" => run["horizon"], "trucks" => run["trucks"],
+                       "trips" => sum(day["trips"] for day in run["days"]),
+                       "down" => sum(day["noBike"] + day["noDock"] for day in run["days"]),
+                       "km" => round(sum(sum((truck["km"] for truck in day["trucks"]); init = 0.0) for day in run["days"]); digits = 1))
+                  for run in sort(ahead; by = run -> (run["horizon"], run["trucks"])) if run["later"] == 1]
+
     data = Dict(
         "days" => string.(collect(REPLAY)), "fleet" => FLEET,
         "truck" => Dict("capacity" => TRUCK.capacity, "shift" => TRUCK.shift, "stopMinutes" => TRUCK.stop_minutes,
                         "bikeMinutes" => TRUCK.bike_minutes, "depot" => [TRUCK.depot_lat, TRUCK.depot_lon]),
         "stations" => [[station.name, round(station.lat; digits = 5), round(station.lon; digits = 5), station.capacity]
                        for station in stations],
-        "runs" => summary, "legs" => legs)
+        "runs" => summary, "lookAhead" => look_ahead, "legs" => legs)
     target = joinpath(ROOT, "report", "fleet-size")
     mkpath(target)
     file = joinpath(target, "data.js")

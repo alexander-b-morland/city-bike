@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340" width="720" height="340" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12">
+<title>Plans that look further ahead let down fewer riders</title><rect width="720" height="340" fill="#ffffff"/>
+<text x="48" y="22" fill="#6f6f6f">Riders let down over four weeks</text>
+<text x="40" y="298.0" text-anchor="end" fill="#6f6f6f">0%</text>
+<line x1="48" x2="588" y1="242.0" y2="242.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="246.0" text-anchor="end" fill="#6f6f6f">10%</text>
+<line x1="48" x2="588" y1="190.0" y2="190.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="194.0" text-anchor="end" fill="#6f6f6f">20%</text>
+<line x1="48" x2="588" y1="138.0" y2="138.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="142.0" text-anchor="end" fill="#6f6f6f">30%</text>
+<line x1="48" x2="588" y1="86.0" y2="86.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="90.0" text-anchor="end" fill="#6f6f6f">40%</text>
+<line x1="48" x2="588" y1="34.0" y2="34.0" stroke="#e6e6e6" stroke-width="0.75"/>
+<text x="40" y="38.0" text-anchor="end" fill="#6f6f6f">50%</text>
+<line x1="48" x2="588" y1="294.0" y2="294.0" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="48.0" x2="48.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="48.0" y="312.0" text-anchor="middle" fill="#6f6f6f">0</text>
+<line x1="115.5" x2="115.5" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="115.5" y="312.0" text-anchor="middle" fill="#6f6f6f">1</text>
+<line x1="183.0" x2="183.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="183.0" y="312.0" text-anchor="middle" fill="#6f6f6f">2</text>
+<line x1="250.5" x2="250.5" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="250.5" y="312.0" text-anchor="middle" fill="#6f6f6f">3</text>
+<line x1="318.0" x2="318.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="318.0" y="312.0" text-anchor="middle" fill="#6f6f6f">4</text>
+<line x1="385.5" x2="385.5" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="385.5" y="312.0" text-anchor="middle" fill="#6f6f6f">5</text>
+<line x1="453.0" x2="453.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="453.0" y="312.0" text-anchor="middle" fill="#6f6f6f">6</text>
+<line x1="520.5" x2="520.5" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="520.5" y="312.0" text-anchor="middle" fill="#6f6f6f">7</text>
+<line x1="588.0" x2="588.0" y1="294.0" y2="298.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="588.0" y="312.0" text-anchor="middle" fill="#6f6f6f">8</text>
+<text x="318.0" y="334" text-anchor="middle" fill="#6f6f6f">Optimized trucks working each night</text>
+<polyline points="48.0,82.4 115.5,121.1 183.0,154.7 250.5,194.3 318.0,229.8 385.5,249.8 453.0,257.7 588.0,261.8" fill="none" stroke="#8a8a8a" stroke-width="1.6" stroke-linejoin="round" />
+<circle cx="48.0" cy="82.4" r="2.4" fill="#8a8a8a"/>
+<circle cx="115.5" cy="121.1" r="2.4" fill="#8a8a8a"/>
+<circle cx="183.0" cy="154.7" r="2.4" fill="#8a8a8a"/>
+<circle cx="250.5" cy="194.3" r="2.4" fill="#8a8a8a"/>
+<circle cx="318.0" cy="229.8" r="2.4" fill="#8a8a8a"/>
+<circle cx="385.5" cy="249.8" r="2.4" fill="#8a8a8a"/>
+<circle cx="453.0" cy="257.7" r="2.4" fill="#8a8a8a"/>
+<circle cx="588.0" cy="261.8" r="2.4" fill="#8a8a8a"/>
+<polyline points="48.0,82.4 115.5,119.3 183.0,160.0 250.5,204.8 318.0,242.3 385.5,258.3 453.0,261.5 588.0,262.4" fill="none" stroke="#5f82a8" stroke-width="1.6" stroke-linejoin="round" />
+<circle cx="48.0" cy="82.4" r="2.4" fill="#5f82a8"/>
+<circle cx="115.5" cy="119.3" r="2.4" fill="#5f82a8"/>
+<circle cx="183.0" cy="160.0" r="2.4" fill="#5f82a8"/>
+<circle cx="250.5" cy="204.8" r="2.4" fill="#5f82a8"/>
+<circle cx="318.0" cy="242.3" r="2.4" fill="#5f82a8"/>
+<circle cx="385.5" cy="258.3" r="2.4" fill="#5f82a8"/>
+<circle cx="453.0" cy="261.5" r="2.4" fill="#5f82a8"/>
+<circle cx="588.0" cy="262.4" r="2.4" fill="#5f82a8"/>
+<polyline points="48.0,82.4 115.5,117.3 183.0,158.9 250.5,210.8 318.0,247.8 385.5,258.4 453.0,260.1 588.0,259.3" fill="none" stroke="#1f3a5f" stroke-width="1.6" stroke-linejoin="round" />
+<circle cx="48.0" cy="82.4" r="2.4" fill="#1f3a5f"/>
+<circle cx="115.5" cy="117.3" r="2.4" fill="#1f3a5f"/>
+<circle cx="183.0" cy="158.9" r="2.4" fill="#1f3a5f"/>
+<circle cx="250.5" cy="210.8" r="2.4" fill="#1f3a5f"/>
+<circle cx="318.0" cy="247.8" r="2.4" fill="#1f3a5f"/>
+<circle cx="385.5" cy="258.4" r="2.4" fill="#1f3a5f"/>
+<circle cx="453.0" cy="260.1" r="2.4" fill="#1f3a5f"/>
+<circle cx="588.0" cy="259.3" r="2.4" fill="#1f3a5f"/>
+<text x="596" y="263.3" fill="#1f3a5f">A week ahead</text>
+<text x="596" y="277.3" fill="#8a8a8a">One day ahead</text>
+<text x="596" y="291.3" fill="#5f82a8">Two days ahead</text>
+</svg>

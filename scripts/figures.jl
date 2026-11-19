@@ -220,6 +220,28 @@ function main()
     numbers["cost"] = Dict("cheapest" => count_of(cheapest), "total" => round(total(cheapest)), "steps" => steps,
                            "greedyCheapest" => count_of(argmin(total, greedy)), "greedyTotal" => round(minimum(total, greedy)))
 
+    # 3b. Plans that look further ahead than the coming day.
+    if isdir(joinpath(ROOT, "results", "look_ahead"))
+        ahead = [run for run in read_runs("look_ahead") if run["later"] == 1]
+        looking(horizon) = sort([run for run in ahead if run["horizon"] == horizon]; by = count_of)
+        drawn = [(horizon, name, colour) for (horizon, name, colour) in ((1, "One day ahead", GRAY), (2, "Two days ahead", "#5f82a8"), (7, "A week ahead", NAVY))
+                 if length(looking(horizon)) > 1]
+        line_chart("look_ahead.svg"; title = "Plans that look further ahead let down fewer riders", ylabel = "Riders let down over four weeks",
+                   xlabel = "Optimized trucks working each night", suffix = "%",
+                   series = [(name, colour, vcat(0, count_of.(looking(horizon))), vcat(share(none), share.(looking(horizon))), false) for (horizon, name, colour) in drawn],
+                   xticks = [(k, string(k)) for k in 0:maximum(count_of.(ahead))])
+        numbers["lookAhead"] = [Dict("horizon" => run["horizon"], "trucks" => count_of(run), "share" => round(share(run); digits = 1), "perDay" => round(per_day(run)),
+                                     "kmPerNight" => round(km_per_night(run); digits = 1), "movedPerNight" => round(moved_per_night(run)),
+                                     "total" => round(total(run)))
+                                for run in sort(ahead; by = run -> (run["horizon"], count_of(run)))]
+        numbers["lookAheadSteps"] = Dict(string(horizon) => begin
+            runs = vcat([none], looking(horizon))
+            [Dict("from" => count_of(a), "to" => count_of(b), "sparedPerTruck" => round((per_day(a) - per_day(b)) / (count_of(b) - count_of(a))),
+                  "breakEven" => round((truck + (km_per_night(b) - km_per_night(a)) / (count_of(b) - count_of(a)) * km) /
+                                       ((per_day(a) - per_day(b)) / (count_of(b) - count_of(a))); digits = 1)) for (a, b) in zip(runs, runs[2:end])]
+        end for horizon in unique(run["horizon"] for run in ahead))
+    end
+
     # 4. Night against midday shifts.
     if isdir(joinpath(ROOT, "results", "day_shift"))
         shifts = filter(run -> haskey(run, "days"), read_runs("day_shift"))   # skips unfinished runs
@@ -262,7 +284,8 @@ function main()
               colours = [1 <= parse(Int, row[1]) <= 5 ? NAVY : LIGHT for row in hours], notes = fill("", length(hours)), height = 300)
     drift_map("drift_map.svg")
     case = load_case(ROOT, Date(2026, 6, 1):Day(1):Date(2026, 8, 16), Date(2026, 8, 17):Day(1):Date(2026, 8, 17))
-    curve_of(name) = case.weekday_curves[1][findfirst(station -> station.name == name, case.stations)]
+    weekday, weekend = curves_for(case, Date(2026, 8, 17)), curves_for(case, Date(2026, 8, 22))   # a Monday and a Saturday
+    curve_of(name) = weekday[findfirst(station -> station.name == name, case.stations)]
     hill, centre = curve_of("Stavangergata"), curve_of("Tøyenbekken")
     line_chart("curves.svg"; title = "What each station wants: riders let down by how the day starts", ylabel = "Riders let down that day",
                xlabel = "Bikes at the station when the day starts (both have 30 docks)", markers = false,
@@ -270,9 +293,9 @@ function main()
                          ("Tøyenbekken", STEEL, collect(0:length(centre) - 1), centre, false)],
                xticks = [(k, string(k)) for k in 0:5:30])
     # What the curves say is the best any set of starting levels could do on an average day.
-    numbers["floor"] = Dict("weekday" => round(sum(minimum, case.weekday_curves[1]); digits = 1),
-                            "weekend" => round(sum(minimum, case.weekend_curves[1]); digits = 1),
-                            "bestStartBikes" => sum(argmin(curve) - 1 for curve in case.weekday_curves[1]))
+    numbers["floor"] = Dict("weekday" => round(sum(minimum, weekday); digits = 1),
+                            "weekend" => round(sum(minimum, weekend); digits = 1),
+                            "bestStartBikes" => sum(argmin(curve) - 1 for curve in weekday))
     numbers["curves"] = Dict("hillBest" => argmin(hill) - 1, "hillWorst" => round(maximum(hill); digits = 1), "hillAtBest" => round(minimum(hill); digits = 1),
                              "centreBest" => argmin(centre) - 1, "centreWorst" => round(maximum(centre); digits = 1), "centreAtBest" => round(minimum(centre); digits = 1))
 
