@@ -19,11 +19,14 @@ bike to take or no free dock to park in.
    thumb did not get below 16.2%, even with sixteen of them.
 3. Five night trucks do almost all that night work can do (8.5%). Ten reach 6.1%.
 4. Moving some trucks to a midday shift does better and costs less. Three night trucks
-   and three midday trucks reach 5.7%, and are the cheapest fleet we found.
+   and three midday trucks reach 5.7%.
 5. Plans that look two days ahead instead of one do better with the same trucks: four
    night trucks let down 9.9% of riders instead of 12.4%, and 8.9% when they look a week
    ahead.
-6. A night truck shift costs about 2,900 kr, nearly all of it the driver. Each of the
+6. Choosing the shift times as well gives the cheapest fleet we found: two trucks from
+   01:00, two from 10:00 and one from 13:00. It lets down 6.6% of riders at about
+   21,800 kr a day, trucks and let-down riders together.
+7. A night truck shift costs about 2,900 kr, nearly all of it the driver. Each of the
    first four trucks pays for itself if a let-down rider costs 8 kr or more.
 
 Interactive versions of the results, with an animated map, are in
@@ -431,17 +434,110 @@ start on a Friday, Saturday or Sunday, and all the week-long curves, are learned
 only 10 or 11 runs of days each. And the shift, sensitivity and rule-of-thumb results in
 this report still use plans that look one day ahead.
 
-### 4.6 Sensitivity
+### 4.6 Choosing the shift times
+
+Section 4.3 split the trucks between two fixed shifts. Here the shift times themselves
+are chosen. A five-hour shift may start at 01, 04, 07, 10, 13, 16 or 19 o'clock, and at
+most five trucks are on the road at once. Pay follows the hours worked: the 40% night
+supplement applies from 21:00 to 06:00, so a shift from 04:00 carries it for two of its
+five hours and a shift from 19:00 for three. Driving is slower by day. We assume driving
+times 60% longer in the rush hours (07 to 09 and 15 to 17), 30% longer at other daytime
+hours and 15% longer in the hours around them. These traffic factors are our assumptions,
+not measurements. Every plan looks two days ahead, from the start of its shift to the
+end of the next service day. A shift that starts while earlier trucks are still out
+plans as if their remaining stops will be made.
+
+*Table 8. The seven possible shifts.*
+
+| Shift | Driving time, relative to night | Hours with night supplement | Cost of the shift before driving, kr |
+|---|---:|---:|---:|
+| 01:00 to 06:00 | 1.00 | 5 of 5 | 2,753 |
+| 04:00 to 09:00 | 1.27 | 2 of 5 | 2,281 |
+| 07:00 to 12:00 | 1.42 | 0 | 1,966 |
+| 10:00 to 15:00 | 1.30 | 0 | 1,966 |
+| 13:00 to 18:00 | 1.42 | 0 | 1,966 |
+| 16:00 to 21:00 | 1.30 | 0 | 1,966 |
+| 19:00 to 00:00 | 1.06 | 3 of 5 | 2,438 |
+
+The search starts with no trucks. At each step it tries every shift that could be added
+and keeps the one that lowers the total cost a day most, counting 25 kr per let-down
+rider. It stops when no extra shift lowers the cost. Choosing the schedule on the four
+test weeks and then reporting it on the same weeks would flatter it. So the search
+compared schedules on two earlier weeks, 3 to 16 August, with curves learned from
+1 June to 2 August, and only its final choice was replayed on the test weeks. It
+replayed 43 schedules.
+
+*Table 9. The search, on the weeks of 3 to 16 August.*
+
+| Step | Shift added | Riders let down | Total, kr a day |
+|---:|---|---:|---:|
+| 0 | None | 38.7% | 57,493 |
+| 1 | 10:00 | 30.5% | 47,390 |
+| 2 | 10:00 | 23.2% | 38,665 |
+| 3 | 01:00 | 14.8% | 29,157 |
+| 4 | 01:00 | 7.8% | 21,682 |
+| 5 | 13:00 | 5.5% | 20,477 |
+| 6 | Best sixth shift, 16:00, not kept | 4.9% | 21,585 |
+
+With one or two trucks the search puts them at midday. A midday shift costs about 790 kr
+less than a night shift, and a single truck spares more riders by repairing the
+afternoon than by setting up a morning that the day soon undoes. From the third truck on
+the night wins, and the next two shifts start at 01:00. The fifth starts at 13:00 and
+overlaps the 10:00 shifts. A sixth shift spares 40 more riders a day but costs more
+than they are worth at 25 kr each. The early shift at 04:00 and the evening shift at
+19:00 were never chosen: each pays part of the night supplement and drives in traffic
+for part of the shift.
+
+![The chosen shifts over the day](figures/shift_times.svg)
+
+*Figure 8. The chosen schedule: two trucks from 01:00, two from 10:00 and one from 13:00.
+The shaded bands are the rush hours.*
+
+*Table 10. The chosen schedule on the four test weeks, against other schedules. All use
+plans that look two days ahead, except the rule of thumb.*
+
+| Schedule | Shifts a day | Riders let down | Total at 25 kr per rider, kr a day |
+|---|---:|---:|---:|
+| Chosen: 2 from 01:00, 2 from 10:00, 1 from 13:00 | 5 | 6.6% | 21,767 |
+| Runner-up: the 13:00 shift moved to 16:00 | 5 | 6.4% | 21,454 |
+| 3 from 01:00, 3 from 10:00 | 6 | 5.6% | 23,266 |
+| 5 from 01:00 | 5 | 6.9% | 24,614 |
+| Rule of thumb on the chosen shifts | 5 | 24.6% | 47,891 |
+| No trucks | 0 | 40.7% | 58,553 |
+
+On the test weeks the chosen schedule lets down 6.6% of riders, at 21,800 kr a day in
+all. That is about 1,500 kr a day less than the cheapest fleet in section 4.3, three
+night and three midday trucks with plans that look one day ahead (23,300 kr), and
+2,800 kr less than five night trucks that look two days ahead. It uses five shifts
+instead of six, and lets down about one percentage point more riders than
+the six-shift fleets. Rule-of-thumb trucks working the same shifts let down 24.6%: good
+shift times help only with plans that make use of them.
+
+The runner-up, with the 13:00 shift moved to 16:00, tied with the chosen schedule on the
+search weeks and did slightly better on the test weeks, 6.4% at 21,500 kr. The two are
+within what the solver's time limit and four weeks of rides can tell apart. What the
+test weeks do confirm is the shape of the answer: two night trucks, two at 10:00 and a
+fifth in the afternoon.
+
+Looking two days ahead adds little once trucks also work by day. Three night and three
+midday trucks let down 5.6% with plans that look two days ahead and 5.7% with plans that
+look one day ahead. The midday trucks repair what a short-sighted night plan leaves.
+
+The search adds one shift at a time and never removes one, so it may miss better
+schedules. It uses the same schedule every day, weekdays and weekends. A different price
+for a let-down rider would change how many shifts are worth running.
+
+### 4.7 Sensitivity
 
 We changed one assumption at a time and replayed the four weeks with four optimized night
 trucks.
 
 ![Sensitivity of the result to the assumptions](figures/sensitivity.svg)
 
-*Figure 8. Share of riders let down with four optimized night trucks when one assumption
+*Figure 9. Share of riders let down with four optimized night trucks when one assumption
 is changed.*
 
-*Table 8. Sensitivity to the assumptions, four optimized night trucks.*
+*Table 11. Sensitivity to the assumptions, four optimized night trucks.*
 
 | Assumption changed | Riders let down |
 |---|---:|
@@ -474,7 +570,7 @@ These runs change the size of the numbers, so the fleet sizes and break-even pri
 this report are estimates for the base case. We did not rerun the rule of thumb under
 each change.
 
-### 4.7 Solver time
+### 4.8 Solver time
 
 The solver is stopped after 10 seconds per truck. On a typical night the worst truck's
 plan was then proven to be within about 6% of the best possible. On the worst night the
@@ -509,7 +605,7 @@ fixed sum per hour or up to 40% of the wage. We use 40%. On top of pay come holi
 base. We add 3 kr per kilometre for energy, tyres and wear, and 10% overhead for planning
 and administration.
 
-*Table 9. Cost of one truck shift, in kroner.*
+*Table 12. Cost of one truck shift, in kroner.*
 
 | | Night shift | Midday shift |
 |---|---:|---:|
@@ -535,7 +631,7 @@ and is only annoyed. It understates it in another: a rider let down often enough
 using the system. We therefore turn the question around and ask how much a let-down rider
 must cost before a truck pays for itself.
 
-*Table 10. What each added night truck achieves, and the cost per let-down rider at which
+*Table 13. What each added night truck achieves, and the cost per let-down rider at which
 it pays for itself.*
 
 | Added truck | Riders it spares a day | Pays for itself if a let-down rider costs more than |
@@ -556,7 +652,7 @@ The first four trucks pay for themselves if a let-down rider costs 8 kr, the fif
 
 ![Total cost a day](figures/cost.svg)
 
-*Figure 9. Total cost a day, trucks plus let-down riders at 25 kr each, by the number of
+*Figure 10. Total cost a day, trucks plus let-down riders at 25 kr each, by the number of
 optimized night trucks.*
 
 At 25 kr per let-down rider, which is one fare plus a little for goodwill, five optimized
@@ -570,11 +666,10 @@ four that look a week ahead. That is 2,300 kr a day less than the best fleet tha
 one day ahead.
 
 Splitting the trucks between night and midday is also cheaper, because a midday shift
-costs about 800 kr less and the split lets down fewer riders. Table 11 uses plans that
-look one day ahead. We have not yet combined the split with plans that look further
-ahead.
+costs about 800 kr less and the split lets down fewer riders. Table 14 uses plans that
+look one day ahead.
 
-*Table 11. Cost a day at 25 kr per let-down rider, for six trucks.*
+*Table 14. Cost a day at 25 kr per let-down rider, for six trucks.*
 
 | Trucks | Riders let down a day | Trucks, kr a day | Let-down riders, kr a day | Total, kr a day |
 |---|---:|---:|---:|---:|
@@ -582,9 +677,11 @@ ahead.
 | 4 at night, 2 at midday | 344 | 15,900 | 8,600 | 24,500 |
 | 3 at night, 3 at midday | 327 | 15,100 | 8,200 | 23,300 |
 
-Three night trucks and three midday trucks, at 23,300 kr a day, is the cheapest fleet we
-found. The [fleet-size page](fleet-size/) has sliders for the wage, the night supplement,
-the price per kilometre and the cost of a let-down rider.
+Choosing the shift times (section 4.6) does better still. Two trucks from 01:00, two from
+10:00 and one from 13:00, with plans that look two days ahead, cost about 21,800 kr a
+day in all. That is the cheapest fleet we found, 1,500 kr a day below three night and
+three midday trucks. The [fleet-size page](fleet-size/) has sliders for the wage, the
+night supplement, the price per kilometre and the cost of a let-down rider.
 
 ## 6. How this compares with real operations
 
@@ -612,8 +709,8 @@ Stations are judged one at a time. A station's curve assumes its riders arrive a
 did in history. In the replay, a rider let down at one station changes what happens at
 the next. The replay captures this; the planner does not.
 
-Outside section 4.5, each plan looks one day ahead and gives no value to where the bikes
-are left for the day after. The longer curves of section 4.5 go to the other extreme and
+Outside sections 4.5 and 4.6, each plan looks one day ahead and gives no value to where
+the bikes are left for the day after. The longer curves of section 4.5 go to the other extreme and
 assume that no truck returns. The truth lies between, and depends on the fleet.
 
 Only some stations are considered. A station can give bikes only if losing them helps the
@@ -621,7 +718,7 @@ station itself, and the model looks at the 15 best givers and the 15 best receiv
 station that could give bikes at no cost to itself is left out. This matters most when
 bikes are scarce.
 
-The solver is stopped early (section 4.7), and because the limit is in seconds, a rerun
+The solver is stopped early (section 4.8), and because the limit is in seconds, a rerun
 gives slightly different plans and numbers. One configuration happened to run twice, four
 midday trucks, and gave 24,150 and 24,101 riders let down.
 
@@ -632,13 +729,16 @@ Demand is understated, every run starts from an even spread of bikes and not fro
 evening, and e-bikes are not modelled. About 38% of the bikes parked in a live snapshot
 were electric. Battery swaps would take truck time that we have not counted.
 
+The shift times were chosen by adding one shift at a time, on two weeks of rides, with
+the same schedule every day and driving times scaled by assumed traffic factors.
+
 The costs are our estimates, not the operator's.
 
 ## 8. Further work
 
-- Plan through the day: let each truck's shift start at any hour, with pay that depends
-  on the hour, and choose the shift times as well as the routes.
-- Repeat the shift and sensitivity experiments with plans that look two days ahead.
+- Search the shift times more widely: remove as well as add shifts, try shifts of other
+  lengths, and let weekdays and weekends have different schedules.
+- Repeat the sensitivity experiments with plans that look two days ahead.
 - Value the later days by what tomorrow's trucks can be expected to repair, instead of
   assuming that none come.
 - Renew the plan at every stop, as the operator does, instead of once per shift.
@@ -649,19 +749,19 @@ The costs are our estimates, not the operator's.
 
 ## Appendix. Assumptions
 
-*Table 12. Assumptions that do not come from the data.*
+*Table 15. Assumptions that do not come from the data.*
 
 | Assumption | Value | Basis |
 |---|---|---|
 | Bikes on the street | 3,000 | The operator's published system size |
 | Starting position | Bikes spread in proportion to docks | No inventory data exists |
 | Bikes per truck | 20 | Our assumption |
-| Shifts | 01:00 to 06:00, and 10:00 to 15:00 | The quiet hours in the data |
+| Shifts | Five hours, from 01:00 or 10:00; in section 4.6 from 01, 04, 07, 10, 13, 16 or 19 o'clock, at most five trucks at once | The quiet hours in the data |
 | Time per stop | 3 minutes plus half a minute per bike | Our assumption |
-| Driving speed | 70% of each street's speed limit; 30% slower at midday | Our assumption; 31 km/h on average at night |
+| Driving speed | 70% of each street's speed limit at night; 30% slower at midday; in section 4.6, 6% to 42% slower depending on the shift | Our assumption; 31 km/h on average at night |
 | A rider who finds no bike | Gives up | Simplification |
 | A rider who finds no dock | Rides to the nearest station with room | Simplification |
-| Driver's wage | 250 kr an hour, 40% more at night | Legal minimum 244.50 kr; night supplements in comparable agreements |
+| Driver's wage | 250 kr an hour, 40% more for hours between 21:00 and 06:00 | Legal minimum 244.50 kr; night supplements in comparable agreements |
 | Social costs | 30% on pay | Holiday pay 12%, employer's contribution 14.1%, pension 2% |
 | Driving | 3 kr per km | Our estimate for energy, tyres and wear |
 | Overhead | 10% | Our assumption |

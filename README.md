@@ -35,8 +35,10 @@ Four weeks of real rides (161,183 of them) were replayed for each policy. A ride
   let-down rider and the fifth at 12 kr. A night shift costs about 2,900 kr, built up
   from the legal minimum wage, a night supplement, social costs and overhead.
 - **Some trucks should work at midday.** Night trucks alone did not get below 6%, even
-  with ten. Six trucks split three and three between night and midday reach 5.7%, and
-  cost less, because a midday shift carries no night supplement.
+  with ten. When the shift times are chosen too, the cheapest schedule found has two
+  trucks from 01:00, two from 10:00 and one from 13:00: 6.6% let down at about
+  21,800 kr a day, against 24,600 kr for five night trucks. Midday shifts carry no night
+  supplement.
 - **Plans should look further ahead than tomorrow.** A bike moved tonight still helps the
   day after. When each station is valued over two days instead of one, four trucks let
   down 9.9% of riders instead of 12.4%, and 8.9% when valued over a week. That is nearly
@@ -56,7 +58,7 @@ their routes along real streets.
 |---|---|
 | [`report/first-model/`](report/first-model/) | One truck, one night at a time |
 | [`report/fleet-size/`](report/fleet-size/) | How many trucks, how far ahead to plan, with a cost calculator and the real Oslo map |
-| [`report/day-shift/`](report/day-shift/) | Night trucks and midday trucks compared |
+| [`report/day-shift/`](report/day-shift/) | Night trucks and midday trucks compared, and the chosen shift times |
 
 GitHub shows these as source code. To see them, clone the repository and open the
 `index.html` files in a browser, or turn on GitHub Pages for the repository
@@ -118,6 +120,8 @@ page and figure scripts collect what the pages and the report need into `report/
 | `julia --project=. scripts/day_shift.jl run 2 2 split` | 2 night trucks and 2 midday trucks | 20 min each |
 | `julia --project=. scripts/sensitivity.jl run capacity 30 4` | Change one assumption | 20 min each |
 | `julia --project=. scripts/look_ahead.jl run 2 4` | 4 trucks whose plans look 2 days ahead; `table` lists the runs | 5 to 40 min each |
+| `julia -t 8 --project=. scripts/shift_times.jl search` | Choose the shift times, on two weeks before the test weeks | 2 hours |
+| `julia -t 8 --project=. scripts/shift_times.jl run optimal 2-0-0-2-1-0-0` | Replay a schedule on the test weeks (trucks starting at 01, 04, 07, 10, 13, 16, 19); also `greedy` | 30 min |
 | `julia --project=. scripts/fleet_size.jl page` | Collect the runs for the fleet-size page | 1 min |
 | `julia --project=. scripts/day_shift.jl page` | Collect the runs for the day-shift page | 1 min |
 | `julia --project=. scripts/foresight_check.jl 4` | Compare planning from history with knowing tomorrow, night by night | 30 min |

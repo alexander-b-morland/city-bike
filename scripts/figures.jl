@@ -260,6 +260,47 @@ function main()
         numbers["shifts"] = [Dict("night" => row[1], "midday" => row[2], "mode" => row[3], "share" => round(row[4]; digits = 1)) for row in rows]
     end
 
+    # 4b. The shift times chosen by scripts/shift_times.jl.
+    times = joinpath(ROOT, "results", "shift_times")
+    if isfile(joinpath(times, "search.json")) && isdir(joinpath(times, "test"))
+        search = JSON.parsefile(joinpath(times, "search.json"))
+        starts, chosen = Int.(search["starts"]), Int.(search["chosen"])
+        lanes = [start for (count, start) in zip(chosen, starts) for _ in 1:count]
+        width, left, right, top, lane, gap = 720, 70, 24, 20, 18, 7
+        height = top + length(lanes) * (lane + gap) + 34
+        x(minutes) = left + (width - left - right) * minutes / 1440
+        hour(minutes) = @sprintf("%02d:00", mod(1 + minutes ÷ 60, 24))
+        open(joinpath(OUT, "shift_times.svg"), "w") do io
+            println(io, """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 $width $height" width="$width" height="$height" $FONT font-size="12">""")
+            println(io, """<title>The chosen shifts over the day</title><rect width="$width" height="$height" fill="#ffffff"/>""")
+            bottom = height - 34
+            for (from, to) in ((360, 480), (840, 960))      # rush hours 07-09 and 15-17
+                println(io, """<rect x="$(px(x(from)))" y="$top" width="$(px(x(to) - x(from)))" height="$(bottom - top)" fill="#efefef"/>""")
+                println(io, """<text x="$(px((x(from) + x(to)) / 2))" y="$(top - 3)" text-anchor="middle" font-size="11" fill="$MUTED">rush hour</text>""")
+            end
+            for (k, start) in enumerate(lanes)
+                y = top + (k - 1) * (lane + gap) + gap / 2
+                println(io, """<text x="$(left - 8)" y="$(px(y + lane - 5))" text-anchor="end" fill="$SOFT">Truck $k</text>""")
+                println(io, """<rect x="$(px(x(start)))" y="$(px(y))" width="$(px(x(start + 300) - x(start)))" height="$lane" fill="$NAVY"/>""")
+                println(io, """<text x="$(px(x(start) + 6))" y="$(px(y + lane - 5))" font-size="11" fill="#ffffff">$(hour(start))–$(hour(start + 300))</text>""")
+            end
+            println(io, """<line x1="$left" x2="$(width - right)" y1="$bottom" y2="$bottom" stroke="$INK" stroke-width="1"/>""")
+            for minutes in 0:180:1440
+                println(io, """<line x1="$(px(x(minutes)))" x2="$(px(x(minutes)))" y1="$bottom" y2="$(bottom + 4)" stroke="$INK" stroke-width="1"/>""")
+                println(io, """<text x="$(px(x(minutes)))" y="$(bottom + 18)" text-anchor="middle" fill="$MUTED">$(hour(minutes))</text>""")
+            end
+            println(io, "</svg>")
+        end
+        tests = [JSON.parsefile(joinpath(times, "test", file)) for file in readdir(joinpath(times, "test")) if endswith(file, ".json")]
+        numbers["shiftTimes"] = Dict("chosen" => chosen, "starts" => starts, "shiftCost" => round.(search["shiftCost"]),
+                                     "traffic" => round.(search["traffic"]; digits = 2),
+                                     "steps" => [Dict("counts" => step["counts"], "cost" => round(step["cost"]), "share" => round(step["share"]; digits = 1))
+                                                 for step in search["steps"]],
+                                     "test" => [Dict("method" => test["method"], "counts" => test["counts"], "share" => round(test["share"]; digits = 1),
+                                                     "perDay" => round(test["down"]), "trucks" => round(test["trucks"] + test["km"] * km), "cost" => round(test["cost"]))
+                                                for test in tests])
+    end
+
     # 5. Sensitivity around four optimized night trucks.
     if isdir(joinpath(ROOT, "results", "sensitivity"))
         runs = read_runs("sensitivity")

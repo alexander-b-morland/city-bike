@@ -80,10 +80,28 @@ function page()
         run = JSON.parsefile(joinpath(fleet, file))
         push!(runs, Dict("night" => run["trucks"], "day" => 0, "mode" => "full", "days" => run["days"]))
     end
+    # The shift times chosen by scripts/shift_times.jl, if that search has been made.
+    times = joinpath(ROOT, "results", "shift_times")
+    shift_times = nothing
+    if isfile(joinpath(times, "search.json")) && isdir(joinpath(times, "test"))
+        search = JSON.parsefile(joinpath(times, "search.json"))
+        tests = [JSON.parsefile(joinpath(times, "test", file)) for file in readdir(joinpath(times, "test")) if endswith(file, ".json")]
+        shift_times = Dict("starts" => search["starts"], "chosen" => search["chosen"], "traffic" => search["traffic"],
+                           "shiftCost" => search["shiftCost"],
+                           "steps" => [Dict("counts" => step["counts"], "cost" => step["cost"], "share" => step["share"]) for step in search["steps"]],
+                           "test" => [Dict(key => test[key] for key in ("method", "counts", "share", "down", "km", "trucks", "cost")) for test in tests])
+        for test in tests
+            test["method"] == "optimal" && test["counts"] == search["chosen"] || continue
+            starts = Int.(test["starts"])
+            push!(runs, Dict("night" => sum(n for (n, s) in zip(test["counts"], starts) if s < 300; init = 0),
+                             "day" => sum(n for (n, s) in zip(test["counts"], starts) if s >= 300; init = 0),
+                             "mode" => "chosen", "days" => test["days"]))
+        end
+    end
     sort!(runs; by = run -> (run["night"] + run["day"], -run["night"], run["mode"]))
     legs = Dict{String,Vector{Int}}()
     for run in runs
-        if run["night"] + run["day"] in (4, 8) && run["mode"] == "full"
+        if (run["night"] + run["day"] in (4, 8) && run["mode"] == "full") || run["mode"] == "chosen"
             collect_legs!(legs, roads, run["days"])
         else
             for day in run["days"]
@@ -98,7 +116,7 @@ function page()
                         "bikeMinutes" => TRUCK.bike_minutes, "depot" => [TRUCK.depot_lat, TRUCK.depot_lon]),
         "stations" => [[station.name, round(station.lat; digits = 5), round(station.lon; digits = 5), station.capacity]
                        for station in stations],
-        "runs" => runs, "legs" => legs)
+        "runs" => runs, "shiftTimes" => shift_times, "legs" => legs)
     target = joinpath(ROOT, "report", "day-shift")
     mkpath(target)
     file = joinpath(target, "data.js")

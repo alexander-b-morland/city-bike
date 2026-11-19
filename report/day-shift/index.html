@@ -94,6 +94,7 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
 .row .fill { height: 100%; min-width: 2px; }
 .row .value { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
 .row.best .name, .row.best .value { font-weight: 600; color: var(--ink); }
+.note { font-size: 13px; color: var(--muted); }
 .pick { flex-wrap: wrap; min-width: 0; }
 .pick output { min-width: min(190px, 100%); }
 @media (max-width: 520px) {
@@ -125,9 +126,24 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
     <div class="tablewrap"><table id="costs"></table></div>
   </section>
 
+  <section id="timesSection" hidden>
+    <h2>Choosing the shift times</h2>
+    <p id="timesText"></p>
+    <div class="legend">
+      <span><i class="key" style="background:var(--optimal)"></i>A truck on the road</span>
+      <span><i class="key" style="background:var(--grid)"></i>Rush hour</span>
+    </div>
+    <div class="chart" id="timeline"></div>
+    <p id="timesTestText"></p>
+    <div class="tablewrap"><table id="timesTest"></table></div>
+    <p>How the shifts were chosen. A shift may start at 01, 04, 07, 10, 13, 16 or 19 o'clock, and at most five trucks are on the road at once. Starting from no trucks, every possible extra shift was tried, and the one that lowered the total cost a day most was kept, until no extra shift lowered it. The search compared schedules on two earlier weeks, 3 to 16 August, so that the four weeks above are a fair test.</p>
+    <div class="tablewrap"><table id="timesSteps"></table></div>
+    <p class="note" id="timesNote"></p>
+  </section>
+
   <section>
     <h2>Watch a day with two shifts</h2>
-    <p>Choose how the trucks are split and press play. Night trucks leave the base at 01:00 and midday trucks at 10:00.</p>
+    <p>Choose how the trucks are split and press play. Night trucks leave the base at 01:00 and midday trucks at 10:00. The chosen shifts add a truck from 13:00.</p>
     <div class="card" id="player" style="overflow:hidden"></div>
   </section>
 
@@ -163,7 +179,7 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
   const S = D.stations.map(([name, lat, lon, cap]) => ({ name, lat, lon, cap }));
   const $ = (id) => document.getElementById(id);
   const plural = (n, word) => n + " " + word + (n === 1 ? "" : "s");
-  const name = (r) => r.day === 0 ? (r.night === 0 ? "No trucks" : `${r.night} at night`) : r.night === 0 ? `${r.day} at midday` : `${r.night} at night, ${r.day} at midday`;
+  const name = (r) => r.mode === "chosen" ? "Chosen shifts" : r.day === 0 ? (r.night === 0 ? "No trucks" : `${r.night} at night`) : r.night === 0 ? `${r.day} at midday` : `${r.night} at night, ${r.day} at midday`;
   const RUNS = D.runs.map((run) => {
     const trips = run.days.reduce((a, d) => a + d.trips, 0), down = run.days.reduce((a, d) => a + d.noBike + d.noDock, 0);
     return { night: run.night, day: run.day, mode: run.mode, total: run.night + run.day, share: 100 * down / trips, perDay: down / run.days.length, run };
@@ -206,6 +222,61 @@ footer { font-size: 13px; color: var(--muted); max-width: 68ch; }
   $("costs").innerHTML = `<thead><tr><th>Trucks</th><th>Riders let down a day</th><th>Trucks, kr a day</th><th>Let-down riders, kr a day</th><th>Total, kr a day</th></tr></thead><tbody>` +
     costed.map((c) => { const cheapest = costed.filter((o) => o.r.total === c.r.total).every((o) => o.sum >= c.sum);
       return `<tr class="${cheapest ? "best" : ""}"><td>${name(c.r)}</td><td>${fmt(c.r.perDay)}</td><td>${fmt(c.trucks)}</td><td>${fmt(c.riders)}</td><td>${fmt(c.sum)}</td></tr>`; }).join("") + "</tbody>";
+
+  // ---------- shift times chosen by the search
+  const T = D.shiftTimes;
+  if (T && T.test && T.test.length) {
+    $("timesSection").hidden = false;
+    const hourOf = (start) => 1 + start / 60, at = (h) => String(h % 24).padStart(2, "0") + ":00";
+    const label = (counts) => counts.map((n, i) => n ? `${n} from ${at(hourOf(T.starts[i]))}` : "").filter(Boolean).join(", ") || "No trucks";
+    const same = (a, b) => a.every((n, i) => n === b[i]);
+    const chosen = T.test.find((r) => r.method === "optimal" && same(r.counts, T.chosen));
+    const greedy = T.test.find((r) => r.method === "greedy" && same(r.counts, T.chosen));
+    const lanes = T.chosen.flatMap((n, i) => Array(n).fill(T.starts[i]));
+    const shifts = lanes.length;
+    $("timesText").innerHTML = `Here the times themselves are chosen. Pay follows the hours worked, with the night supplement from 21:00 to 06:00, and driving is slower by day and slowest in the rush hours. The cheapest schedule found has <strong>${plural(shifts, "shift")} a day</strong>: ${label(T.chosen).toLowerCase()}.`;
+
+    // timeline: one lane per truck shift over the service day, 01:00 to 01:00
+    const draw = () => {
+      const host = $("timeline"); host.querySelectorAll("svg").forEach((n) => n.remove());
+      const w = host.clientWidth; if (!w) return;
+      const lane = 16, gap = 6, m = { l: 8, r: 8, t: 4, b: 26 }, h = m.t + lanes.length * (lane + gap) + m.b;
+      const NS = "http://www.w3.org/2000/svg", el = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (text !== undefined) n.textContent = text; svg.appendChild(n); return n; };
+      const svg = document.createElementNS(NS, "svg"); host.appendChild(svg);
+      for (const [k, v] of Object.entries({ viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "img", "aria-label": "The chosen shifts over the day" })) svg.setAttribute(k, v);
+      const x = (minutes) => m.l + (w - m.l - m.r) * minutes / 1440, bottom = h - m.b;
+      for (const [from, to] of [[7, 9], [15, 17]]) el("rect", { x: x((from - 1) * 60), y: m.t, width: x((to - from) * 60) - m.l, height: bottom - m.t, fill: "var(--grid)" });
+      lanes.forEach((start, k) => {
+        const y = m.t + k * (lane + gap);
+        el("rect", { x: x(start), y, width: x(D.truck.shift) - m.l, height: lane, fill: "var(--optimal)" });
+        if (x(D.truck.shift) - m.l > 90) el("text", { x: x(start) + 6, y: y + lane - 4, style: "fill:var(--bg);font-size:11px" }, `${at(hourOf(start))}–${at(hourOf(start) + D.truck.shift / 60)}`);
+      });
+      el("line", { x1: m.l, x2: w - m.r, y1: bottom, y2: bottom, stroke: "var(--axis)", "stroke-width": 1 });
+      const every = w < 520 ? 6 : 3;
+      for (let k = 0; k <= 24; k += every) el("text", { x: x(k * 60), y: h - 8, "text-anchor": k === 0 ? "start" : k === 24 ? "end" : "middle" }, at(1 + k));
+    };
+    draw(); window.addEventListener("resize", draw);
+
+    // the chosen schedule on the test weeks, against the alternatives
+    const rows = T.test.slice().sort((a, b) => a.cost - b.cost);
+    const rowName = (r) => r.method === "greedy" ? "Rule of thumb on the chosen shifts" : same(r.counts, T.chosen) ? "Chosen shifts" : label(r.counts);
+    $("timesTest").innerHTML = `<thead><tr><th>Schedule, test weeks</th><th>Shifts a day</th><th>Riders let down</th><th>Trucks, kr a day</th><th>Total at 25 kr per rider, kr a day</th></tr></thead><tbody>` +
+      rows.map((r) => `<tr class="${r === chosen ? "best" : ""}"><td>${rowName(r)}</td><td>${r.counts.reduce((a, b) => a + b, 0)}</td><td>${r.share.toFixed(1)}%</td><td>${fmt(r.trucks + r.km * PER_KM)}</td><td>${fmt(r.cost)}</td></tr>`).join("") + "</tbody>";
+    const others = rows.filter((r) => r !== chosen && r.method === "optimal" && r.counts.some((n) => n));
+    const cheaper = others.filter((r) => r.cost < chosen.cost);
+    $("timesTestText").innerHTML = `On the four test weeks the chosen shifts let down <strong>${chosen.share.toFixed(1)}%</strong> of riders, at <strong>${fmt(chosen.cost)} kr a day</strong> in all.` +
+      (cheaper.length ? ` ${cheaper.length === 1 ? "One schedule" : "Some schedules"} we compared it with did slightly better on these weeks: ${rowName(cheaper[0]).toLowerCase()}, at ${fmt(cheaper[0].cost)} kr. It tied with the chosen schedule on the search weeks, and the difference is within what the solver's time limit and four weeks of rides can tell apart.` : others.length ? ` That is cheaper than every schedule we compared it with.` : "") +
+      (greedy ? ` Rule-of-thumb trucks working the same shifts let down ${greedy.share.toFixed(1)}%.` : "");
+
+    let prev = T.steps[0];
+    $("timesSteps").innerHTML = `<thead><tr><th>Step</th><th>Shift added</th><th>Riders let down, search weeks</th><th>Total, kr a day</th></tr></thead><tbody>` +
+      `<tr><td>0</td><td>No trucks</td><td>${prev.share.toFixed(1)}%</td><td>${fmt(prev.cost)}</td></tr>` +
+      T.steps.slice(1).map((s, k) => {
+        const added = s.counts.findIndex((n, i) => n > prev.counts[i]), kept = s.cost < prev.cost;
+        const row = `<tr class="${kept ? "" : "note"}"><td>${k + 1}</td><td>${kept ? "" : "Best next, not kept: "}${at(hourOf(T.starts[added]))}</td><td>${s.share.toFixed(1)}%</td><td>${fmt(s.cost)}</td></tr>`;
+        if (kept) prev = s; return row; }).join("") + "</tbody>";
+    $("timesNote").textContent = `Assumed driving time relative to the night, by shift start: ` + T.starts.map((s, i) => `${at(hourOf(s))} ×${T.traffic[i].toFixed(2)}`).join(", ") + `. Cost of a shift before driving: ` + T.starts.map((s, i) => `${at(hourOf(s))} ${fmt(T.shiftCost[i])} kr`).join(", ") + `.`;
+  }
 
   const mapped = RUNS.filter((r) => r.run.days[0].levels).sort((a, b) => a.total - b.total || b.night - a.night);
   const player = createMapPlayer($("player"), {

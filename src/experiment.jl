@@ -41,9 +41,10 @@ function load_case(root::AbstractString, training, replay; windows = [(0, 1440)]
     for pattern in unique(day_pattern.(starts, horizon))
         days = filter(day -> day_pattern(day, horizon) == pattern, starts)
         curves[pattern] = map(windows) do (from, until)
-            first_day = failure_curves(trips, stations, days; from, until)
-            (horizon == 1 || until < 1440) && return first_day
+            (horizon == 1 || until < 1440) && return failure_curves(trips, stations, days; from, until)
             all_days = failure_curves(trips, stations, days; from, until = 1440 * horizon)
+            later == 1 && return all_days
+            first_day = failure_curves(trips, stations, days; from, until)
             return [(1 - later) .* near .+ later .* far for (near, far) in zip(first_day, all_days)]
         end
     end

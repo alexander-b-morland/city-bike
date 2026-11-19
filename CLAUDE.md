@@ -41,7 +41,8 @@ Gurobi needs a licence file on the machine; it is never committed.
 - **Experiments** (`src/experiment.jl`, `scripts/`): `first_model.jl` (one truck,
   straight lines), `fleet_size.jl` (how many trucks, plus `oracle`), `day_shift.jl`
   (night and midday shifts), `sensitivity.jl`, `look_ahead.jl` (plans that value each
-  station over 2 or 7 days), `figures.jl` (report figures).
+  station over 2 or 7 days), `shift_times.jl` (choose shift start times by adding one
+  shift at a time; searched on 3-16 August, tested on the replay weeks), `figures.jl`.
 - A service day runs 01:00 to 01:00. Night trucks work 01:00 to 06:00.
 - Planners must only use trips from before the replay period. Never let a planner see
   the trips of the day it plans for (the `oracle` policy does so on purpose).
@@ -49,6 +50,10 @@ Gurobi needs a licence file on the machine; it is never committed.
   `map.js` and `player.js` (copies of `report/map/oslo.js` and `report/shared/player.js`).
   Pages are also published as Claude artifacts, so they follow the artifact page rules:
   no doctype, inline CSS, scripts only as sibling files.
+
+Shift-time model (`shift_times.jl`): five-hour shifts from 01, 04, 07, 10, 13, 16 or 19
+o'clock, at most five trucks at once, night supplement for hours 21-06, driving 1.6 times
+slower at 07-09 and 15-17, 1.3 at other daytime hours, 1.15 at 06 and 19-21 (assumed).
 
 Assumptions that are not from data: fleet of 3,000 bikes spread evenly at the start,
 truck of 20 bikes, 3 minutes per stop, half a minute per bike, driving at 70% of the
