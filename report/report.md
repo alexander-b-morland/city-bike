@@ -141,16 +141,16 @@ $$\sum_{j} x_{ij} = \sum_{j} x_{ji} = y_i \quad (i \in N), \qquad \sum_{j} x_{0j
 
 Bikes move only at stops, and every stop moves at least one:
 
-$$y_i \le p_i + d_i \le Q\, y_i$$
+$$y_i \le p_i + d_i \le Q y_i$$
 
 The load on board changes by what is handled, fits the truck, and is zero when the truck
 leaves the base and when it returns:
 
-$$\sum_{j} f_{ij} - \sum_{j} f_{ji} = p_i - d_i, \qquad 0 \le f_{ij} \le Q\, x_{ij}, \qquad f_{0j} = f_{j0} = 0$$
+$$\sum_{j} f_{ij} - \sum_{j} f_{ji} = p_i - d_i, \qquad 0 \le f_{ij} \le Q x_{ij}, \qquad f_{0j} = f_{j0} = 0$$
 
 Driving, stopping (3 minutes) and handling (half a minute per bike) fit in the shift:
 
-$$\sum_{i,j} t_{ij}\, x_{ij} + 3 \sum_{i} y_i + \tfrac{1}{2} \sum_{i} (p_i + d_i) \le T$$
+$$\sum_{i,j} t_{ij} x_{ij} + 3 \sum_{i} y_i + \tfrac{1}{2} \sum_{i} (p_i + d_i) \le T$$
 
 Stations stay within their docks:
 
